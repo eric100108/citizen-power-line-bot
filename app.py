@@ -5,8 +5,7 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)#建立Flask應用程式
 
 DB_NAME = "app.db"
-CHANNEL_ACCESS_TOKEN = "FqcdztZgTNH5UxO1pklwcyZFPHVz0f7WV7NQ59z6VP9DE2vyB0cRsiF1ZcV7LBcPxazjJhzFn1U+JusP7goxQ7qf/UKmn6G4BhesEMaSZ/8n775N8Jkgo4e0LO2Vcv82bljisDJEoMxc6bVwBUmADwdB04t89/1O/w1cDnyilFU="
-
+CHANNEL_ACCESS_TOKEN = os.environ.get("CHANNEL_ACCESS_TOKEN")
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     
@@ -67,6 +66,23 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+def find_faq_answer(keyword):
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+
+    row = conn.execute("""
+        SELECT answer
+        FROM faq_items
+        WHERE question LIKE ? OR answer LIKE ?
+        LIMIT 1
+    """, (f"%{keyword}%", f"%{keyword}%")).fetchone()
+
+    conn.close()
+
+    if row:
+        return row["answer"]
+    return None
 
 
 
