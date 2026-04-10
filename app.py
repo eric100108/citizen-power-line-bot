@@ -69,7 +69,9 @@ def init_db():
 
 
 #建立網站首頁回應
-
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    return "OK"
 @app.route("/")
 def home():
     return jsonify({
@@ -121,6 +123,7 @@ def faq():
 @app.route("/hello")
 def hello():
     return "你好，這是我自己新增的頁面"
+
 
 @app.route("/calc")
 def calc():
