@@ -2,13 +2,16 @@ import os
 import sqlite3
 import requests
 from flask import Flask, jsonify, request
-app = Flask(__name__)#建立Flask應用程式
+
+app = Flask(__name__)
 
 DB_NAME = "app.db"
 CHANNEL_ACCESS_TOKEN = os.environ.get("CHANNEL_ACCESS_TOKEN")
+
+
 def init_db():
     conn = sqlite3.connect(DB_NAME)
-    
+
     conn.execute("""
     CREATE TABLE IF NOT EXISTS faq_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,6 +19,7 @@ def init_db():
         answer TEXT NOT NULL
     )
     """)
+
     conn.execute("""
     CREATE TABLE IF NOT EXISTS progress_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,6 +27,7 @@ def init_db():
         updated_at TEXT NOT NULL
     )
     """)
+
     conn.execute("""
     CREATE TABLE IF NOT EXISTS calculator_rules (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,42 +35,39 @@ def init_db():
         value REAL NOT NULL
     )
     """)
+
     cursor = conn.execute("SELECT COUNT(*) FROM calculator_rules")
     count = cursor.fetchone()[0]
-
     if count == 0:
         conn.execute("""
         INSERT INTO calculator_rules (rule_name, value)
         VALUES (?, ?)
         """, ("share_rate", 0.5))
-    
+
     cursor = conn.execute("SELECT COUNT(*) FROM faq_items")
     count = cursor.fetchone()[0]
-    
     if count == 0:
         conn.execute("""
         INSERT INTO faq_items (question, answer)
         VALUES (?, ?)
         """, ("什麼是公民電廠？", "公民電廠是由社區居民共同參與的再生能源建置與收益共享模式。"))
-        
+
         conn.execute("""
         INSERT INTO faq_items (question, answer)
         VALUES (?, ?)
         """, ("為什麼要推動公民電廠？", "因為它可以提升在地能源自主、促進社區參與，並創造地方收益。"))
-        
-    
+
     cursor = conn.execute("SELECT COUNT(*) FROM progress_items")
     count = cursor.fetchone()[0]
-
     if count == 0:
         conn.execute("""
         INSERT INTO progress_items (stage, updated_at)
         VALUES (?, ?)
         """, ("申請中", "2026-04-10"))
 
-
     conn.commit()
     conn.close()
+
 
 def find_faq_answer(keyword):
     conn = sqlite3.connect(DB_NAME)
@@ -85,53 +87,88 @@ def find_faq_answer(keyword):
     return None
 
 
+def reply_line_message(reply_token, text):
+    if not CHANNEL_ACCESS_TOKEN:
+        print("ERROR: CHANNEL_ACCESS_TOKEN 未設定")
+        return
 
-#建立網站首頁回應
+    headers = {
+        "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "replyToken": reply_token,
+        "messages": [
+            {
+                "type": "text",
+                "text": text
+            }
+        ]
+    }
+
+    response = requests.post(
+        "https://api.line.me/v2/bot/message/reply",
+        headers=headers,
+        json=body,
+        timeout=10
+    )
+
+    print("LINE reply status:", response.status_code)
+    print("LINE reply body:", response.text)
+
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.json
+    data = request.get_json(silent=True)
 
-    if "events" in data:
-        for event in data["events"]:
-            if event["type"] == "message":
-                reply_token = event["replyToken"]
-                user_message = event["message"]["text"]
+    print("=== webhook received ===")
+    print(data)
 
-                headers = {
-                    "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
-                    "Content-Type": "application/json"
-                }
+    if not data or "events" not in data:
+        return "OK", 200
 
-                body = {
-                    "replyToken": reply_token,
-                    "messages": [
-                        {
-                            "type": "text",
-                            "text": f"你說：{user_message}"
-                        }
-                    ]
-                }
+    for event in data["events"]:
+        if event.get("type") != "message":
+            continue
 
-                requests.post(
-                    "https://api.line.me/v2/bot/message/reply",
-                    headers=headers,
-                    json=body
-                )
+        message = event.get("message", {})
+        if message.get("type") != "text":
+            continue
 
-    return "OK"
+        reply_token = event.get("replyToken")
+        user_message = message.get("text", "").strip()
+
+        if not reply_token or not user_message:
+            continue
+
+        answer = find_faq_answer(user_message)
+
+        if answer:
+            reply_text = answer
+        else:
+            reply_text = "查無相關 FAQ"
+
+        reply_line_message(reply_token, reply_text)
+
+    return "OK", 200
+
+
 @app.route("/")
 def home():
     return jsonify({
         "status": "ok",
         "system": "citizen power line bot",
-        "version": "0.1",
+        "version": "0.2",
         "features": {
             "faq_all": "/faq",
             "faq_search": "/faq?keyword=公民電廠",
             "calc": "/calc?amount=10000",
-            "progress": "/progress"
+            "progress": "/progress",
+            "webhook": "/webhook"
         }
     })
+
 
 @app.route("/faq")
 def faq():
@@ -153,6 +190,7 @@ def faq():
         """).fetchall()
 
     conn.close()
+
     if not rows:
         return jsonify({
             "message": "查無相關 FAQ"
@@ -166,6 +204,7 @@ def faq():
         })
 
     return jsonify(result)
+
 
 @app.route("/hello")
 def hello():
@@ -202,6 +241,7 @@ def calc():
         "estimated_return": estimated_return
     })
 
+
 @app.route("/progress")
 def progress():
     conn = sqlite3.connect(DB_NAME)
@@ -225,7 +265,9 @@ def progress():
         "stage": row["stage"],
         "updated_at": row["updated_at"]
     })
+
+
 if __name__ == "__main__":
-    init_db()  # 初始化資料庫
+    init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
