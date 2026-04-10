@@ -1,9 +1,11 @@
 import os
 import sqlite3
+import requests
 from flask import Flask, jsonify, request
 app = Flask(__name__)#建立Flask應用程式
 
 DB_NAME = "app.db"
+CHANNEL_ACCESS_TOKEN = "FqcdztZgTNH5UxO1pklwcyZFPHVz0f7WV7NQ59z6VP9DE2vyB0cRsiF1ZcV7LBcPxazjJhzFn1U+JusP7goxQ7qf/UKmn6G4BhesEMaSZ/8n775N8Jkgo4e0LO2Vcv82bljisDJEoMxc6bVwBUmADwdB04t89/1O/w1cDnyilFU="
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
@@ -71,6 +73,35 @@ def init_db():
 #建立網站首頁回應
 @app.route("/webhook", methods=["POST"])
 def webhook():
+    data = request.json
+
+    if "events" in data:
+        for event in data["events"]:
+            if event["type"] == "message":
+                reply_token = event["replyToken"]
+                user_message = event["message"]["text"]
+
+                headers = {
+                    "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
+                    "Content-Type": "application/json"
+                }
+
+                body = {
+                    "replyToken": reply_token,
+                    "messages": [
+                        {
+                            "type": "text",
+                            "text": f"你說：{user_message}"
+                        }
+                    ]
+                }
+
+                requests.post(
+                    "https://api.line.me/v2/bot/message/reply",
+                    headers=headers,
+                    json=body
+                )
+
     return "OK"
 @app.route("/")
 def home():
