@@ -147,7 +147,7 @@ def webhook():
         if answer:
             reply_text = answer
         else:
-            reply_text = "查無相關 FAQ"
+            reply_text = "查無相關 FAQ\n你可以試試看問：\n- 公民電廠\n- 為什麼要推動公民電廠"
 
         reply_line_message(reply_token, reply_text)
 
