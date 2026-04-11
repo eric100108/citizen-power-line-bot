@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>市民電廠服務首頁</title>
+  <title>公民電廠服務首頁</title>
   <style>
     :root {
       --bg: #eef3f1;
@@ -24,7 +24,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      padding: 24px 16px 40px;
+      padding: 18px 12px 28px;
       font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
       background:
         radial-gradient(circle at top, rgba(6, 199, 85, 0.16), transparent 32%),
@@ -34,19 +34,14 @@
 
     .page-shell {
       width: 100%;
-      max-width: 100%;
       margin: 0 auto;
-    }
-
-    .phone-shell {
-      width: 100%;
     }
 
     .app {
       background: rgba(255, 255, 255, 0.72);
       border: 1px solid rgba(255, 255, 255, 0.75);
-      border-radius: 32px;
-      padding: 18px;
+      border-radius: 24px;
+      padding: 14px;
       box-shadow: 0 24px 60px rgba(17, 47, 32, 0.12);
       backdrop-filter: blur(10px);
     }
@@ -55,7 +50,7 @@
       position: relative;
       overflow: hidden;
       border-radius: var(--radius-xl);
-      padding: 28px 24px 98px;
+      padding: 24px 20px 92px;
       background: linear-gradient(135deg, var(--brand-1), #39d98a 55%, var(--brand-2));
       color: #ffffff;
       box-shadow: var(--shadow);
@@ -64,8 +59,8 @@
     .hero::after {
       content: "";
       position: absolute;
-      right: -40px;
-      bottom: -52px;
+      right: -42px;
+      bottom: -56px;
       width: 180px;
       height: 180px;
       border-radius: 50%;
@@ -84,50 +79,28 @@
       letter-spacing: 0.04em;
     }
 
+    .hero-layout {
+      display: grid;
+      gap: 16px;
+      align-items: start;
+    }
+
     .hero h1 {
       margin: 16px 0 10px;
       font-size: 30px;
-      line-height: 1.25;
+      line-height: 1.2;
     }
 
     .hero p {
       margin: 0;
-      max-width: 320px;
+      max-width: 560px;
       font-size: 15px;
       line-height: 1.7;
       color: rgba(255, 255, 255, 0.92);
     }
 
-    .hero-note {
-      position: absolute;
-      left: 24px;
-      right: 24px;
-      bottom: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.18);
-      backdrop-filter: blur(8px);
-      font-size: 13px;
-    }
-
-    .hero-note strong {
-      display: block;
-      margin-bottom: 2px;
-      font-size: 14px;
-    }
-
-    .hero-layout {
-      display: grid;
-      gap: 18px;
-      align-items: start;
-    }
-
     .hero-stats {
-      display: grid;
+      display: none;
       gap: 12px;
     }
 
@@ -151,11 +124,29 @@
       line-height: 1.3;
     }
 
+    .hero-note {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      font-size: 13px;
+    }
+
+    .hero-note strong {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+
     .quick-strip {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
-      margin: -26px 10px 8px;
+      margin: -24px 0 10px;
       position: relative;
       z-index: 2;
     }
@@ -164,11 +155,12 @@
       padding: 12px 10px;
       border-radius: 18px;
       text-align: center;
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(255, 255, 255, 0.95);
       border: 1px solid rgba(223, 231, 226, 0.9);
       box-shadow: 0 14px 30px rgba(19, 52, 36, 0.1);
       font-size: 13px;
       color: var(--text-main);
+      text-decoration: none;
     }
 
     .quick-pill strong {
@@ -206,7 +198,7 @@
       text-decoration: none;
       background: var(--surface);
       border-radius: var(--radius-lg);
-      padding: 18px 16px 18px 18px;
+      padding: 18px;
       color: inherit;
       box-shadow: var(--shadow);
       border: 1px solid rgba(223, 231, 226, 0.9);
@@ -226,14 +218,10 @@
       place-items: center;
       border-radius: 18px;
       font-size: 28px;
-      background: linear-gradient(180deg, #f1fff7, #dcf7e7);
-    }
-
-    .feature-card:nth-child(2) .icon-wrap {
       background: linear-gradient(180deg, #fff9ea, #ffefbf);
     }
 
-    .feature-card:nth-child(3) .icon-wrap {
+    .feature-card:nth-child(2) .icon-wrap {
       background: linear-gradient(180deg, #eef7ff, #d6e9ff);
     }
 
@@ -254,15 +242,15 @@
       color: var(--text-sub);
     }
 
-    .feature-arrow {
-      font-size: 18px;
-      color: #9ab1a4;
-    }
-
     .feature-meta {
       margin-top: 10px;
       font-size: 12px;
       color: #7b8f84;
+    }
+
+    .feature-arrow {
+      font-size: 18px;
+      color: #9ab1a4;
     }
 
     .footer {
@@ -272,72 +260,38 @@
       color: #7a8a81;
     }
 
-    @media (min-width: 640px) {
+    @media (min-width: 760px) {
       body {
-        padding: 32px 20px 48px;
-      }
-
-      .app {
-        padding: 22px;
-      }
-
-      .hero p {
-        max-width: 420px;
-      }
-
-      .quick-strip {
-        margin-left: 14px;
-        margin-right: 14px;
-      }
-
-      .card-list {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .feature-card:last-child {
-        grid-column: 1 / -1;
-      }
-    }
-
-    @media (min-width: 980px) {
-      body {
-        padding: 20px 16px 36px;
+        padding: 20px 16px 32px;
       }
 
       .app {
         padding: 24px;
-        border-radius: 28px;
       }
 
       .hero {
-        padding: 34px 34px 118px;
+        padding: 30px 28px 100px;
       }
 
       .hero-layout {
-        grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+        grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+      }
+
+      .hero-stats {
+        display: grid;
       }
 
       .hero h1 {
         font-size: 42px;
       }
 
-      .hero p {
-        max-width: 560px;
-        font-size: 16px;
-      }
-
       .hero-note {
-        left: 34px;
-        right: 34px;
+        left: 28px;
+        right: 28px;
       }
 
       .quick-strip {
-        margin: -34px 10px 10px;
-      }
-
-      .section-title {
-        margin-top: 30px;
-        margin-bottom: 18px;
+        margin: -28px 8px 14px;
       }
 
       .section-title h2 {
@@ -345,149 +299,71 @@
       }
 
       .card-list {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      .feature-card,
-      .feature-card:last-child {
-        grid-column: auto;
-      }
-
-      .feature-card {
-        align-items: flex-start;
-        min-height: 210px;
-      }
-
-      .icon-wrap {
-        width: 64px;
-        height: 64px;
-        flex-basis: 64px;
-        font-size: 30px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      body {
-        padding: 16px 12px 28px;
-      }
-
-      .app {
-        border-radius: 24px;
-        padding: 14px;
-      }
-
-      .hero {
-        padding: 24px 20px 84px;
-      }
-
-      .hero h1 {
-        font-size: 27px;
-      }
-
-      .hero-note {
-        left: 20px;
-        right: 20px;
-        bottom: 16px;
-      }
-
-      .hero-note div:last-child {
-        display: none;
-      }
-
-      .quick-strip {
-        gap: 8px;
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .quick-pill {
-        border-radius: 16px;
-        padding: 10px 8px;
-        font-size: 12px;
-      }
-
-      .hero-stats {
-        display: none;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
   </style>
 </head>
 <body>
   <main class="page-shell">
-    <section class="phone-shell">
-      <section class="app">
-        <header class="hero">
-          <div class="hero-layout">
-            <div>
-              <div class="hero-badge">LINE 官方帳號服務</div>
-              <h1>市民電廠服務首頁</h1>
-              <p>快速找到你需要的資訊，從常見問題到投資試算，再到案場進度，一頁就能完成。</p>
+    <section class="app">
+      <header class="hero">
+        <div class="hero-layout">
+          <div>
+            <div class="hero-badge">LINE 官方帳號服務</div>
+            <h1>公民電廠服務首頁</h1>
+            <p>快速找到你需要的資訊，直接使用投資試算與案場進度功能，掌握參與門檻與最新專案狀態。</p>
+          </div>
+          <div class="hero-stats" aria-label="服務摘要">
+            <div class="hero-stat">
+              <span>可用功能</span>
+              <strong>投資試算、案場進度</strong>
             </div>
-            <div class="hero-stats" aria-label="服務摘要">
-              <div class="hero-stat">
-                <span>常用服務</span>
-                <strong>FAQ、試算、進度</strong>
-              </div>
-              <div class="hero-stat">
-                <span>使用方式</span>
-                <strong>點選卡片快速進入</strong>
-              </div>
+            <div class="hero-stat">
+              <span>使用方式</span>
+              <strong>點選卡片快速進入</strong>
             </div>
           </div>
-          <div class="hero-note">
-            <div>
-              <strong>今天想先看哪一項？</strong>
-              點選下方卡片，立即進入服務功能
-            </div>
-            <div>📱</div>
-          </div>
-        </header>
-
-        <section class="quick-strip" aria-label="快速入口">
-          <div class="quick-pill">💬<strong>FAQ</strong></div>
-          <div class="quick-pill">📈<strong>試算</strong></div>
-          <div class="quick-pill">🏗️<strong>進度</strong></div>
-        </section>
-
-        <div class="section-title">
-          <h2>主要功能</h2>
-          <span>3 項服務</span>
         </div>
+        <div class="hero-note">
+          <strong>從兩個主要功能開始</strong>
+          依照你現在想了解的內容，直接選擇下方服務入口。
+        </div>
+      </header>
 
-        <section class="card-list">
-          <a class="feature-card" href="/faq?keyword=市民電廠">
-            <div class="icon-wrap">💬</div>
-            <div class="feature-content">
-              <h3>常見問題</h3>
-              <p>快速查詢加入方式、收益說明與常見申辦流程。</p>
-              <div class="feature-meta">常用查詢</div>
-            </div>
-            <div class="feature-arrow">›</div>
-          </a>
-
-          <a class="feature-card" href="/calc?amount=10000">
-            <div class="icon-wrap">📈</div>
-            <div class="feature-content">
-              <h3>投資試算</h3>
-              <p>輸入金額立即估算投資報酬，幫你掌握參與門檻。</p>
-              <div class="feature-meta">即時計算</div>
-            </div>
-            <div class="feature-arrow">›</div>
-          </a>
-
-          <a class="feature-card" href="/progress">
-            <div class="icon-wrap">🏗️</div>
-            <div class="feature-content">
-              <h3>案場進度</h3>
-              <p>查看目前建置狀態、施工節點與最新專案更新。</p>
-              <div class="feature-meta">最新狀態</div>
-            </div>
-            <div class="feature-arrow">›</div>
-          </a>
-        </section>
-
-        <div class="footer">Citizen Power MVP</div>
+      <section class="quick-strip" aria-label="快速入口">
+        <a class="quick-pill" href="/calc?amount=10000">📈<strong>試算</strong></a>
+        <a class="quick-pill" href="/progress">🏗️<strong>進度</strong></a>
       </section>
+
+      <div class="section-title">
+        <h2>主要功能</h2>
+        <span>2 項服務</span>
+      </div>
+
+      <section class="card-list">
+        <a class="feature-card" href="/calc?amount=10000">
+          <div class="icon-wrap">📈</div>
+          <div class="feature-content">
+            <h3>投資試算</h3>
+            <p>輸入金額後立即查看預估收益，快速掌握參與門檻與回報。</p>
+            <div class="feature-meta">即時計算</div>
+          </div>
+          <div class="feature-arrow">›</div>
+        </a>
+
+        <a class="feature-card" href="/progress">
+          <div class="icon-wrap">🏗️</div>
+          <div class="feature-content">
+            <h3>案場進度</h3>
+            <p>查看目前案場建置狀態、最新更新日期與進行中的階段。</p>
+            <div class="feature-meta">最新狀態</div>
+          </div>
+          <div class="feature-arrow">›</div>
+        </a>
+      </section>
+
+      <div class="footer">Citizen Power MVP</div>
     </section>
   </main>
 </body>

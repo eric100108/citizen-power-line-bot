@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案場進度</title>
+  <style>
+    :root {
+      --bg: #eef4f7;
+      --surface: #ffffff;
+      --brand: #1f8fff;
+      --brand-dark: #1668bd;
+      --text: #1f2a24;
+      --sub: #64746b;
+      --line: #d8e4ef;
+      --shadow: 0 18px 42px rgba(22, 49, 77, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      color: var(--text);
+      padding: 20px 12px 32px;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #66b6ff, var(--brand) 58%, var(--brand-dark));
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hero h1 {
+      margin: 12px 0 10px;
+      font-size: 34px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 620px;
+      line-height: 1.8;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #e8f4ff;
+      color: var(--brand-dark);
+      font-weight: 700;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 16px 18px 16px 48px;
+      border-radius: 18px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--brand);
+      box-shadow: 0 0 0 6px rgba(31, 143, 255, 0.14);
+    }
+
+    .timeline-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .timeline-item span {
+      color: var(--sub);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--brand-dark);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    @media (min-width: 820px) {
+      body { padding: 24px 18px 40px; }
+      .grid { grid-template-columns: 0.9fr 1.1fr; }
+      .hero { padding: 34px 30px; }
+      .hero h1 { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">Project Progress</div>
+      <h1>案場進度</h1>
+      <p>追蹤目前專案的建置狀態、最新更新日期與下一步進度，讓資訊呈現更清楚、更接近一般網站的閱讀方式。</p>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <h2>目前狀態</h2>
+        <div class="status">🏗️ {{ stage }}</div>
+        <p style="margin:16px 0 0; color:#64746b; line-height:1.8;">最新更新日期為 {{ updated_at }}。如有施工調整、驗收完成或上線節點，都可以持續更新在這一頁。</p>
+      </section>
+
+      <section class="card">
+        <h2>進度時間軸</h2>
+        <div class="timeline">
+          <div class="timeline-item">
+            <strong>目前階段：{{ stage }}</strong>
+            <span>系統目前顯示的最新案場狀態，適合用來快速掌握工程是否正在進行。</span>
+          </div>
+          <div class="timeline-item">
+            <strong>最近更新：{{ updated_at }}</strong>
+            <span>此日期可作為網站揭露資訊的更新時間，協助使用者判斷資料是否新鮮。</span>
+          </div>
+          <div class="timeline-item">
+            <strong>下一步建議</strong>
+            <span>後續可以繼續補上更多階段，例如規劃中、施工中、併網測試、正式運轉，讓頁面更完整。</span>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <a class="back-link" href="/menu">← 返回服務首頁</a>
+  </main>
+</body>
+</html>

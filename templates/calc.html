@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>投資試算</title>
+  <style>
+    :root {
+      --bg: #eef4f1;
+      --surface: #ffffff;
+      --brand: #06c755;
+      --brand-dark: #149e56;
+      --text: #1f2a24;
+      --sub: #64746b;
+      --line: #dfe8e2;
+      --shadow: 0 18px 42px rgba(20, 55, 39, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background: linear-gradient(180deg, #f8fbf9 0%, var(--bg) 100%);
+      color: var(--text);
+      padding: 20px 12px 32px;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--brand), #3ad987 60%, var(--brand-dark));
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+      margin: 12px 0 10px;
+      font-size: 34px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 620px;
+      line-height: 1.8;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--sub);
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid #cfdcd4;
+      font-size: 16px;
+    }
+
+    .button {
+      display: inline-block;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .summary {
+      display: grid;
+      gap: 14px;
+    }
+
+    .summary-item {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: #f7fbf8;
+      border: 1px solid var(--line);
+    }
+
+    .summary-item span {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--sub);
+    }
+
+    .summary-item strong {
+      font-size: 28px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 18px;
+      color: var(--brand-dark);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    @media (min-width: 820px) {
+      body { padding: 24px 18px 40px; }
+      .grid { grid-template-columns: 1.05fr 0.95fr; }
+      .hero { padding: 34px 30px; }
+      .hero h1 { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">Investment Calculator</div>
+      <h1>投資試算</h1>
+      <p>輸入想參與的金額，立即查看目前試算規則下的預估回報，作為評估參與門檻與規模的參考。</p>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <h2>輸入試算金額</h2>
+        <form method="get" action="/calc" class="form-grid">
+          <div>
+            <label for="amount">投資金額</label>
+            <input id="amount" name="amount" type="number" min="0" step="1000" value="{{ amount|int }}">
+          </div>
+          <button class="button" type="submit">重新試算</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>試算結果</h2>
+        <div class="summary">
+          <div class="summary-item">
+            <span>輸入金額</span>
+            <strong>NT$ {{ "{:,.0f}".format(amount) }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>目前分潤比例</span>
+            <strong>{{ "{:.0%}".format(share_rate) }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>預估回報</span>
+            <strong>NT$ {{ "{:,.0f}".format(estimated_return) }}</strong>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <a class="back-link" href="/menu">← 返回服務首頁</a>
+  </main>
+</body>
+</html>

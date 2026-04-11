@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import requests
-from flask import Flask, jsonify, request,  render_template
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
@@ -50,12 +50,12 @@ def init_db():
         conn.execute("""
         INSERT INTO faq_items (question, answer)
         VALUES (?, ?)
-        """, ("什麼是公民電廠？", "公民電廠是由社區居民共同參與的再生能源建置與收益共享模式。"))
+        """, ("什麼是公民電廠？", "公民電廠是由民眾共同參與投資、共享綠能收益的模式。"))
 
         conn.execute("""
         INSERT INTO faq_items (question, answer)
         VALUES (?, ?)
-        """, ("為什麼要推動公民電廠？", "因為它可以提升在地能源自主、促進社區參與，並創造地方收益。"))
+        """, ("為什麼要推動公民電廠？", "希望讓更多人參與再生能源，提升在地永續與能源轉型。"))
 
     cursor = conn.execute("SELECT COUNT(*) FROM progress_items")
     count = cursor.fetchone()[0]
@@ -63,7 +63,7 @@ def init_db():
         conn.execute("""
         INSERT INTO progress_items (stage, updated_at)
         VALUES (?, ?)
-        """, ("申請中", "2026-04-10"))
+        """, ("施工中", "2026-04-10"))
 
     conn.commit()
     conn.close()
@@ -89,7 +89,7 @@ def find_faq_answer(keyword):
 
 def reply_line_message(reply_token, text):
     if not CHANNEL_ACCESS_TOKEN:
-        print("ERROR: CHANNEL_ACCESS_TOKEN 未設定")
+        print("ERROR: CHANNEL_ACCESS_TOKEN is missing")
         return
 
     headers = {
@@ -117,9 +117,60 @@ def reply_line_message(reply_token, text):
     print("LINE reply status:", response.status_code)
     print("LINE reply body:", response.text)
 
+def reply_faq_quick_reply(reply_token):
+    if not CHANNEL_ACCESS_TOKEN:
+        print("ERROR: CHANNEL_ACCESS_TOKEN 未設定")
+        return
+
+    headers = {
+        "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    body = {
+        "replyToken": reply_token,
+        "messages": [
+            {
+                "type": "text",
+                "text": "請選擇想了解的問題：",
+                "quickReply": {
+                    "items": [
+                        {
+                            "type": "action",
+                            "action": {
+                                "type": "message",
+                                "label": "什麼是公民電廠？",
+                                "text": "什麼是公民電廠？"
+                            }
+                        },
+                        {
+                            "type": "action",
+                            "action": {
+                                "type": "message",
+                                "label": "為什麼要推動公民電廠？",
+                                "text": "為什麼要推動公民電廠？"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+
+    response = requests.post(
+        "https://api.line.me/v2/bot/message/reply",
+        headers=headers,
+        json=body,
+        timeout=10
+    )
+
+    print("LINE quick reply status:", response.status_code)
+    print("LINE quick reply body:", response.text)
+
 @app.route("/menu")
 def menu():
     return render_template("menu.html")
+
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -145,12 +196,16 @@ def webhook():
         if not reply_token or not user_message:
             continue
 
+        if user_message.upper() == "FAQ":
+            reply_faq_quick_reply(reply_token)
+            continue
+
         answer = find_faq_answer(user_message)
 
         if answer:
             reply_text = answer
         else:
-            reply_text = "查無相關 FAQ\n你可以試試看問：\n- 公民電廠\n- 為什麼要推動公民電廠"
+            reply_text = "查無相關 FAQ"
 
         reply_line_message(reply_token, reply_text)
 
@@ -168,7 +223,8 @@ def home():
             "faq_search": "/faq?keyword=公民電廠",
             "calc": "/calc?amount=10000",
             "progress": "/progress",
-            "webhook": "/webhook"
+            "webhook": "/webhook",
+            "menu": "/menu"
         }
     })
 
@@ -196,7 +252,7 @@ def faq():
 
     if not rows:
         return jsonify({
-            "message": "查無相關 FAQ"
+            "message": "找不到相關 FAQ"
         }), 404
 
     result = []
@@ -211,12 +267,12 @@ def faq():
 
 @app.route("/hello")
 def hello():
-    return "你好，這是我自己新增的頁面"
+    return "歡迎使用公民電廠服務"
 
 
 @app.route("/calc")
 def calc():
-    amount = request.args.get("amount", default=0, type=float)
+    amount = request.args.get("amount", default=10000, type=float)
 
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
@@ -231,18 +287,17 @@ def calc():
     conn.close()
 
     if row is None:
-        return jsonify({
-            "error": "查無試算規則"
-        }), 404
+        return "找不到投資試算規則", 404
 
     share_rate = row["value"]
     estimated_return = amount * share_rate
 
-    return jsonify({
-        "input_amount": amount,
-        "share_rate": share_rate,
-        "estimated_return": estimated_return
-    })
+    return render_template(
+        "calc.html",
+        amount=amount,
+        share_rate=share_rate,
+        estimated_return=estimated_return
+    )
 
 
 @app.route("/progress")
@@ -260,14 +315,13 @@ def progress():
     conn.close()
 
     if row is None:
-        return jsonify({
-            "error": "目前查無進度資料"
-        }), 404
+        return "目前沒有案場進度資料", 404
 
-    return jsonify({
-        "stage": row["stage"],
-        "updated_at": row["updated_at"]
-    })
+    return render_template(
+        "progress.html",
+        stage=row["stage"],
+        updated_at=row["updated_at"]
+    )
 
 
 init_db()
