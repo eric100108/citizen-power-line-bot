@@ -24,8 +24,6 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
       padding: 24px 16px 40px;
       font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
       background:
@@ -34,9 +32,14 @@
       color: var(--text-main);
     }
 
+    .page-shell {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
     .phone-shell {
       width: 100%;
-      max-width: 420px;
     }
 
     .app {
@@ -52,7 +55,7 @@
       position: relative;
       overflow: hidden;
       border-radius: var(--radius-xl);
-      padding: 28px 24px 88px;
+      padding: 28px 24px 98px;
       background: linear-gradient(135deg, var(--brand-1), #39d98a 55%, var(--brand-2));
       color: #ffffff;
       box-shadow: var(--shadow);
@@ -89,7 +92,7 @@
 
     .hero p {
       margin: 0;
-      max-width: 270px;
+      max-width: 320px;
       font-size: 15px;
       line-height: 1.7;
       color: rgba(255, 255, 255, 0.92);
@@ -99,7 +102,7 @@
       position: absolute;
       left: 24px;
       right: 24px;
-      bottom: 20px;
+      bottom: 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -114,6 +117,32 @@
     .hero-note strong {
       display: block;
       margin-bottom: 2px;
+      font-size: 14px;
+    }
+
+    .quick-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: -26px 10px 8px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .quick-pill {
+      padding: 12px 10px;
+      border-radius: 18px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(223, 231, 226, 0.9);
+      box-shadow: 0 14px 30px rgba(19, 52, 36, 0.1);
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .quick-pill strong {
+      display: block;
+      margin-top: 3px;
       font-size: 14px;
     }
 
@@ -146,7 +175,7 @@
       text-decoration: none;
       background: var(--surface);
       border-radius: var(--radius-lg);
-      padding: 18px 16px;
+      padding: 18px 16px 18px 18px;
       color: inherit;
       box-shadow: var(--shadow);
       border: 1px solid rgba(223, 231, 226, 0.9);
@@ -199,11 +228,44 @@
       color: #9ab1a4;
     }
 
+    .feature-meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #7b8f84;
+    }
+
     .footer {
       margin-top: 18px;
       text-align: center;
       font-size: 12px;
       color: #7a8a81;
+    }
+
+    @media (min-width: 640px) {
+      body {
+        padding: 32px 20px 48px;
+      }
+
+      .app {
+        padding: 22px;
+      }
+
+      .hero p {
+        max-width: 420px;
+      }
+
+      .quick-strip {
+        margin-left: 14px;
+        margin-right: 14px;
+      }
+
+      .card-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .feature-card:last-child {
+        grid-column: 1 / -1;
+      }
     }
 
     @media (max-width: 480px) {
@@ -229,60 +291,87 @@
         right: 20px;
         bottom: 16px;
       }
+
+      .hero-note div:last-child {
+        display: none;
+      }
+
+      .quick-strip {
+        gap: 8px;
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .quick-pill {
+        border-radius: 16px;
+        padding: 10px 8px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="phone-shell">
-    <section class="app">
-      <header class="hero">
-        <div class="hero-badge">LINE 官方帳號服務</div>
-        <h1>市民電廠服務首頁</h1>
-        <p>快速找到你需要的資訊，從常見問題到投資試算，再到案場進度，一頁就能完成。</p>
-        <div class="hero-note">
-          <div>
-            <strong>今天想先看哪一項？</strong>
-            點選下方卡片，立即進入服務功能
+  <main class="page-shell">
+    <section class="phone-shell">
+      <section class="app">
+        <header class="hero">
+          <div class="hero-badge">LINE 官方帳號服務</div>
+          <h1>市民電廠服務首頁</h1>
+          <p>快速找到你需要的資訊，從常見問題到投資試算，再到案場進度，一頁就能完成。</p>
+          <div class="hero-note">
+            <div>
+              <strong>今天想先看哪一項？</strong>
+              點選下方卡片，立即進入服務功能
+            </div>
+            <div>📱</div>
           </div>
-          <div>📱</div>
+        </header>
+
+        <section class="quick-strip" aria-label="快速入口">
+          <div class="quick-pill">💬<strong>FAQ</strong></div>
+          <div class="quick-pill">📈<strong>試算</strong></div>
+          <div class="quick-pill">🏗️<strong>進度</strong></div>
+        </section>
+
+        <div class="section-title">
+          <h2>主要功能</h2>
+          <span>3 項服務</span>
         </div>
-      </header>
 
-      <div class="section-title">
-        <h2>主要功能</h2>
-        <span>3 項服務</span>
-      </div>
+        <section class="card-list">
+          <a class="feature-card" href="/faq?keyword=市民電廠">
+            <div class="icon-wrap">💬</div>
+            <div class="feature-content">
+              <h3>常見問題</h3>
+              <p>快速查詢加入方式、收益說明與常見申辦流程。</p>
+              <div class="feature-meta">常用查詢</div>
+            </div>
+            <div class="feature-arrow">›</div>
+          </a>
 
-      <section class="card-list">
-        <a class="feature-card" href="/faq?keyword=市民電廠">
-          <div class="icon-wrap">💬</div>
-          <div class="feature-content">
-            <h3>常見問題</h3>
-            <p>快速查詢加入方式、收益說明與常見申辦流程。</p>
-          </div>
-          <div class="feature-arrow">›</div>
-        </a>
+          <a class="feature-card" href="/calc?amount=10000">
+            <div class="icon-wrap">📈</div>
+            <div class="feature-content">
+              <h3>投資試算</h3>
+              <p>輸入金額立即估算投資報酬，幫你掌握參與門檻。</p>
+              <div class="feature-meta">即時計算</div>
+            </div>
+            <div class="feature-arrow">›</div>
+          </a>
 
-        <a class="feature-card" href="/calc?amount=10000">
-          <div class="icon-wrap">📈</div>
-          <div class="feature-content">
-            <h3>投資試算</h3>
-            <p>輸入金額立即估算投資報酬，幫你掌握參與門檻。</p>
-          </div>
-          <div class="feature-arrow">›</div>
-        </a>
+          <a class="feature-card" href="/progress">
+            <div class="icon-wrap">🏗️</div>
+            <div class="feature-content">
+              <h3>案場進度</h3>
+              <p>查看目前建置狀態、施工節點與最新專案更新。</p>
+              <div class="feature-meta">最新狀態</div>
+            </div>
+            <div class="feature-arrow">›</div>
+          </a>
+        </section>
 
-        <a class="feature-card" href="/progress">
-          <div class="icon-wrap">🏗️</div>
-          <div class="feature-content">
-            <h3>案場進度</h3>
-            <p>查看目前建置狀態、施工節點與最新專案更新。</p>
-          </div>
-          <div class="feature-arrow">›</div>
-        </a>
+        <div class="footer">Citizen Power MVP</div>
       </section>
-
-      <div class="footer">Citizen Power MVP</div>
     </section>
   </main>
 </body>
