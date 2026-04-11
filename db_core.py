@@ -10,379 +10,6 @@ DEFAULT_DB_PATH = LOCAL_DATA_DIR / "citizen_power_line_bot.db"
 SCHEMA_PATH = BASE_DIR / "schema.sql"
 BUNDLED_DB_NAME = BASE_DIR / "app.db"
 
-
-def get_db_path():
-    raw_path = os.environ.get("DB_NAME", "").strip()
-    return Path(raw_path) if raw_path else DEFAULT_DB_PATH
-
-
-def ensure_db_directory():
-    get_db_path().parent.mkdir(parents=True, exist_ok=True)
-
-
-def get_connection():
-    ensure_db_directory()
-    conn = sqlite3.connect(get_db_path())
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
-
-
-def run_schema(conn):
-    conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
-
-
-def ensure_progress_columns(conn):
-    columns = {row["name"] for row in conn.execute("PRAGMA table_info(progress_items)").fetchall()}
-    if "line_user_id" not in columns:
-        conn.execute("ALTER TABLE progress_items ADD COLUMN line_user_id TEXT NOT NULL DEFAULT ''")
-    if "display_name" not in columns:
-        conn.execute("ALTER TABLE progress_items ADD COLUMN display_name TEXT NOT NULL DEFAULT ''")
-    if "created_at" not in columns:
-        conn.execute("ALTER TABLE progress_items ADD COLUMN created_at TEXT NOT NULL DEFAULT ''")
-
-
-def ensure_faq_columns(conn):
-    columns = {row["name"] for row in conn.execute("PRAGMA table_info(faq_items)").fetchall()}
-    if "category_id" not in columns:
-        conn.execute("ALTER TABLE faq_items ADD COLUMN category_id INTEGER")
-    if "is_active" not in columns:
-        conn.execute("ALTER TABLE faq_items ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1")
-    if "created_at" not in columns:
-        conn.execute("ALTER TABLE faq_items ADD COLUMN created_at TEXT NOT NULL DEFAULT ''")
-    if "updated_at" not in columns:
-        conn.execute("ALTER TABLE faq_items ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''")
-
-
-def ensure_calculator_rule_columns(conn):
-    columns = {row["name"] for row in conn.execute("PRAGMA table_info(calculator_rules)").fetchall()}
-    if "version" not in columns:
-        conn.execute("ALTER TABLE calculator_rules ADD COLUMN version INTEGER NOT NULL DEFAULT 1")
-    if "effective_from" not in columns:
-        conn.execute("ALTER TABLE calculator_rules ADD COLUMN effective_from TEXT NOT NULL DEFAULT ''")
-    if "created_at" not in columns:
-        conn.execute("ALTER TABLE calculator_rules ADD COLUMN created_at TEXT NOT NULL DEFAULT ''")
-
-
-def ensure_calculator_rule(conn, rule_name, value):
-    row = conn.execute(
-        "SELECT id FROM calculator_rules WHERE rule_name = ? LIMIT 1",
-        (rule_name,),
-    ).fetchone()
-    if row:
-        return
-
-    conn.execute(
-        """
-        INSERT INTO calculator_rules (rule_name, value, version, effective_from, created_at)
-        VALUES (?, ?, ?, ?, ?)
-        """,
-        (
-            rule_name,
-            value,
-            1,
-            datetime.utcnow().date().isoformat(),
-            datetime.utcnow().isoformat(timespec="seconds"),
-        ),
-    )
-
-
-def ensure_project_financial_rule(conn, project_id, source_document_id, rule_name, rule_value, unit="", note="", version=1):
-    row = conn.execute(
-        """
-        SELECT id
-        FROM project_financial_rules
-        WHERE project_id = ? AND rule_name = ? AND version = ?
-        LIMIT 1
-        """,
-        (project_id, rule_name, version),
-    ).fetchone()
-    if row:
-        return
-
-    conn.execute(
-        """
-        INSERT INTO project_financial_rules (
-            project_id, source_document_id, rule_name, rule_value, unit, note, version, effective_from
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            project_id,
-            source_document_id,
-            rule_name,
-            rule_value,
-            unit,
-            note,
-            version,
-            datetime.utcnow().date().isoformat(),
-        ),
-    )
-
-
-def ensure_profit_distribution_rule(conn, project_id, source_document_id, item_name, ratio, display_order, note=""):
-    row = conn.execute(
-        """
-        SELECT id
-        FROM project_profit_distribution_rules
-        WHERE project_id = ? AND item_name = ?
-        LIMIT 1
-        """,
-        (project_id, item_name),
-    ).fetchone()
-    if row:
-        return
-
-    conn.execute(
-        """
-        INSERT INTO project_profit_distribution_rules (
-            project_id, source_document_id, item_name, ratio, display_order, note
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (project_id, source_document_id, item_name, ratio, display_order, note),
-    )
-
-
-def ensure_investment_intent(conn, project_id, source_document_id, intent_code, amount, note="", investor_name=""):
-    row = conn.execute(
-        """
-        SELECT id
-        FROM investment_intents
-        WHERE project_id = ? AND intent_code = ?
-        LIMIT 1
-        """,
-        (project_id, intent_code),
-    ).fetchone()
-    if row:
-        return
-
-    conn.execute(
-        """
-        INSERT INTO investment_intents (
-            project_id, source_document_id, intent_code, investor_name, amount, note
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (project_id, source_document_id, intent_code, investor_name, amount, note),
-    )
-
-
-def seed_legacy_data(conn):
-    ensure_calculator_rule(conn, "annual_return_rate", 0.08)
-    ensure_calculator_rule(conn, "operation_cost_rate", 0.15)
-    ensure_calculator_rule(conn, "project_years", 20)
-    ensure_calculator_rule(conn, "degradation_rate", 0.005)
-    ensure_calculator_rule(conn, "reference_irr", 0.0878)
-    ensure_calculator_rule(conn, "sell_price_per_kwh", 5.5)
-    ensure_calculator_rule(conn, "annual_generation_kwh", 112635)
-    ensure_calculator_rule(conn, "annual_net_income", 304754)
-    ensure_calculator_rule(conn, "shareholder_dividend_rate", 0.50)
-    ensure_calculator_rule(conn, "site_rent_rate", 0.10)
-    ensure_calculator_rule(conn, "community_return_rate", 0.05)
-    ensure_calculator_rule(conn, "reference_project_budget", 5265000)
-    ensure_calculator_rule(conn, "reference_resident_investment", 2632500)
-
-    cursor = conn.execute("SELECT COUNT(*) FROM faq_items")
-    if cursor.fetchone()[0] == 0:
-        conn.execute(
-            """
-            INSERT INTO faq_items (category_id, question, answer, is_active)
-            VALUES (
-                (SELECT id FROM faq_categories WHERE slug = 'regulation' LIMIT 1),
-                ?, ?, 1
-            )
-            """,
-            ("????????", "?????????????????????????"),
-        )
-        conn.execute(
-            """
-            INSERT INTO faq_items (category_id, question, answer, is_active)
-            VALUES (
-                (SELECT id FROM faq_categories WHERE slug = 'investment' LIMIT 1),
-                ?, ?, 1
-            )
-            """,
-            ("???????????", "?????????????????????????"),
-        )
-
-    cursor = conn.execute("SELECT COUNT(*) FROM progress_items")
-    if cursor.fetchone()[0] == 0:
-        conn.execute(
-            """
-            INSERT INTO progress_items (stage, updated_at, line_user_id, display_name, created_at)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            ("???", "2026-04-10", "", "????", datetime.utcnow().isoformat(timespec="seconds")),
-        )
-
-
-def seed_product_tables(conn):
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO communities (id, name, slug)
-        VALUES (1, ?, ?)
-        """,
-        ("??????", "penghu-chongguang"),
-    )
-
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO projects (
-            id, community_id, name, slug, current_stage, status
-        )
-        VALUES (1, 1, ?, ?, ?, ?)
-        """,
-        ("??????????", "chongguang-demo", "???", "active"),
-    )
-
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO communities (id, name, slug)
-        VALUES (2, ?, ?)
-        """,
-        ("澎湖南寮社區", "penghu-nanliao"),
-    )
-
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO projects (
-            id, community_id, name, slug, current_stage, status
-        )
-        VALUES (2, 2, ?, ?, ?, ?)
-        """,
-        ("南寮公民電廠", "nanliao-citizen-power", "規劃中", "planning"),
-    )
-
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO source_documents (
-            id, title, slug, file_name, version_label, source_type, published_date, note
-        )
-        VALUES (1, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            "111年度澎湖南寮社區公開募集設置再生能源公民電廠示範獎勵計畫執行方案書",
-            "nanliao-demo-plan-20231108",
-            "111年度澎湖南寮社區公開募集設置再生能源公民電廠示範獎勵計畫_執行方案書_20231108_修正.pdf",
-            "2023-11-08 修正版",
-            "pdf",
-            "2023-11-08",
-            "作為南寮案場財務模型、分潤規則與投資意向的參考來源。",
-        ),
-    )
-
-    conn.execute(
-        """
-        INSERT OR IGNORE INTO faq_categories (id, name, slug)
-        VALUES
-            (1, '????', 'regulation'),
-            (2, '????', 'investment'),
-            (3, '????', 'project-progress'),
-            (4, '????', 'resilience')
-        """
-    )
-
-    ensure_project_financial_rule(
-        conn, 2, 1, "installed_capacity_kw", 87.75, "kW", "南寮案場規劃容量"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "project_budget", 5265000, "TWD", "表3總建置預算"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "price_per_kw", 60000, "TWD/kW", "每kW建置費用"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "sell_price_per_kwh", 5.5, "TWD/kWh", "收入模型採用綠電轉供價格"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "annual_generation_kwh", 112635, "kWh", "年平均發電量"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "degradation_rate", 0.01, "ratio", "模組每年衰退1%"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "project_years", 20, "year", "收入模型期間"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "average_annual_income", 619494, "TWD", "年平均收入"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "annual_net_income", 304754, "TWD", "第一年年淨營收參考值"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "total_20y_income", 12389873, "TWD", "20年總收入"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "total_20y_net_income", 5516039, "TWD", "20年總淨營收"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "reference_irr", 0.0878, "ratio", "20年平均內部報酬率 IRR"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "government_subsidy", 2632500, "TWD", "設備補助金額"
-    )
-    ensure_project_financial_rule(
-        conn, 2, 1, "government_subsidy_ratio", 0.50, "ratio", "設備補助占比"
-    )
-
-    ensure_profit_distribution_rule(conn, 2, 1, "股東紅利", 0.50, 1, "年度股東紅利")
-    ensure_profit_distribution_rule(conn, 2, 1, "運維與行政", 0.35, 2, "公民電廠運維與公司行政開銷")
-    ensure_profit_distribution_rule(conn, 2, 1, "案場租金", 0.10, 3, "案場租金")
-    ensure_profit_distribution_rule(conn, 2, 1, "社區回饋", 0.05, 4, "綠能社區回饋")
-
-    nanliao_intents = [
-        ("A01", 1100000), ("A02", 1000000), ("A03", 400000), ("A04", 100000),
-        ("A05", 50000), ("A06", 50000), ("A07", 400000), ("A08", 540000),
-        ("A09", 100000), ("A10", 100000), ("A11", 100000), ("A12", 50000),
-        ("B01", 100000), ("B02", 100000), ("B03", 400000), ("B04", 100000),
-        ("C01", 525000), ("C02", 50000),
-    ]
-    for intent_code, amount in nanliao_intents:
-        ensure_investment_intent(conn, 2, 1, intent_code, amount, "南寮方案書投資意向資料")
-
-
-def copy_bundled_db_if_needed():
-    db_path = get_db_path()
-    if not db_path.exists() and BUNDLED_DB_NAME.exists():
-        ensure_db_directory()
-        shutil.copyfile(BUNDLED_DB_NAME, db_path)
-
-
-def init_db():
-    copy_bundled_db_if_needed()
-    conn = get_connection()
-    run_schema(conn)
-    ensure_progress_columns(conn)
-    ensure_faq_columns(conn)
-    ensure_calculator_rule_columns(conn)
-    seed_product_tables(conn)
-    seed_legacy_data(conn)
-    conn.commit()
-    conn.close()
-
-
-from db_core import *  # noqa: F401,F403,E402
-
-
-# Final handoff to the cleaned implementation.
-from db_core import *  # noqa: F401,F403,E402
-
-
-# Use the cleaned implementation below while keeping this file path stable
-# for the rest of the application.
-from db_core import *  # noqa: F401,F403,E402
-
-
-# Clean redefinitions below keep the module working even if older seeded
-# strings were saved with broken encoding in previous revisions.
-
-BASE_DIR = Path(__file__).resolve().parent
-LOCAL_DATA_DIR = Path(os.environ.get("LOCALAPPDATA", str(BASE_DIR))) / "citizen-power-line-bot"
-DEFAULT_DB_PATH = LOCAL_DATA_DIR / "citizen_power_line_bot.db"
-SCHEMA_PATH = BASE_DIR / "schema.sql"
-BUNDLED_DB_NAME = BASE_DIR / "app.db"
-
 CHONGGUANG_COMMUNITY_ID = 1
 NANLIAO_COMMUNITY_ID = 2
 
@@ -395,6 +22,14 @@ DOC_NANLIAO_COMPANY_INTRO_20240916_ID = 3
 DOC_CITIZEN_POWER_STAGE2_APPLY_ID = 4
 DOC_NANLIAO_COMPANY_INTRO_20250623_ID = 5
 DOC_CITIZEN_POWER_HISTORY_MODEL_ID = 6
+
+__all__ = [
+    "get_db_path",
+    "ensure_db_directory",
+    "get_connection",
+    "run_schema",
+    "init_db",
+]
 
 
 def utc_now_iso():
@@ -884,51 +519,34 @@ def seed_legacy_data(conn):
         ensure_calculator_rule(conn, rule_name, value)
 
     if conn.execute("SELECT COUNT(*) FROM faq_items").fetchone()[0] == 0:
-        conn.execute(
-            """
-            INSERT INTO faq_items (category_id, question, answer, is_active, created_at, updated_at)
-            VALUES (
-                (SELECT id FROM faq_categories WHERE slug = 'regulation' LIMIT 1),
-                ?, ?, 1, ?, ?
-            )
-            """,
+        faq_rows = [
             (
+                "regulation",
                 "如何加入公民電廠？",
                 "可以先了解案場說明、投資門檻與社區規則，再由社區或公司提供實際參與方式。",
-                utc_now_iso(),
-                utc_now_iso(),
             ),
-        )
-        conn.execute(
-            """
-            INSERT INTO faq_items (category_id, question, answer, is_active, created_at, updated_at)
-            VALUES (
-                (SELECT id FROM faq_categories WHERE slug = 'investment' LIMIT 1),
-                ?, ?, 1, ?, ?
-            )
-            """,
             (
+                "investment",
                 "投資試算的數字怎麼來？",
                 "目前依南寮公民電廠方案書中的建置成本、售電價格、年發電量與 IRR 參考值進行估算。",
-                utc_now_iso(),
-                utc_now_iso(),
             ),
-        )
-        conn.execute(
-            """
-            INSERT INTO faq_items (category_id, question, answer, is_active, created_at, updated_at)
-            VALUES (
-                (SELECT id FROM faq_categories WHERE slug = 'project-progress' LIMIT 1),
-                ?, ?, 1, ?, ?
-            )
-            """,
             (
+                "project-progress",
                 "案場進度會顯示哪些階段？",
                 "起案初期通常會經過增資、併網審查、試運轉、驗收交接與正式運維等階段。",
-                utc_now_iso(),
-                utc_now_iso(),
             ),
-        )
+        ]
+        for category_slug, question, answer in faq_rows:
+            conn.execute(
+                """
+                INSERT INTO faq_items (category_id, question, answer, is_active, created_at, updated_at)
+                VALUES (
+                    (SELECT id FROM faq_categories WHERE slug = ? LIMIT 1),
+                    ?, ?, 1, ?, ?
+                )
+                """,
+                (category_slug, question, answer, utc_now_iso(), utc_now_iso()),
+            )
 
     if conn.execute("SELECT COUNT(*) FROM progress_items").fetchone()[0] == 0:
         conn.execute(
@@ -977,77 +595,79 @@ def seed_product_tables(conn):
         "active",
     )
 
-    upsert_source_document(
-        conn,
-        DOC_NANLIAO_EXEC_PLAN_ID,
-        "111年度澎湖南寮社區公開募集設置再生能源公民電廠示範獎勵計畫執行方案書",
-        "nanliao-exec-plan-20231108",
-        "nanliao_exec_plan_20231108.pdf",
-        "2023-11-08 修正版",
-        "pdf",
-        "2023-11-08",
-        "南寮公民電廠起案與財務模型的主要執行方案。",
-    )
-    upsert_source_document(
-        conn,
-        DOC_NANLIAO_APPROVED_GRANT_ID,
-        "111年社區公開募集設置再生能源公民電廠示範獎勵申請（澎湖南寮）核定版",
-        "nanliao-grant-approved-20220610",
-        "nanliao_grant_approved_20220610.pdf",
-        "2022-06-10 核定版",
-        "pdf",
-        "2022-06-10",
-        "南寮社區早期目標容量、潛力點與查核點資料來源。",
-    )
-    upsert_source_document(
-        conn,
-        DOC_NANLIAO_COMPANY_INTRO_20240916_ID,
-        "1130916 南寮公民電廠公司介紹",
-        "nanliao-company-intro-20240916",
-        "nanliao_company_intro_20240916.pdf",
-        "2024-09-16",
-        "pdf",
-        "2024-09-16",
-        "南寮公民電廠公司介紹與社區參與說明。",
-    )
-    upsert_source_document(
-        conn,
-        DOC_CITIZEN_POWER_STAGE2_APPLY_ID,
-        "1131017 公民電廠示範獎勵辦法計畫第二階段獎勵申請",
-        "citizen-power-stage2-apply-20241017",
-        "citizen_power_stage2_apply_20241017.pdf",
-        "2024-10-17",
-        "pdf",
-        "2024-10-17",
-        "第二階段增資、併網、驗收與正式運維的時程依據。",
-    )
-    upsert_source_document(
-        conn,
-        DOC_NANLIAO_COMPANY_INTRO_20250623_ID,
-        "20250623 南寮公民電廠簡介",
-        "nanliao-company-intro-20250623",
-        "nanliao_company_intro_20250623.pdf",
-        "2025-06-23",
-        "pdf",
-        "2025-06-23",
-        "南寮公民電廠實際建置場景、年發電量與年收益摘要。",
-    )
-    upsert_source_document(
-        conn,
-        DOC_CITIZEN_POWER_HISTORY_MODEL_ID,
-        "公民電廠發展歷程與創新推動模式",
-        "citizen-power-history-model",
-        "citizen_power_history_model.pdf",
-        "研究整理版",
-        "pdf",
-        "",
-        "作為公民電廠模式與制度演進的背景參考文件。",
-    )
+    source_documents = [
+        (
+            DOC_NANLIAO_EXEC_PLAN_ID,
+            "111年度澎湖南寮社區公開募集設置再生能源公民電廠示範獎勵計畫執行方案書",
+            "nanliao-exec-plan-20231108",
+            "nanliao_exec_plan_20231108.pdf",
+            "2023-11-08 修正版",
+            "pdf",
+            "2023-11-08",
+            "南寮公民電廠起案與財務模型的主要執行方案。",
+        ),
+        (
+            DOC_NANLIAO_APPROVED_GRANT_ID,
+            "111年社區公開募集設置再生能源公民電廠示範獎勵申請（澎湖南寮）核定版",
+            "nanliao-grant-approved-20220610",
+            "nanliao_grant_approved_20220610.pdf",
+            "2022-06-10 核定版",
+            "pdf",
+            "2022-06-10",
+            "南寮社區早期目標容量、潛力點與查核點資料來源。",
+        ),
+        (
+            DOC_NANLIAO_COMPANY_INTRO_20240916_ID,
+            "1130916 南寮公民電廠公司介紹",
+            "nanliao-company-intro-20240916",
+            "nanliao_company_intro_20240916.pdf",
+            "2024-09-16",
+            "pdf",
+            "2024-09-16",
+            "南寮公民電廠公司介紹與社區參與說明。",
+        ),
+        (
+            DOC_CITIZEN_POWER_STAGE2_APPLY_ID,
+            "1131017 公民電廠示範獎勵辦法計畫第二階段獎勵申請",
+            "citizen-power-stage2-apply-20241017",
+            "citizen_power_stage2_apply_20241017.pdf",
+            "2024-10-17",
+            "pdf",
+            "2024-10-17",
+            "第二階段增資、併網、驗收與正式運維的時程依據。",
+        ),
+        (
+            DOC_NANLIAO_COMPANY_INTRO_20250623_ID,
+            "20250623 南寮公民電廠簡介",
+            "nanliao-company-intro-20250623",
+            "nanliao_company_intro_20250623.pdf",
+            "2025-06-23",
+            "pdf",
+            "2025-06-23",
+            "南寮公民電廠實際建置場景、年發電量與年收益摘要。",
+        ),
+        (
+            DOC_CITIZEN_POWER_HISTORY_MODEL_ID,
+            "公民電廠發展歷程與創新推動模式",
+            "citizen-power-history-model",
+            "citizen_power_history_model.pdf",
+            "研究整理版",
+            "pdf",
+            "",
+            "作為公民電廠模式與制度演進的背景參考文件。",
+        ),
+    ]
+    for args in source_documents:
+        upsert_source_document(conn, *args)
 
-    upsert_faq_category(conn, 1, "法規與申請", "regulation")
-    upsert_faq_category(conn, 2, "投資與收益", "investment")
-    upsert_faq_category(conn, 3, "案場進度", "project-progress")
-    upsert_faq_category(conn, 4, "韌性與社區回饋", "resilience")
+    faq_categories = [
+        (1, "法規與申請", "regulation"),
+        (2, "投資與收益", "investment"),
+        (3, "案場進度", "project-progress"),
+        (4, "韌性與社區回饋", "resilience"),
+    ]
+    for args in faq_categories:
+        upsert_faq_category(conn, *args)
 
     financial_rules = [
         ("installed_capacity_kw", 87.75, "kW", "南寮方案書中的規劃建置容量", DOC_NANLIAO_EXEC_PLAN_ID),
@@ -1323,6 +943,3 @@ def init_db():
     seed_legacy_data(conn)
     conn.commit()
     conn.close()
-
-from db_core import *  # noqa: F401,F403,E402
-

@@ -1,7 +1,7 @@
-﻿import os
+import os
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
-from calc_repo import get_share_rate
+from calc_repo import build_calculator_result
 from db import init_db
 from faq_repo import find_faq_answer, list_faqs
 from line_service import (
@@ -30,7 +30,7 @@ def line_profile():
     try:
         profile = get_line_profile_from_access_token(access_token)
     except Exception:
-        return jsonify({"ok": False, "message": "LINE 身分驗證失敗"}), 400
+        return jsonify({"ok": False, "message": "LINE ??????"}), 400
 
     return jsonify({"ok": True, "profile": profile})
 
@@ -65,7 +65,7 @@ def webhook():
             continue
 
         answer = find_faq_answer(user_message)
-        reply_text = answer if answer else "查無相關 FAQ，請輸入 FAQ 查看可選問題。"
+        reply_text = answer if answer else "???? FAQ???? FAQ ???????"
         reply_line_message(reply_token, reply_text)
 
     return "OK", 200
@@ -76,10 +76,10 @@ def home():
     return jsonify({
         "status": "ok",
         "system": "citizen power line bot",
-        "version": "0.6",
+        "version": "0.7",
         "features": {
             "faq_all": "/faq",
-            "faq_search": "/faq?keyword=公民電廠",
+            "faq_search": "/faq?keyword=????",
             "calc": "/calc?amount=10000",
             "progress": "/progress",
             "webhook": "/webhook",
@@ -95,7 +95,7 @@ def faq():
     rows = list_faqs(keyword)
 
     if not rows:
-        return jsonify({"message": "找不到相關 FAQ"}), 404
+        return jsonify({"message": "????? FAQ"}), 404
 
     return jsonify([
         {"question": row["question"], "answer": row["answer"]}
@@ -105,24 +105,16 @@ def faq():
 
 @app.route("/hello")
 def hello():
-    return "歡迎使用公民電廠服務"
+    return "??????????"
 
 
 @app.route("/calc")
 def calc():
     amount = request.args.get("amount", default=10000, type=float)
-    share_rate = get_share_rate()
+    project_slug = request.args.get("project", default="nanliao-citizen-power", type=str).strip() or "nanliao-citizen-power"
+    calc_result = build_calculator_result(amount, project_slug)
 
-    if share_rate is None:
-        return "找不到投資試算規則", 404
-
-    estimated_return = amount * share_rate
-    return render_template(
-        "calc.html",
-        amount=amount,
-        share_rate=share_rate,
-        estimated_return=estimated_return,
-    )
+    return render_template("calc_v2.html", **calc_result)
 
 
 @app.route("/progress", methods=["GET", "POST"])
