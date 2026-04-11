@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案場進度</title>
+  <style>
+    :root { --bg:#eef4f7; --surface:#fff; --brand:#1f8fff; --brand-dark:#1668bd; --text:#1f2a24; --sub:#64746b; --line:#d8e4ef; --success:#1aa25f; --success-bg:#eaf8f0; --warning:#d97706; --warning-bg:#fff4dd; --shadow:0 18px 42px rgba(22,49,77,.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:"Microsoft JhengHei","PingFang TC",sans-serif; background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%); color:var(--text); padding:20px 12px 32px; }
+    .page { max-width:1120px; margin:0 auto; }
+    .hero { background:linear-gradient(135deg,#66b6ff,var(--brand) 58%,var(--brand-dark)); color:#fff; border-radius:28px; padding:28px 22px; box-shadow:var(--shadow); }
+    .badge { display:inline-block; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.16); font-size:13px; font-weight:700; }
+    .hero h1 { margin:12px 0 10px; font-size:34px; }
+    .hero p { margin:0; max-width:680px; line-height:1.8; }
+    .layout { display:grid; gap:18px; margin-top:18px; }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:24px; padding:22px; box-shadow:var(--shadow); }
+    .card h2 { margin:0 0 14px; font-size:22px; }
+    .status { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px; background:#e8f4ff; color:var(--brand-dark); font-weight:700; }
+    .message { margin-top:14px; padding:12px 14px; border-radius:16px; font-size:14px; }
+    .message.success { background:var(--success-bg); color:var(--success); }
+    .message.warning { background:var(--warning-bg); color:var(--warning); }
+    .form-grid { display:grid; gap:14px; }
+    label { display:block; margin-bottom:8px; font-size:14px; color:var(--sub); }
+    input, select { width:100%; border:1px solid #d1dee8; border-radius:16px; padding:14px 16px; font-size:15px; font-family:inherit; background:#fff; }
+    .button { display:inline-block; border:none; border-radius:16px; padding:14px 18px; background:var(--brand); color:#fff; font-size:16px; font-weight:700; cursor:pointer; }
+    .button[disabled] { opacity:.6; cursor:not-allowed; }
+    .muted { margin:10px 0 0; color:var(--sub); line-height:1.8; font-size:14px; }
+    .user-box { margin-top:14px; padding:14px 16px; border-radius:18px; background:#f8fbff; border:1px solid var(--line); color:var(--sub); line-height:1.7; }
+    .user-box strong { color:var(--text); }
+    .section-grid { display:grid; gap:18px; margin-top:18px; }
+    .timeline, .forecast-list { display:grid; gap:14px; }
+    .timeline-item, .forecast-item { position:relative; padding:16px 18px 16px 48px; border-radius:18px; background:#f8fbff; border:1px solid var(--line); }
+    .timeline-item::before, .forecast-item::before { content:""; position:absolute; left:20px; top:20px; width:12px; height:12px; border-radius:50%; background:var(--brand); box-shadow:0 0 0 6px rgba(31,143,255,.14); }
+    .forecast-item::before { background:var(--success); box-shadow:0 0 0 6px rgba(26,162,95,.14); }
+    .timeline-item strong, .forecast-item strong { display:block; margin-bottom:6px; font-size:18px; }
+    .timeline-item span, .forecast-item span { color:var(--sub); font-size:14px; line-height:1.7; display:block; }
+    .empty-state { padding:18px; border-radius:18px; background:#f8fbff; border:1px dashed #c8d8e5; color:var(--sub); line-height:1.7; }
+    .back-link { display:inline-block; margin-top:18px; color:var(--brand-dark); text-decoration:none; font-weight:700; }
+    @media (min-width:860px) { body{padding:24px 18px 40px;} .layout{grid-template-columns:.9fr 1.1fr;} .section-grid{grid-template-columns:1fr 1fr;} .hero{padding:34px 30px;} .hero h1{font-size:40px;} }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">Project Progress</div>
+      <h1>案場進度</h1>
+      <p>查看最新階段、歷次更新與後續推估節點。需要新增進度時，請先完成 LINE 驗證。</p>
+    </section>
+    <section class="layout">
+      <section class="card">
+        <h2>目前狀態</h2>
+        {% if latest_record %}
+          <div class="status">🏗️ {{ latest_record.stage }}</div>
+          <p class="muted">最新更新日期為 {{ latest_record.updated_at }}。{% if latest_record.display_name %}最近一筆由 {{ latest_record.display_name }} 新增。{% else %}系統會依目前節奏推估後續節點。{% endif %}</p>
+        {% else %}
+          <div class="empty-state">目前還沒有任何進度資料，請先新增第一筆紀錄。</div>
+        {% endif %}
+        {% if saved == "1" %}<div class="message success">已成功新增一筆案場進度。</div>{% elif saved == "0" %}<div class="message warning">新增失敗，請確認已完成 LINE 驗證，且日期與階段填寫正確。</div>{% endif %}
+      </section>
+      <section class="card">
+        <h2>新增進度</h2>
+        <div id="line-user-box" class="user-box"><strong>尚未完成 LINE 驗證</strong><div>請從 LINE 內開啟此頁面。</div></div>
+        <form method="post" action="/progress" class="form-grid" id="progress-form">
+          <input type="hidden" name="line_user_id" id="line_user_id">
+          <input type="hidden" name="display_name" id="display_name">
+          <div><label for="stage">目前階段</label><select id="stage" name="stage" required>{% for stage in progress_stages %}<option value="{{ stage }}">{{ stage }}</option>{% endfor %}</select></div>
+          <div><label for="updated_at">更新日期</label><input id="updated_at" name="updated_at" type="date" required></div>
+          <button class="button" type="submit" id="submit-button" disabled>完成驗證後才能新增</button>
+        </form>
+      </section>
+    </section>
+    <section class="section-grid">
+      <section class="card">
+        <h2>進度紀錄</h2>
+        {% if progress_rows %}
+          <div class="timeline">{% for item in progress_rows %}<div class="timeline-item"><strong>{{ item.stage }}</strong><span>更新日期：{{ item.updated_at }}</span>{% if item.display_name %}<span>新增者：{{ item.display_name }}</span>{% endif %}</div>{% endfor %}</div>
+        {% else %}
+          <div class="empty-state">尚未建立任何進度紀錄。</div>
+        {% endif %}
+      </section>
+      <section class="card">
+        <h2>後續推估</h2>
+        {% if predicted_rows %}
+          <div class="forecast-list">{% for item in predicted_rows %}<div class="forecast-item"><strong>{{ item.stage }}</strong><span>預估日期：{{ item.predicted_date }}</span><span>依目前節奏，約 {{ item.days_after }} 天後進入此階段。</span></div>{% endfor %}</div>
+        {% else %}
+          <div class="empty-state">目前已到最後階段，或資料不足以推估更多後續進度。</div>
+        {% endif %}
+      </section>
+    </section>
+    <a class="back-link" href="/menu">← 返回服務首頁</a>
+  </main>
+  {% if liff_id %}
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+      const liffId = {{ liff_id|tojson }};
+      const userBox = document.getElementById("line-user-box");
+      const lineUserIdInput = document.getElementById("line_user_id");
+      const displayNameInput = document.getElementById("display_name");
+      const submitButton = document.getElementById("submit-button");
+      async function setupLiff() {
+        try {
+          await liff.init({ liffId });
+          if (!liff.isLoggedIn()) { userBox.innerHTML = "<strong>尚未登入 LINE</strong><div>請先以 LINE 帳號登入後再新增進度。</div>"; liff.login(); return; }
+          const accessToken = liff.getAccessToken();
+          const response = await fetch("/api/line-profile", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ accessToken }) });
+          const result = await response.json();
+          if (!result.ok) { userBox.innerHTML = "<strong>LINE 驗證失敗</strong><div>請重新從 LINE 內開啟此頁面。</div>"; return; }
+          const profile = result.profile;
+          lineUserIdInput.value = profile.line_user_id;
+          displayNameInput.value = profile.display_name;
+          submitButton.disabled = false;
+          submitButton.textContent = "新增進度";
+          userBox.innerHTML = `<strong>目前登入者：${profile.display_name}</strong><div>新增紀錄時會同步綁定你的 LINE 身分。</div>`;
+        } catch (error) {
+          userBox.innerHTML = "<strong>LIFF 初始化失敗</strong><div>請稍後再試，或確認 LINE 設定是否完整。</div>";
+        }
+      }
+      setupLiff();
+    </script>
+  {% else %}
+    <script>document.getElementById("line-user-box").innerHTML = "<strong>目前無法使用 LINE 驗證</strong><div>請聯繫管理者完成 LIFF 設定。</div>";</script>
+  {% endif %}
+</body>
+</html>

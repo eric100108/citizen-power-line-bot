@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>市民電廠服務首頁</title>
+  <style>
+    :root { --bg:#eef3f1; --surface:rgba(255,255,255,.84); --surface-solid:#fff; --text-main:#1f2a24; --text-sub:#5f6f66; --text-soft:#7b8f84; --brand-1:#06c755; --brand-2:#26a96c; --line:rgba(212,225,217,.96); --shadow:0 18px 44px rgba(19,52,36,.12); --radius-xl:30px; --radius-lg:22px; --sidebar-width:286px; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:"Microsoft JhengHei","PingFang TC",sans-serif; background:radial-gradient(circle at top left, rgba(6,199,85,.18), transparent 24%), radial-gradient(circle at right top, rgba(38,169,108,.12), transparent 20%), linear-gradient(180deg,#f8fbf9 0%,var(--bg) 100%); color:var(--text-main); }
+    .layout { min-height:100vh; display:grid; grid-template-columns:1fr; gap:16px; padding:12px; }
+    .sidebar { display:none; }
+    .sidebar-shell { position:sticky; top:14px; height:calc(100vh - 28px); border-radius:28px; background:rgba(255,255,255,.76); border:1px solid rgba(255,255,255,.75); box-shadow:0 24px 60px rgba(17,47,32,.1); backdrop-filter:blur(12px); padding:16px 14px; display:flex; flex-direction:column; gap:18px; }
+    .brand { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:18px; background:rgba(6,199,85,.08); }
+    .brand-mark { width:42px; height:42px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg,var(--brand-1),var(--brand-2)); color:#fff; font-size:20px; font-weight:700; box-shadow:0 12px 24px rgba(6,199,85,.22); }
+    .brand-copy strong { display:block; font-size:15px; }
+    .brand-copy span { display:block; margin-top:4px; color:var(--text-soft); font-size:12px; line-height:1.5; }
+    .side-nav { display:grid; gap:8px; }
+    .nav-label { padding:4px 12px 0; color:var(--text-soft); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+    .nav-link { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; color:inherit; text-decoration:none; transition:background .2s ease, transform .2s ease; }
+    .nav-link:hover, .nav-link.active { background:rgba(6,199,85,.1); transform:translateX(2px); }
+    .nav-icon { width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:#f4faf7; border:1px solid #e1eee6; font-size:18px; }
+    .nav-copy strong { display:block; font-size:14px; }
+    .nav-copy span { display:block; margin-top:4px; font-size:12px; color:var(--text-soft); line-height:1.4; }
+    .side-panel { margin-top:auto; padding:16px; border-radius:20px; background:linear-gradient(180deg,#f5fff9,#e8fbf0); border:1px solid #d6f0df; }
+    .side-panel strong { display:block; font-size:15px; margin-bottom:8px; }
+    .side-panel p { margin:0; color:#46705a; line-height:1.7; font-size:13px; }
+    .workspace { min-width:0; background:rgba(255,255,255,.78); border:1px solid rgba(255,255,255,.75); border-radius:30px; padding:14px; box-shadow:0 24px 60px rgba(17,47,32,.1); backdrop-filter:blur(12px); }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 4px 16px; }
+    .crumb { display:flex; align-items:center; gap:10px; min-width:0; }
+    .menu-button, .topbar-button { border:0; background:#fff; color:var(--text-main); width:44px; height:44px; border-radius:14px; box-shadow:var(--shadow); cursor:pointer; font-size:18px; }
+    .crumb-copy span { display:block; color:var(--text-soft); font-size:12px; margin-bottom:4px; }
+    .crumb-copy strong { display:block; font-size:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hero { position:relative; overflow:hidden; border-radius:var(--radius-xl); padding:24px 20px; background:linear-gradient(135deg,var(--brand-1),#39d98a 55%,var(--brand-2)); color:#fff; box-shadow:var(--shadow); }
+    .hero::after { content:""; position:absolute; right:-70px; bottom:-74px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,.14); }
+    .hero-copy { max-width:760px; position:relative; z-index:1; }
+    .hero-badge { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.16); font-size:13px; font-weight:700; }
+    .hero h1 { margin:16px 0 12px; font-size:30px; line-height:1.18; }
+    .hero p { margin:0; font-size:15px; line-height:1.75; color:rgba(255,255,255,.92); }
+    .hero-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    .hero-action { display:inline-flex; align-items:center; gap:8px; padding:12px 14px; border-radius:16px; text-decoration:none; color:#fff; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.18); font-weight:700; }
+    .hero-action.secondary { background:rgba(17,50,34,.18); }
+    .main-grid { display:grid; gap:18px; margin-top:18px; }
+    .panel { background:var(--surface-solid); border-radius:24px; padding:22px; border:1px solid var(--line); box-shadow:var(--shadow); }
+    .section-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .section-title h2 { margin:0; font-size:22px; }
+    .section-title span { color:var(--text-soft); font-size:13px; }
+    .feature-grid { display:grid; gap:14px; }
+    .feature-card { display:flex; align-items:flex-start; gap:14px; text-decoration:none; color:inherit; padding:18px; border-radius:22px; background:#fbfefd; border:1px solid var(--line); transition:transform .2s ease, box-shadow .2s ease; }
+    .feature-card:hover { transform:translateY(-2px); box-shadow:0 18px 40px rgba(19,52,36,.12); }
+    .icon-wrap { flex:0 0 58px; width:58px; height:58px; display:grid; place-items:center; border-radius:18px; font-size:28px; background:linear-gradient(180deg,#fff9ea,#ffefbf); }
+    .feature-card:nth-child(2) .icon-wrap { background:linear-gradient(180deg,#eef7ff,#d6e9ff); }
+    .feature-card:nth-child(3) .icon-wrap { background:linear-gradient(180deg,#f4efff,#e3d8ff); }
+    .feature-content h3 { margin:0 0 6px; font-size:18px; }
+    .feature-content p { margin:0; font-size:14px; line-height:1.65; color:var(--text-sub); }
+    .feature-meta { margin-top:10px; font-size:12px; color:var(--text-soft); }
+    .feature-arrow { font-size:20px; color:#9ab1a4; padding-top:6px; }
+    .overview-stack, .drawer-links { display:grid; gap:12px; }
+    .overview-card, .drawer-link { padding:16px 18px; border-radius:18px; background:#fbfefd; border:1px solid var(--line); }
+    .overview-card span, .drawer-link span { display:block; color:var(--text-soft); font-size:12px; margin-bottom:6px; }
+    .overview-card strong, .drawer-link strong { display:block; font-size:18px; margin-bottom:6px; }
+    .overview-card p, .drawer-link p { margin:0; color:var(--text-sub); line-height:1.65; font-size:13px; }
+    .overview-card.accent { background:linear-gradient(180deg,#f1fff6,#e7f9ee); border-color:#d2eedc; }
+    .footer { margin-top:18px; text-align:center; color:var(--text-soft); font-size:12px; }
+    .drawer { position:fixed; inset:0; opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:30; }
+    .drawer.open { opacity:1; pointer-events:auto; }
+    .drawer-backdrop { position:absolute; inset:0; background:rgba(16,33,24,.35); backdrop-filter:blur(2px); }
+    .drawer-panel { position:absolute; top:14px; right:14px; bottom:14px; width:min(92vw,360px); padding:18px; border-radius:28px; background:rgba(255,255,255,.96); border:1px solid rgba(255,255,255,.86); box-shadow:0 26px 70px rgba(13,39,27,.2); display:flex; flex-direction:column; gap:18px; overflow:auto; }
+    .drawer-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .drawer-top h3 { margin:0; font-size:20px; }
+    .drawer-close { border:0; background:#f2f7f4; width:42px; height:42px; border-radius:14px; font-size:20px; cursor:pointer; }
+    .drawer-link { display:block; text-decoration:none; color:inherit; }
+    .drawer-bottom { margin-top:auto; padding:16px; border-radius:20px; background:linear-gradient(180deg,#f5fff9,#e8fbf0); border:1px solid #d6f0df; }
+    .drawer-bottom strong { display:block; font-size:15px; margin-bottom:8px; }
+    .drawer-bottom p { margin:0; color:#46705a; line-height:1.7; font-size:13px; }
+    @media (min-width:960px) { .layout { grid-template-columns:var(--sidebar-width) minmax(0,1fr); padding:14px; } .sidebar{display:block;} .menu-button{display:none;} .main-grid{grid-template-columns:1.18fr .82fr;} .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .feature-grid .feature-card:first-child{grid-column:span 2;} .hero h1{font-size:42px;} }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="側邊導覽">
+      <div class="sidebar-shell">
+        <div class="brand">
+          <div class="brand-mark">CP</div>
+          <div class="brand-copy">
+            <strong>市民電廠服務</strong>
+            <span>從起案資料到投資評估與進度查詢的整合入口。</span>
+          </div>
+        </div>
+        <nav class="side-nav">
+          <div class="nav-label">Workspace</div>
+          <a class="nav-link active" href="/menu"><div class="nav-icon">⌂</div><div class="nav-copy"><strong>服務首頁</strong><span>快速進入主要功能與案場資訊。</span></div></a>
+          <a class="nav-link" href="/project"><div class="nav-icon">▣</div><div class="nav-copy"><strong>起案資料</strong><span>查看案場規模、里程碑與社區回饋。</span></div></a>
+          <a class="nav-link" href="/calc?amount=10000"><div class="nav-icon">↗</div><div class="nav-copy"><strong>投資試算</strong><span>依案場參考數據估算投資與收益。</span></div></a>
+          <a class="nav-link" href="/progress"><div class="nav-icon">◎</div><div class="nav-copy"><strong>案場進度</strong><span>追蹤最新更新與後續節點。</span></div></a>
+        </nav>
+        <div class="side-panel">
+          <strong>服務重點</strong>
+          <p>整合起案資訊、財務參考與進度管理，讓查詢與更新都集中在同一個入口。</p>
+        </div>
+      </div>
+    </aside>
+    <main class="workspace">
+      <header class="topbar">
+        <div class="crumb">
+          <button class="menu-button" type="button" onclick="openDrawer()" aria-label="開啟面板">☰</button>
+          <div class="crumb-copy"><span>Citizen Power Workspace</span><strong>市民電廠服務首頁</strong></div>
+        </div>
+        <div class="topbar-actions"><button class="topbar-button" type="button" onclick="openDrawer()" aria-label="快捷入口">⋯</button></div>
+      </header>
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="hero-badge">LINE 服務入口</div>
+          <h1>快速查看案場資訊、投資試算與最新進度</h1>
+          <p>從同一個工作區完成查詢、評估與追蹤，讓社區案場的核心資訊清楚集中。</p>
+          <div class="hero-actions">
+            <a class="hero-action" href="/project">查看起案資料</a>
+            <a class="hero-action secondary" href="/calc?amount=10000">開始投資試算</a>
+          </div>
+        </div>
+      </section>
+      <section class="main-grid">
+        <section class="panel">
+          <div class="section-title"><h2>主要功能</h2><span>3 項服務</span></div>
+          <div class="feature-grid">
+            <a class="feature-card" href="/project"><div class="icon-wrap">📁</div><div class="feature-content"><h3>起案資料</h3><p>查看案場規模、進度里程碑、建置場址與社區回饋內容。</p><div class="feature-meta">規劃容量、建置資訊、回饋方案</div></div><div class="feature-arrow">›</div></a>
+            <a class="feature-card" href="/calc?amount=10000"><div class="icon-wrap">📈</div><div class="feature-content"><h3>投資試算</h3><p>依南寮案場的參考財務規則，估算投資金額、配息占比與長期收益。</p><div class="feature-meta">IRR、補助比例、分潤結構</div></div><div class="feature-arrow">›</div></a>
+            <a class="feature-card" href="/progress"><div class="icon-wrap">🗂️</div><div class="feature-content"><h3>案場進度</h3><p>查看目前階段、歷次紀錄與後續推估日期，掌握案場最新狀態。</p><div class="feature-meta">進度更新、預估節點、LINE 驗證</div></div><div class="feature-arrow">›</div></a>
+          </div>
+        </section>
+        <aside class="panel">
+          <div class="section-title"><h2>服務摘要</h2><span>快速查看</span></div>
+          <div class="overview-stack">
+            <div class="overview-card accent"><span>目前焦點</span><strong>南寮公民電廠</strong><p>整合起案、財務與進度資訊，作為案場查詢與對外說明的統一入口。</p></div>
+            <div class="overview-card"><span>常用入口</span><strong>起案、試算、進度</strong><p>把常用查詢與管理動作集中，降低使用者切換頁面的成本。</p></div>
+            <div class="overview-card"><span>服務用途</span><strong>查詢、評估、追蹤</strong><p>適合用於社區說明、投資評估、案場管理與後續更新。</p></div>
+          </div>
+        </aside>
+      </section>
+      <div class="footer">Citizen Power Workspace</div>
+    </main>
+  </div>
+  <div class="drawer" id="toolDrawer" aria-hidden="true">
+    <div class="drawer-backdrop" onclick="closeDrawer()"></div>
+    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="快捷入口">
+      <div class="drawer-top"><h3>快捷入口</h3><button class="drawer-close" type="button" onclick="closeDrawer()" aria-label="關閉面板">×</button></div>
+      <div class="drawer-links">
+        <a class="drawer-link" href="/project"><span>起案資料</span><strong>查看案場概況</strong><p>快速進入規模、場址、里程碑與社區回饋資料。</p></a>
+        <a class="drawer-link" href="/calc?amount=10000"><span>投資試算</span><strong>立即開始估算</strong><p>輸入投資金額，查看 IRR 參考值與收益試算結果。</p></a>
+        <a class="drawer-link" href="/progress"><span>案場進度</span><strong>查看最新更新</strong><p>追蹤目前階段與後續節點，必要時可登入後新增紀錄。</p></a>
+      </div>
+      <div class="drawer-bottom"><strong>服務說明</strong><p>此入口提供案場資訊查詢、投資試算與進度追蹤三個核心功能。</p></div>
+    </aside>
+  </div>
+  <script>
+    const toolDrawer = document.getElementById("toolDrawer");
+    function openDrawer() { toolDrawer.classList.add("open"); toolDrawer.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; }
+    function closeDrawer() { toolDrawer.classList.remove("open"); toolDrawer.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; }
+    document.addEventListener("keydown", function (event) { if (event.key === "Escape") { closeDrawer(); } });
+  </script>
+</body>
+</html>

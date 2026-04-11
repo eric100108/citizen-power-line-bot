@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ project.name }}｜起案資料</title>
+  <style>
+    :root { --bg:#edf4f1; --surface:#fff; --brand:#06c755; --brand-dark:#0b8f4b; --brand-soft:#eafcf1; --text:#1f2a24; --sub:#65756c; --line:#d9e6df; --shadow:0 18px 46px rgba(18,53,36,.12); --radius-xl:28px; --radius-lg:22px; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:"Microsoft JhengHei","PingFang TC",sans-serif; background:linear-gradient(180deg,#f8fbf9 0%,var(--bg) 100%); color:var(--text); padding:20px 12px 36px; }
+    .page { max-width:1180px; margin:0 auto; }
+    .hero { background:linear-gradient(135deg,var(--brand),#3fd58b 58%,var(--brand-dark)); color:#fff; border-radius:var(--radius-xl); padding:28px 22px; box-shadow:var(--shadow); }
+    .badge { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.18); font-size:13px; font-weight:700; }
+    .hero h1 { margin:14px 0 10px; font-size:34px; line-height:1.2; }
+    .hero p { margin:0; max-width:760px; line-height:1.8; color:rgba(255,255,255,.94); }
+    .hero-grid { display:grid; gap:14px; margin-top:20px; }
+    .hero-pill { padding:14px 16px; border-radius:18px; background:rgba(255,255,255,.15); }
+    .hero-pill span { display:block; font-size:12px; opacity:.85; margin-bottom:4px; }
+    .hero-pill strong { font-size:20px; }
+    .grid { display:grid; gap:18px; margin-top:18px; }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); padding:22px; box-shadow:var(--shadow); }
+    .card h2 { margin:0 0 14px; font-size:22px; }
+    .card p { margin:0; color:var(--sub); line-height:1.7; }
+    .stats-grid, .site-grid, .benefit-grid { display:grid; gap:14px; }
+    .stat-card, .site-card, .benefit-card, .timeline-item, .distribution-item { padding:16px 18px; border-radius:18px; border:1px solid var(--line); background:#fbfefd; }
+    .stat-card span, .site-card span, .distribution-item span { display:block; color:var(--sub); margin-bottom:6px; font-size:13px; line-height:1.6; }
+    .stat-card strong, .site-card strong, .distribution-item strong { font-size:24px; }
+    .timeline { display:grid; gap:14px; }
+    .timeline-item { position:relative; padding-left:50px; }
+    .timeline-item::before { content:""; position:absolute; left:20px; top:20px; width:12px; height:12px; border-radius:50%; background:var(--brand); box-shadow:0 0 0 6px rgba(6,199,85,.14); }
+    .timeline-item strong { display:block; margin-bottom:6px; font-size:18px; }
+    .timeline-item span { display:block; color:var(--sub); line-height:1.7; }
+    .distribution-list { display:grid; gap:12px; margin-top:16px; }
+    .distribution-item { display:flex; justify-content:space-between; align-items:center; gap:18px; }
+    .benefit-card strong { display:block; margin-bottom:6px; font-size:18px; }
+    .benefit-card p { margin:0; }
+    .nav-links { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    .nav-link { display:inline-block; padding:12px 16px; border-radius:16px; text-decoration:none; background:var(--brand-soft); color:#166534; font-weight:700; border:1px solid #caeed6; }
+    @media (min-width:820px) { body{padding:24px 18px 40px;} .hero h1{font-size:42px;} .hero-grid{grid-template-columns:repeat(3,1fr);} .grid{grid-template-columns:1.12fr .88fr;} .stats-grid{grid-template-columns:repeat(3,1fr);} .site-grid,.benefit-grid{grid-template-columns:repeat(2,1fr);} }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">{{ project.community_name }}｜案場總覽</div>
+      <h1>{{ project.name }}</h1>
+      <p>{{ project.description }}</p>
+      <div class="hero-grid">
+        <div class="hero-pill"><span>目前階段</span><strong>{{ project.current_stage }}</strong></div>
+        <div class="hero-pill"><span>已建置容量</span><strong>{{ "{:,.3f}".format(metrics["actual_built_capacity_kw"]["metric_value"] if metrics.get("actual_built_capacity_kw") else 0) }} kW</strong></div>
+        <div class="hero-pill"><span>參考 IRR</span><strong>{{ "{:.2%}".format(metrics["reference_irr"]["metric_value"] if metrics.get("reference_irr") else 0) }}</strong></div>
+      </div>
+    </section>
+    <section class="card" style="margin-top: 18px;">
+      <h2>核心指標</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><span>規劃容量</span><strong>{{ "{:,.2f}".format(metrics["planned_capacity_kw"]["metric_value"] if metrics.get("planned_capacity_kw") else 0) }} kW</strong></div>
+        <div class="stat-card"><span>建置預算</span><strong>NT$ {{ "{:,.0f}".format(metrics["project_budget_twd"]["metric_value"] if metrics.get("project_budget_twd") else 0) }}</strong></div>
+        <div class="stat-card"><span>居民投資人數</span><strong>{{ "{:,.0f}".format(metrics["resident_investor_count"]["metric_value"] if metrics.get("resident_investor_count") else 0) }} 位</strong></div>
+        <div class="stat-card"><span>有效問卷數</span><strong>{{ "{:,.0f}".format(metrics["valid_survey_response_count"]["metric_value"] if metrics.get("valid_survey_response_count") else 0) }} 份</strong></div>
+        <div class="stat-card"><span>年發電量</span><strong>{{ "{:,.0f}".format(metrics["actual_annual_generation_kwh"]["metric_value"] if metrics.get("actual_annual_generation_kwh") else 0) }}</strong></div>
+        <div class="stat-card"><span>年售電收入</span><strong>NT$ {{ "{:,.0f}".format(metrics["actual_annual_revenue_twd"]["metric_value"] if metrics.get("actual_annual_revenue_twd") else 0) }}</strong></div>
+      </div>
+    </section>
+    <section class="grid">
+      <section class="card">
+        <h2>里程碑</h2>
+        <div class="timeline">
+          {% for item in milestones %}
+          <div class="timeline-item">
+            <strong>{{ item.title }}</strong>
+            <span>階段分類：{{ item.stage_group }}</span>
+            <span>規劃期間：{{ item.planned_period }}</span>
+            <span>目前狀態：{{ item.status }}</span>
+            {% if item.note %}<span>{{ item.note }}</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="card">
+        <h2>分潤結構</h2>
+        <p>依南寮案場的分潤規則，年度淨收益分配如下。</p>
+        <div class="distribution-list">
+          {% for row in distribution_rows %}
+          <div class="distribution-item"><span>{{ row.item_name }}</span><strong>{{ "{:.0%}".format(row.ratio) }}</strong></div>
+          {% endfor %}
+        </div>
+      </section>
+    </section>
+    <section class="card" style="margin-top: 18px;">
+      <h2>建置場址</h2>
+      <div class="site-grid">
+        {% for item in sites %}
+        <div class="site-card">
+          <span>{{ item.site_type }}｜{{ item.status }}</span>
+          <strong>{{ item.site_name }}</strong>
+          <span>容量：{{ "{:,.3f}".format(item.actual_capacity_kw) }} kW</span>
+          {% if item.note %}<span>{{ item.note }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="card" style="margin-top: 18px;">
+      <h2>社區回饋</h2>
+      <div class="benefit-grid">
+        {% for item in benefit_programs %}
+        <div class="benefit-card"><strong>{{ item.program_name }}</strong><p>{{ item.description }}</p></div>
+        {% endfor %}
+      </div>
+    </section>
+    <div class="nav-links">
+      <a class="nav-link" href="/calc?amount=10000&project={{ project.slug }}">投資試算</a>
+      <a class="nav-link" href="/progress">案場進度</a>
+      <a class="nav-link" href="/menu">返回首頁</a>
+    </div>
+  </main>
+</body>
+</html>

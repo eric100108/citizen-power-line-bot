@@ -20,7 +20,7 @@ app = Flask(__name__)
 
 @app.route("/menu")
 def menu():
-    return render_template("menu_v2.html")
+    return render_template("menu_product.html")
 
 
 @app.route("/api/line-profile", methods=["POST"])
@@ -115,7 +115,7 @@ def calc():
     project_slug = request.args.get("project", default="nanliao-citizen-power", type=str).strip() or "nanliao-citizen-power"
     calc_result = build_calculator_result(amount, project_slug)
 
-    return render_template("calc_v2.html", **calc_result)
+    return render_template("calc_v3.html", **calc_result)
 
 
 @app.route("/project")
@@ -125,7 +125,7 @@ def project_overview(project_slug="nanliao-citizen-power"):
     if not overview:
         return jsonify({"message": "找不到案場資料"}), 404
 
-    return render_template("project_overview.html", **overview)
+    return render_template("project_overview_v2.html", **overview)
 
 
 @app.route("/progress", methods=["GET", "POST"])
@@ -153,7 +153,7 @@ def progress():
     predictions = build_predicted_progress(latest_record, records_asc)
 
     return render_template(
-        "progress.html",
+        "progress_v2.html",
         latest_record=latest_record,
         progress_rows=progress_rows,
         predicted_rows=predictions,
