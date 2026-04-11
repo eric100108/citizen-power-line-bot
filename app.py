@@ -1,10 +1,16 @@
-import os
+﻿import os
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 from calc_repo import get_share_rate
 from db import init_db
 from faq_repo import find_faq_answer, list_faqs
-from line_service import reply_faq_quick_reply, reply_line_message
+from line_service import (
+    get_liff_id,
+    get_line_profile_from_access_token,
+    reply_faq_quick_reply,
+    reply_line_message,
+    verify_line_signature,
+)
 from progress_repo import create_progress, get_progress_records
 from progress_service import PROGRESS_STAGES, build_predicted_progress, parse_progress_date
 
@@ -16,12 +22,28 @@ def menu():
     return render_template("menu.html")
 
 
+@app.route("/api/line-profile", methods=["POST"])
+def line_profile():
+    data = request.get_json(silent=True) or {}
+    access_token = data.get("accessToken", "")
+
+    try:
+        profile = get_line_profile_from_access_token(access_token)
+    except Exception:
+        return jsonify({"ok": False, "message": "LINE 身分驗證失敗"}), 400
+
+    return jsonify({"ok": True, "profile": profile})
+
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json(silent=True)
-    print("=== webhook received ===")
-    print(data)
+    body = request.get_data()
+    signature = request.headers.get("X-Line-Signature", "")
 
+    if not verify_line_signature(body, signature):
+        return "Invalid signature", 403
+
+    data = request.get_json(silent=True)
     if not data or "events" not in data:
         return "OK", 200
 
@@ -54,7 +76,7 @@ def home():
     return jsonify({
         "status": "ok",
         "system": "citizen power line bot",
-        "version": "0.5",
+        "version": "0.6",
         "features": {
             "faq_all": "/faq",
             "faq_search": "/faq?keyword=公民電廠",
@@ -62,6 +84,7 @@ def home():
             "progress": "/progress",
             "webhook": "/webhook",
             "menu": "/menu",
+            "line_profile_api": "/api/line-profile",
         },
     })
 
@@ -107,8 +130,10 @@ def progress():
     if request.method == "POST":
         stage = request.form.get("stage", "").strip()
         updated_at = request.form.get("updated_at", "").strip()
+        line_user_id = request.form.get("line_user_id", "").strip()
+        display_name = request.form.get("display_name", "").strip()
 
-        if stage not in PROGRESS_STAGES or not updated_at:
+        if stage not in PROGRESS_STAGES or not updated_at or not line_user_id or not display_name:
             return redirect(url_for("progress", saved="0"))
 
         try:
@@ -116,7 +141,7 @@ def progress():
         except ValueError:
             return redirect(url_for("progress", saved="0"))
 
-        create_progress(stage, updated_at)
+        create_progress(stage, updated_at, line_user_id, display_name)
         return redirect(url_for("progress", saved="1"))
 
     progress_rows = get_progress_records()
@@ -131,6 +156,7 @@ def progress():
         predicted_rows=predictions,
         progress_stages=PROGRESS_STAGES,
         saved=request.args.get("saved"),
+        liff_id=get_liff_id(),
     )
 
 

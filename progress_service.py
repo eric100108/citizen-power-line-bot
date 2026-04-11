@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-
+﻿from datetime import datetime, timedelta
 
 PROGRESS_STAGES = ["規劃中", "申請中", "施工中", "併網測試", "正式運轉"]
 DEFAULT_PROGRESS_INTERVAL_DAYS = 14

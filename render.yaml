@@ -1,6 +1,15 @@
-services:
+﻿services:
   - type: web
     name: citizen-power-line-bot
     env: python
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python app.py"
+    envVars:
+      - key: LINE_LOGIN_CHANNEL_ID
+        sync: false
+      - key: LIFF_ID
+        sync: false
+      - key: CHANNEL_ACCESS_TOKEN
+        sync: false
+      - key: CHANNEL_SECRET
+        sync: false
