@@ -5,19 +5,27 @@ import os
 
 import requests
 
-CHANNEL_ACCESS_TOKEN = os.environ.get("CHANNEL_ACCESS_TOKEN")
-CHANNEL_SECRET = os.environ.get("CHANNEL_SECRET", "")
-LINE_LOGIN_CHANNEL_ID = os.environ.get("LINE_LOGIN_CHANNEL_ID", "")
-LIFF_ID = os.environ.get("LIFF_ID", "")
+
+def get_channel_access_token():
+    return os.environ.get("CHANNEL_ACCESS_TOKEN", "").strip()
+
+
+def get_channel_secret():
+    return os.environ.get("CHANNEL_SECRET", "").strip()
+
+
+def get_line_login_channel_id():
+    return os.environ.get("LINE_LOGIN_CHANNEL_ID", "").strip()
 
 
 def reply_line_message(reply_token, text):
-    if not CHANNEL_ACCESS_TOKEN:
+    channel_access_token = get_channel_access_token()
+    if not channel_access_token:
         print("ERROR: CHANNEL_ACCESS_TOKEN is missing")
         return
 
     headers = {
-        "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
+        "Authorization": f"Bearer {channel_access_token}",
         "Content-Type": "application/json",
     }
     body = {
@@ -35,12 +43,13 @@ def reply_line_message(reply_token, text):
 
 
 def reply_faq_quick_reply(reply_token):
-    if not CHANNEL_ACCESS_TOKEN:
+    channel_access_token = get_channel_access_token()
+    if not channel_access_token:
         print("ERROR: CHANNEL_ACCESS_TOKEN is missing")
         return
 
     headers = {
-        "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
+        "Authorization": f"Bearer {channel_access_token}",
         "Content-Type": "application/json",
     }
     body = {
@@ -83,15 +92,16 @@ def reply_faq_quick_reply(reply_token):
 
 
 def get_liff_id():
-    return LIFF_ID
+    return os.environ.get("LIFF_ID", "").strip()
 
 
 def verify_line_signature(body, signature):
-    if not CHANNEL_SECRET or not signature:
+    channel_secret = get_channel_secret()
+    if not channel_secret or not signature:
         return False
 
     digest = hmac.new(
-        CHANNEL_SECRET.encode("utf-8"),
+        channel_secret.encode("utf-8"),
         body,
         hashlib.sha256,
     ).digest()
@@ -111,7 +121,8 @@ def get_line_profile_from_access_token(access_token):
     verify_response.raise_for_status()
     verify_data = verify_response.json()
 
-    if LINE_LOGIN_CHANNEL_ID and verify_data.get("client_id") != LINE_LOGIN_CHANNEL_ID:
+    line_login_channel_id = get_line_login_channel_id()
+    if line_login_channel_id and verify_data.get("client_id") != line_login_channel_id:
         raise ValueError("channel id mismatch")
 
     scopes = verify_data.get("scope", "")
