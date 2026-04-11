@@ -1,8 +1,7 @@
 import os
 import sqlite3
 import requests
-from flask import Flask, jsonify, request
-from flask import render_template
+from flask import Flask, jsonify, request,  render_template
 
 app = Flask(__name__)
 
@@ -120,12 +119,7 @@ def reply_line_message(reply_token, text):
 
 @app.route("/menu")
 def menu():
-    return"""
-    <h1>公民電廠服務</h1>
-    <p><a href="/faq">查詢常見問題</a></p>
-    <p><a href="/calc?amount=10000">投資試算</a></p>
-    <p><a href="/progress">案廠進度</a></p>
-    """
+    return render_template("menu.html")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>公民電廠服務首頁</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4a7c59, #6fa67c);
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .header p {
+      margin-top: 10px;
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #2f5d3a;
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .link-btn {
+      display: block;
+      text-decoration: none;
+      background: #eef7f0;
+      color: #2f5d3a;
+      text-align: center;
+      padding: 18px 12px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .link-btn:hover {
+      background: #dceedd;
+    }
+
+    .tips {
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #777;
+      font-size: 14px;
+      padding: 15px 0 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>公民電廠服務首頁</h1>
+    <p>提供常見問題、投資試算與案場進度查詢</p>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>快速功能</h2>
+      <div class="quick-links">
+        <a class="link-btn" href="/faq?keyword=公民電廠">常見問題</a>
+        <a class="link-btn" href="/calc?amount=10000">投資試算</a>
+        <a class="link-btn" href="/progress">案場進度</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>使用說明</h2>
+      <div class="tips">
+        你可以直接點上方功能，或回到 LINE 輸入問題。<br>
+        建議先試試看：<br>
+        1. 什麼是公民電廠？<br>
+        2. 為什麼要推動公民電廠？<br>
+        3. 試算<br>
+        4. 進度
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    公民電力線機器人 MVP
+  </div>
+</body>
+</html>
