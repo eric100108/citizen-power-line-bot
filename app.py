@@ -1,171 +1,15 @@
 import os
-import sqlite3
-import requests
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, redirect, render_template, request, url_for
+
+from calc_repo import get_share_rate
+from db import init_db
+from faq_repo import find_faq_answer, list_faqs
+from line_service import reply_faq_quick_reply, reply_line_message
+from progress_repo import create_progress, get_progress_records
+from progress_service import PROGRESS_STAGES, build_predicted_progress, parse_progress_date
 
 app = Flask(__name__)
 
-DB_NAME = "app.db"
-CHANNEL_ACCESS_TOKEN = os.environ.get("CHANNEL_ACCESS_TOKEN")
-
-
-def init_db():
-    conn = sqlite3.connect(DB_NAME)
-
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS faq_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        question TEXT NOT NULL,
-        answer TEXT NOT NULL
-    )
-    """)
-
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS progress_items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        stage TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-    )
-    """)
-
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS calculator_rules (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        rule_name TEXT NOT NULL,
-        value REAL NOT NULL
-    )
-    """)
-
-    cursor = conn.execute("SELECT COUNT(*) FROM calculator_rules")
-    count = cursor.fetchone()[0]
-    if count == 0:
-        conn.execute("""
-        INSERT INTO calculator_rules (rule_name, value)
-        VALUES (?, ?)
-        """, ("share_rate", 0.5))
-
-    cursor = conn.execute("SELECT COUNT(*) FROM faq_items")
-    count = cursor.fetchone()[0]
-    if count == 0:
-        conn.execute("""
-        INSERT INTO faq_items (question, answer)
-        VALUES (?, ?)
-        """, ("什麼是公民電廠？", "公民電廠是由民眾共同參與投資、共享綠能收益的模式。"))
-
-        conn.execute("""
-        INSERT INTO faq_items (question, answer)
-        VALUES (?, ?)
-        """, ("為什麼要推動公民電廠？", "希望讓更多人參與再生能源，提升在地永續與能源轉型。"))
-
-    cursor = conn.execute("SELECT COUNT(*) FROM progress_items")
-    count = cursor.fetchone()[0]
-    if count == 0:
-        conn.execute("""
-        INSERT INTO progress_items (stage, updated_at)
-        VALUES (?, ?)
-        """, ("施工中", "2026-04-10"))
-
-    conn.commit()
-    conn.close()
-
-
-def find_faq_answer(keyword):
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-
-    row = conn.execute("""
-        SELECT answer
-        FROM faq_items
-        WHERE question LIKE ? OR answer LIKE ?
-        LIMIT 1
-    """, (f"%{keyword}%", f"%{keyword}%")).fetchone()
-
-    conn.close()
-
-    if row:
-        return row["answer"]
-    return None
-
-
-def reply_line_message(reply_token, text):
-    if not CHANNEL_ACCESS_TOKEN:
-        print("ERROR: CHANNEL_ACCESS_TOKEN is missing")
-        return
-
-    headers = {
-        "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
-        "Content-Type": "application/json"
-    }
-
-    body = {
-        "replyToken": reply_token,
-        "messages": [
-            {
-                "type": "text",
-                "text": text
-            }
-        ]
-    }
-
-    response = requests.post(
-        "https://api.line.me/v2/bot/message/reply",
-        headers=headers,
-        json=body,
-        timeout=10
-    )
-
-    print("LINE reply status:", response.status_code)
-    print("LINE reply body:", response.text)
-
-def reply_faq_quick_reply(reply_token):
-    if not CHANNEL_ACCESS_TOKEN:
-        print("ERROR: CHANNEL_ACCESS_TOKEN 未設定")
-        return
-
-    headers = {
-        "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}",
-        "Content-Type": "application/json"
-    }
-
-    body = {
-        "replyToken": reply_token,
-        "messages": [
-            {
-                "type": "text",
-                "text": "請選擇想了解的問題：",
-                "quickReply": {
-                    "items": [
-                        {
-                            "type": "action",
-                            "action": {
-                                "type": "message",
-                                "label": "什麼是公民電廠？",
-                                "text": "什麼是公民電廠？"
-                            }
-                        },
-                        {
-                            "type": "action",
-                            "action": {
-                                "type": "message",
-                                "label": "為什麼要推動公民電廠？",
-                                "text": "為什麼要推動公民電廠？"
-                            }
-                        }
-                    ]
-                }
-            }
-        ]
-    }
-
-    response = requests.post(
-        "https://api.line.me/v2/bot/message/reply",
-        headers=headers,
-        json=body,
-        timeout=10
-    )
-
-    print("LINE quick reply status:", response.status_code)
-    print("LINE quick reply body:", response.text)
 
 @app.route("/menu")
 def menu():
@@ -175,7 +19,6 @@ def menu():
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json(silent=True)
-
     print("=== webhook received ===")
     print(data)
 
@@ -192,7 +35,6 @@ def webhook():
 
         reply_token = event.get("replyToken")
         user_message = message.get("text", "").strip()
-
         if not reply_token or not user_message:
             continue
 
@@ -201,12 +43,7 @@ def webhook():
             continue
 
         answer = find_faq_answer(user_message)
-
-        if answer:
-            reply_text = answer
-        else:
-            reply_text = "查無相關 FAQ"
-
+        reply_text = answer if answer else "查無相關 FAQ，請輸入 FAQ 查看可選問題。"
         reply_line_message(reply_token, reply_text)
 
     return "OK", 200
@@ -217,52 +54,30 @@ def home():
     return jsonify({
         "status": "ok",
         "system": "citizen power line bot",
-        "version": "0.2",
+        "version": "0.5",
         "features": {
             "faq_all": "/faq",
             "faq_search": "/faq?keyword=公民電廠",
             "calc": "/calc?amount=10000",
             "progress": "/progress",
             "webhook": "/webhook",
-            "menu": "/menu"
-        }
+            "menu": "/menu",
+        },
     })
 
 
 @app.route("/faq")
 def faq():
     keyword = request.args.get("keyword", default="", type=str)
-
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-
-    if keyword:
-        rows = conn.execute("""
-            SELECT question, answer
-            FROM faq_items
-            WHERE question LIKE ? OR answer LIKE ?
-        """, (f"%{keyword}%", f"%{keyword}%")).fetchall()
-    else:
-        rows = conn.execute("""
-            SELECT question, answer
-            FROM faq_items
-        """).fetchall()
-
-    conn.close()
+    rows = list_faqs(keyword)
 
     if not rows:
-        return jsonify({
-            "message": "找不到相關 FAQ"
-        }), 404
+        return jsonify({"message": "找不到相關 FAQ"}), 404
 
-    result = []
-    for row in rows:
-        result.append({
-            "question": row["question"],
-            "answer": row["answer"]
-        })
-
-    return jsonify(result)
+    return jsonify([
+        {"question": row["question"], "answer": row["answer"]}
+        for row in rows
+    ])
 
 
 @app.route("/hello")
@@ -273,54 +88,49 @@ def hello():
 @app.route("/calc")
 def calc():
     amount = request.args.get("amount", default=10000, type=float)
+    share_rate = get_share_rate()
 
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-
-    row = conn.execute("""
-        SELECT value
-        FROM calculator_rules
-        WHERE rule_name = ?
-        LIMIT 1
-    """, ("share_rate",)).fetchone()
-
-    conn.close()
-
-    if row is None:
+    if share_rate is None:
         return "找不到投資試算規則", 404
 
-    share_rate = row["value"]
     estimated_return = amount * share_rate
-
     return render_template(
         "calc.html",
         amount=amount,
         share_rate=share_rate,
-        estimated_return=estimated_return
+        estimated_return=estimated_return,
     )
 
 
-@app.route("/progress")
+@app.route("/progress", methods=["GET", "POST"])
 def progress():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    if request.method == "POST":
+        stage = request.form.get("stage", "").strip()
+        updated_at = request.form.get("updated_at", "").strip()
 
-    row = conn.execute("""
-        SELECT stage, updated_at
-        FROM progress_items
-        ORDER BY id DESC
-        LIMIT 1
-    """).fetchone()
+        if stage not in PROGRESS_STAGES or not updated_at:
+            return redirect(url_for("progress", saved="0"))
 
-    conn.close()
+        try:
+            parse_progress_date(updated_at)
+        except ValueError:
+            return redirect(url_for("progress", saved="0"))
 
-    if row is None:
-        return "目前沒有案場進度資料", 404
+        create_progress(stage, updated_at)
+        return redirect(url_for("progress", saved="1"))
+
+    progress_rows = get_progress_records()
+    latest_record = progress_rows[0] if progress_rows else None
+    records_asc = list(reversed(progress_rows))
+    predictions = build_predicted_progress(latest_record, records_asc)
 
     return render_template(
         "progress.html",
-        stage=row["stage"],
-        updated_at=row["updated_at"]
+        latest_record=latest_record,
+        progress_rows=progress_rows,
+        predicted_rows=predictions,
+        progress_stages=PROGRESS_STAGES,
+        saved=request.args.get("saved"),
     )
 
 

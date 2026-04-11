@@ -13,6 +13,10 @@
       --text: #1f2a24;
       --sub: #64746b;
       --line: #d8e4ef;
+      --success: #1aa25f;
+      --success-bg: #eaf8f0;
+      --warning: #d97706;
+      --warning-bg: #fff4dd;
       --shadow: 0 18px 42px rgba(22, 49, 77, 0.12);
     }
 
@@ -28,7 +32,7 @@
     }
 
     .page {
-      max-width: 980px;
+      max-width: 1120px;
       margin: 0 auto;
     }
 
@@ -56,11 +60,11 @@
 
     .hero p {
       margin: 0;
-      max-width: 620px;
+      max-width: 680px;
       line-height: 1.8;
     }
 
-    .grid {
+    .layout {
       display: grid;
       gap: 18px;
       margin-top: 18px;
@@ -90,12 +94,79 @@
       font-weight: 700;
     }
 
-    .timeline {
+    .message {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+    }
+
+    .message.success {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .message.warning {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    .form-grid {
       display: grid;
       gap: 14px;
     }
 
-    .timeline-item {
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--sub);
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid #d1dee8;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .button {
+      display: inline-block;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .muted {
+      margin: 10px 0 0;
+      color: var(--sub);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .section-grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .timeline,
+    .forecast-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline-item,
+    .forecast-item {
       position: relative;
       padding: 16px 18px 16px 48px;
       border-radius: 18px;
@@ -103,7 +174,8 @@
       border: 1px solid var(--line);
     }
 
-    .timeline-item::before {
+    .timeline-item::before,
+    .forecast-item::before {
       content: "";
       position: absolute;
       left: 20px;
@@ -115,15 +187,32 @@
       box-shadow: 0 0 0 6px rgba(31, 143, 255, 0.14);
     }
 
-    .timeline-item strong {
+    .forecast-item::before {
+      background: var(--success);
+      box-shadow: 0 0 0 6px rgba(26, 162, 95, 0.14);
+    }
+
+    .timeline-item strong,
+    .forecast-item strong {
       display: block;
       margin-bottom: 6px;
       font-size: 18px;
     }
 
-    .timeline-item span {
+    .timeline-item span,
+    .forecast-item span {
       color: var(--sub);
       font-size: 14px;
+      line-height: 1.7;
+      display: block;
+    }
+
+    .empty-state {
+      padding: 18px;
+      border-radius: 18px;
+      background: #f8fbff;
+      border: 1px dashed #c8d8e5;
+      color: var(--sub);
       line-height: 1.7;
     }
 
@@ -135,9 +224,10 @@
       font-weight: 700;
     }
 
-    @media (min-width: 820px) {
+    @media (min-width: 860px) {
       body { padding: 24px 18px 40px; }
-      .grid { grid-template-columns: 0.9fr 1.1fr; }
+      .layout { grid-template-columns: 0.9fr 1.1fr; }
+      .section-grid { grid-template-columns: 1fr 1fr; }
       .hero { padding: 34px 30px; }
       .hero h1 { font-size: 40px; }
     }
@@ -148,32 +238,78 @@
     <section class="hero">
       <div class="badge">Project Progress</div>
       <h1>案場進度</h1>
-      <p>追蹤目前專案的建置狀態、最新更新日期與下一步進度，讓資訊呈現更清楚、更接近一般網站的閱讀方式。</p>
+      <p>你現在可以直接在這個頁面新增最新進度，系統也會依照目前階段與既有節奏，自動推估下一步可能的時程。</p>
     </section>
 
-    <section class="grid">
+    <section class="layout">
       <section class="card">
         <h2>目前狀態</h2>
-        <div class="status">🏗️ {{ stage }}</div>
-        <p style="margin:16px 0 0; color:#64746b; line-height:1.8;">最新更新日期為 {{ updated_at }}。如有施工調整、驗收完成或上線節點，都可以持續更新在這一頁。</p>
+        {% if latest_record %}
+          <div class="status">🏗️ {{ latest_record.stage }}</div>
+          <p class="muted">最新更新日期為 {{ latest_record.updated_at }}。系統會依照目前階段與既有紀錄，推估後續可能的進度日期。</p>
+        {% else %}
+          <div class="empty-state">目前還沒有任何進度資料，請先新增第一筆紀錄。</div>
+        {% endif %}
+
+        {% if saved == "1" %}
+          <div class="message success">已成功新增一筆案場進度。</div>
+        {% elif saved == "0" %}
+          <div class="message warning">新增失敗，請確認階段與日期格式是否正確。</div>
+        {% endif %}
       </section>
 
       <section class="card">
-        <h2>進度時間軸</h2>
-        <div class="timeline">
-          <div class="timeline-item">
-            <strong>目前階段：{{ stage }}</strong>
-            <span>系統目前顯示的最新案場狀態，適合用來快速掌握工程是否正在進行。</span>
+        <h2>新增進度</h2>
+        <form method="post" action="/progress" class="form-grid">
+          <div>
+            <label for="stage">目前階段</label>
+            <select id="stage" name="stage" required>
+              {% for stage in progress_stages %}
+                <option value="{{ stage }}">{{ stage }}</option>
+              {% endfor %}
+            </select>
           </div>
-          <div class="timeline-item">
-            <strong>最近更新：{{ updated_at }}</strong>
-            <span>此日期可作為網站揭露資訊的更新時間，協助使用者判斷資料是否新鮮。</span>
+          <div>
+            <label for="updated_at">更新日期</label>
+            <input id="updated_at" name="updated_at" type="date" required>
           </div>
-          <div class="timeline-item">
-            <strong>下一步建議</strong>
-            <span>後續可以繼續補上更多階段，例如規劃中、施工中、併網測試、正式運轉，讓頁面更完整。</span>
+          <button class="button" type="submit">新增進度</button>
+        </form>
+      </section>
+    </section>
+
+    <section class="section-grid">
+      <section class="card">
+        <h2>進度紀錄</h2>
+        {% if progress_rows %}
+          <div class="timeline">
+            {% for item in progress_rows %}
+              <div class="timeline-item">
+                <strong>{{ item.stage }}</strong>
+                <span>更新日期：{{ item.updated_at }}</span>
+              </div>
+            {% endfor %}
           </div>
-        </div>
+        {% else %}
+          <div class="empty-state">尚未建立任何進度紀錄。</div>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>未來推估進度</h2>
+        {% if predicted_rows %}
+          <div class="forecast-list">
+            {% for item in predicted_rows %}
+              <div class="forecast-item">
+                <strong>{{ item.stage }}</strong>
+                <span>預估日期：{{ item.predicted_date }}</span>
+                <span>依據目前節奏，約 {{ item.days_after }} 天後進入此階段。</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">目前已到最後階段，或資料不足以推估更多後續進度。</div>
+        {% endif %}
       </section>
     </section>
 
