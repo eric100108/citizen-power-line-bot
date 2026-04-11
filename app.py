@@ -11,6 +11,7 @@ from line_service import (
     reply_line_message,
     verify_line_signature,
 )
+from project_repo import get_project_overview
 from progress_repo import create_progress, get_progress_records
 from progress_service import PROGRESS_STAGES, build_predicted_progress, parse_progress_date
 
@@ -19,7 +20,7 @@ app = Flask(__name__)
 
 @app.route("/menu")
 def menu():
-    return render_template("menu.html")
+    return render_template("menu_v2.html")
 
 
 @app.route("/api/line-profile", methods=["POST"])
@@ -115,6 +116,16 @@ def calc():
     calc_result = build_calculator_result(amount, project_slug)
 
     return render_template("calc_v2.html", **calc_result)
+
+
+@app.route("/project")
+@app.route("/project/<project_slug>")
+def project_overview(project_slug="nanliao-citizen-power"):
+    overview = get_project_overview(project_slug)
+    if not overview:
+        return jsonify({"message": "找不到案場資料"}), 404
+
+    return render_template("project_overview.html", **overview)
 
 
 @app.route("/progress", methods=["GET", "POST"])
