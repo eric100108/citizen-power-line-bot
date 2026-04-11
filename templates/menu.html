@@ -1,123 +1,289 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>公民電廠服務首頁</title>
+  <title>市民電廠服務首頁</title>
   <style>
+    :root {
+      --bg: #eef3f1;
+      --surface: #ffffff;
+      --text-main: #1f2a24;
+      --text-sub: #5f6f66;
+      --brand-1: #06c755;
+      --brand-2: #26a96c;
+      --shadow: 0 16px 40px rgba(19, 52, 36, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: "Microsoft JhengHei", sans-serif;
-      background: #f5f5f5;
-      color: #333;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px 40px;
+      font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(6, 199, 85, 0.16), transparent 32%),
+        linear-gradient(180deg, #f8fbf9 0%, var(--bg) 100%);
+      color: var(--text-main);
     }
 
-    .header {
-      background: linear-gradient(135deg, #4a7c59, #6fa67c);
-      color: white;
-      padding: 28px 20px;
-      text-align: center;
+    .phone-shell {
+      width: 100%;
+      max-width: 420px;
     }
 
-    .header h1 {
+    .app {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: 32px;
+      padding: 18px;
+      box-shadow: 0 24px 60px rgba(17, 47, 32, 0.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      padding: 28px 24px 88px;
+      background: linear-gradient(135deg, var(--brand-1), #39d98a 55%, var(--brand-2));
+      color: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      bottom: -52px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .hero h1 {
+      margin: 16px 0 10px;
+      font-size: 30px;
+      line-height: 1.25;
+    }
+
+    .hero p {
       margin: 0;
-      font-size: 28px;
-    }
-
-    .header p {
-      margin-top: 10px;
+      max-width: 270px;
       font-size: 15px;
-      opacity: 0.95;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.92);
     }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
+    .hero-note {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      font-size: 13px;
     }
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .card h2 {
-      margin-top: 0;
-      font-size: 22px;
-      color: #2f5d3a;
-    }
-
-    .quick-links {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-
-    .link-btn {
+    .hero-note strong {
       display: block;
-      text-decoration: none;
-      background: #eef7f0;
-      color: #2f5d3a;
-      text-align: center;
-      padding: 18px 12px;
-      border-radius: 12px;
+      margin-bottom: 2px;
+      font-size: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 24px 6px 14px;
+    }
+
+    .section-title h2 {
+      margin: 0;
       font-size: 18px;
-      font-weight: bold;
-      transition: 0.2s;
     }
 
-    .link-btn:hover {
-      background: #dceedd;
+    .section-title span {
+      font-size: 13px;
+      color: var(--text-sub);
     }
 
-    .tips {
-      line-height: 1.8;
-      font-size: 16px;
+    .card-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .feature-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 18px 16px;
+      color: inherit;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(223, 231, 226, 0.9);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 44px rgba(19, 52, 36, 0.16);
+    }
+
+    .icon-wrap {
+      flex: 0 0 58px;
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      font-size: 28px;
+      background: linear-gradient(180deg, #f1fff7, #dcf7e7);
+    }
+
+    .feature-card:nth-child(2) .icon-wrap {
+      background: linear-gradient(180deg, #fff9ea, #ffefbf);
+    }
+
+    .feature-card:nth-child(3) .icon-wrap {
+      background: linear-gradient(180deg, #eef7ff, #d6e9ff);
+    }
+
+    .feature-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .feature-content h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .feature-content p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-sub);
+    }
+
+    .feature-arrow {
+      font-size: 18px;
+      color: #9ab1a4;
     }
 
     .footer {
+      margin-top: 18px;
       text-align: center;
-      color: #777;
-      font-size: 14px;
-      padding: 15px 0 30px;
+      font-size: 12px;
+      color: #7a8a81;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px 12px 28px;
+      }
+
+      .app {
+        border-radius: 24px;
+        padding: 14px;
+      }
+
+      .hero {
+        padding: 24px 20px 84px;
+      }
+
+      .hero h1 {
+        font-size: 27px;
+      }
+
+      .hero-note {
+        left: 20px;
+        right: 20px;
+        bottom: 16px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>公民電廠服務首頁</h1>
-    <p>提供常見問題、投資試算與案場進度查詢</p>
-  </div>
+  <main class="phone-shell">
+    <section class="app">
+      <header class="hero">
+        <div class="hero-badge">LINE 官方帳號服務</div>
+        <h1>市民電廠服務首頁</h1>
+        <p>快速找到你需要的資訊，從常見問題到投資試算，再到案場進度，一頁就能完成。</p>
+        <div class="hero-note">
+          <div>
+            <strong>今天想先看哪一項？</strong>
+            點選下方卡片，立即進入服務功能
+          </div>
+          <div>📱</div>
+        </div>
+      </header>
 
-  <div class="container">
-    <div class="card">
-      <h2>快速功能</h2>
-      <div class="quick-links">
-        <a class="link-btn" href="/faq?keyword=公民電廠">常見問題</a>
-        <a class="link-btn" href="/calc?amount=10000">投資試算</a>
-        <a class="link-btn" href="/progress">案場進度</a>
+      <div class="section-title">
+        <h2>主要功能</h2>
+        <span>3 項服務</span>
       </div>
-    </div>
 
-    <div class="card">
-      <h2>使用說明</h2>
-      <div class="tips">
-        你可以直接點上方功能，或回到 LINE 輸入問題。<br>
-        建議先試試看：<br>
-        1. 什麼是公民電廠？<br>
-        2. 為什麼要推動公民電廠？<br>
-        3. 試算<br>
-        4. 進度
-      </div>
-    </div>
-  </div>
+      <section class="card-list">
+        <a class="feature-card" href="/faq?keyword=市民電廠">
+          <div class="icon-wrap">💬</div>
+          <div class="feature-content">
+            <h3>常見問題</h3>
+            <p>快速查詢加入方式、收益說明與常見申辦流程。</p>
+          </div>
+          <div class="feature-arrow">›</div>
+        </a>
 
-  <div class="footer">
-    公民電力線機器人 MVP
-  </div>
+        <a class="feature-card" href="/calc?amount=10000">
+          <div class="icon-wrap">📈</div>
+          <div class="feature-content">
+            <h3>投資試算</h3>
+            <p>輸入金額立即估算投資報酬，幫你掌握參與門檻。</p>
+          </div>
+          <div class="feature-arrow">›</div>
+        </a>
+
+        <a class="feature-card" href="/progress">
+          <div class="icon-wrap">🏗️</div>
+          <div class="feature-content">
+            <h3>案場進度</h3>
+            <p>查看目前建置狀態、施工節點與最新專案更新。</p>
+          </div>
+          <div class="feature-arrow">›</div>
+        </a>
+      </section>
+
+      <div class="footer">Citizen Power MVP</div>
+    </section>
+  </main>
 </body>
 </html>
