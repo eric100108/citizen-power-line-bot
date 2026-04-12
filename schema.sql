@@ -1,10 +1,16 @@
-CREATE TABLE IF NOT EXISTS communities (
+﻿CREATE TABLE IF NOT EXISTS communities (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     slug TEXT NOT NULL UNIQUE,
     description TEXT NOT NULL DEFAULT '',
     is_active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS app_metadata (
+    meta_key TEXT PRIMARY KEY,
+    meta_value TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -42,6 +48,19 @@ CREATE TABLE IF NOT EXISTS source_documents (
     published_date TEXT NOT NULL DEFAULT '',
     note TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS document_highlights (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_document_id INTEGER NOT NULL,
+    highlight_type TEXT NOT NULL DEFAULT 'summary',
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    reference_page TEXT NOT NULL DEFAULT '',
+    display_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (source_document_id) REFERENCES source_documents(id),
+    UNIQUE(source_document_id, title)
 );
 
 CREATE TABLE IF NOT EXISTS project_financial_rules (
@@ -123,6 +142,24 @@ CREATE TABLE IF NOT EXISTS project_milestones (
     FOREIGN KEY (project_id) REFERENCES projects(id),
     FOREIGN KEY (source_document_id) REFERENCES source_documents(id),
     UNIQUE(project_id, milestone_code)
+);
+
+CREATE TABLE IF NOT EXISTS service_journey_steps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL,
+    source_document_id INTEGER,
+    step_code TEXT NOT NULL,
+    title TEXT NOT NULL,
+    stage_group TEXT NOT NULL DEFAULT '',
+    audience TEXT NOT NULL DEFAULT 'community',
+    summary TEXT NOT NULL DEFAULT '',
+    recommended_action TEXT NOT NULL DEFAULT '',
+    display_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects(id),
+    FOREIGN KEY (source_document_id) REFERENCES source_documents(id),
+    UNIQUE(project_id, step_code)
 );
 
 CREATE TABLE IF NOT EXISTS project_metrics (

@@ -1,4 +1,4 @@
-from db import get_connection
+﻿from db import get_connection
 
 DEFAULT_PROJECT_SLUG = "nanliao-citizen-power"
 
@@ -89,6 +89,30 @@ def get_project_overview(project_slug=DEFAULT_PROJECT_SLUG):
         (project["id"],),
     ).fetchall()
 
+    service_steps = conn.execute(
+        """
+        SELECT step_code, title, stage_group, audience, summary, recommended_action, display_order
+        FROM service_journey_steps
+        WHERE project_id = ?
+        ORDER BY display_order ASC, id ASC
+        """,
+        (project["id"],),
+    ).fetchall()
+
+    document_highlights = conn.execute(
+        """
+        SELECT dh.highlight_type, dh.title, dh.content, dh.reference_page, dh.display_order, sd.title AS source_title
+        FROM document_highlights dh
+        INNER JOIN source_documents sd ON sd.id = dh.source_document_id
+        INNER JOIN projects p ON p.slug = ?
+        WHERE dh.source_document_id IN (
+            SELECT id FROM source_documents
+        )
+        ORDER BY dh.display_order ASC, dh.id ASC
+        """,
+        (project_slug,),
+    ).fetchall()
+
     conn.close()
 
     metrics = {}
@@ -110,4 +134,6 @@ def get_project_overview(project_slug=DEFAULT_PROJECT_SLUG):
         "benefit_programs": benefit_programs,
         "financial_rules": financial_rules,
         "distribution_rows": distribution_rows,
+        "service_steps": service_steps,
+        "document_highlights": document_highlights,
     }

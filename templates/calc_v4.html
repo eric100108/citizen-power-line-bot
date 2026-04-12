@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>投資試算</title>
+  <style>
+    :root { --bg:#eef5f2; --surface:#fff; --brand:#06c755; --brand-dark:#048b47; --brand-soft:#e9fff2; --text:#1f2a24; --sub:#64746b; --line:#dfe8e2; --shadow:0 20px 46px rgba(20,55,39,.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:"Microsoft JhengHei","PingFang TC",sans-serif; background:linear-gradient(180deg,#f8fbf9 0%,var(--bg) 100%); color:var(--text); padding:20px 12px 32px; }
+    .page { max-width:1160px; margin:0 auto; }
+    .hero { background:linear-gradient(135deg,var(--brand),#3ad987 60%,var(--brand-dark)); color:#fff; border-radius:28px; padding:28px 22px; box-shadow:var(--shadow); }
+    .badge { display:inline-block; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.16); font-size:13px; font-weight:700; }
+    .hero h1 { margin:12px 0 10px; font-size:34px; }
+    .hero p { margin:0; max-width:700px; line-height:1.8; }
+    .hero-meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    .hero-pill { min-width:160px; padding:10px 14px; border-radius:16px; background:rgba(255,255,255,.14); }
+    .hero-pill span { display:block; font-size:12px; opacity:.82; margin-bottom:4px; }
+    .hero-pill strong { font-size:16px; }
+    .grid { display:grid; gap:18px; margin-top:18px; }
+    .card { background:var(--surface); border:1px solid var(--line); border-radius:24px; padding:22px; box-shadow:var(--shadow); }
+    .card h2 { margin:0 0 14px; font-size:22px; }
+    .card p { margin:0; color:var(--sub); line-height:1.7; }
+    .form-grid,.summary,.distribution-list,.detail-list { display:grid; gap:14px; }
+    label { display:block; margin-bottom:8px; font-size:14px; color:var(--sub); }
+    input { width:100%; padding:14px 16px; border-radius:16px; border:1px solid #cfdcd4; font-size:16px; }
+    .button { display:inline-block; border:none; border-radius:16px; padding:14px 18px; background:var(--brand); color:#fff; font-size:16px; font-weight:700; cursor:pointer; text-decoration:none; text-align:center; }
+    .summary-item,.detail-item,.distribution-item,.mini-card { padding:16px 18px; border-radius:18px; background:#f7fbf8; border:1px solid var(--line); }
+    .summary-item span,.mini-card span { display:block; margin-bottom:6px; font-size:13px; color:var(--sub); }
+    .summary-item strong { font-size:28px; }
+    .summary-item small { display:block; margin-top:8px; color:var(--sub); line-height:1.6; }
+    .detail-item,.distribution-item { display:flex; justify-content:space-between; gap:18px; align-items:center; background:#fcfefd; }
+    .detail-item span,.distribution-item span { color:var(--sub); line-height:1.6; }
+    .detail-item strong,.distribution-item strong,.mini-card strong { font-size:18px; }
+    .stat-grid { display:grid; gap:12px; margin-top:18px; }
+    .hint { margin-top:18px; padding:16px 18px; border-radius:18px; background:var(--brand-soft); color:#166534; line-height:1.7; border:1px solid #cbeed7; }
+    .back-link { display:inline-block; margin-top:18px; color:var(--brand-dark); text-decoration:none; font-weight:700; }
+    @media (min-width:820px) { body{padding:24px 18px 40px;} .grid{grid-template-columns:1fr 1.08fr;} .stat-grid{grid-template-columns:repeat(3,1fr);} .hero{padding:34px 30px;} .hero h1{font-size:40px;} }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">{{ community_name }}案場試算</div>
+      <h1>投資試算</h1>
+      <p>以 {{ project_name }} 的既有財務參數為基礎，快速估算參與金額對應的年回報、股利分配與長期收益輪廓。這裡提供的是說明型試算，方便先理解參與規模與收益感受。</p>
+      <div class="hero-meta">
+        <div class="hero-pill"><span>目前階段</span><strong>{{ project_stage }}</strong></div>
+        <div class="hero-pill"><span>已建置容量</span><strong>{{ "{:,.2f}".format(actual_built_capacity_kw) }} kW</strong></div>
+        <div class="hero-pill"><span>參考 IRR</span><strong>{{ "{:.2%}".format(reference_irr) }}</strong></div>
+      </div>
+    </section>
+    <section class="grid">
+      <section class="card">
+        <h2>輸入投資金額</h2>
+        <p>調整下方金額後重新計算，系統會依據目前資料中的專案預算、住戶投資比例與收益分配規則進行估算。</p>
+        <form method="get" action="/calc" class="form-grid">
+          <input type="hidden" name="project" value="{{ project_slug }}">
+          <div><label for="amount">投資金額</label><input id="amount" name="amount" type="number" min="0" step="1000" value="{{ amount|int }}"></div>
+          <button class="button" type="submit">重新試算</button>
+        </form>
+        <div class="detail-list" style="margin-top: 18px;">
+          <div class="detail-item"><span>專案總預算</span><strong>NT$ {{ "{:,.0f}".format(reference_project_budget) }}</strong></div>
+          <div class="detail-item"><span>住戶投資比例</span><strong>{{ "{:.0%}".format(resident_investment_ratio) }}</strong></div>
+          <div class="detail-item"><span>住戶投資總額</span><strong>NT$ {{ "{:,.0f}".format(reference_resident_investment) }}</strong></div>
+          <div class="detail-item"><span>售電單價區間</span><strong>{{ "{:,.1f}".format(sell_price_min_per_kwh) }} - {{ "{:,.1f}".format(sell_price_max_per_kwh) }} 元/度</strong></div>
+          <div class="detail-item"><span>參考售電單價</span><strong>{{ "{:,.1f}".format(sell_price_per_kwh) }} 元/度</strong></div>
+          <div class="detail-item"><span>年衰減率</span><strong>{{ "{:.1%}".format(degradation_rate) }}</strong></div>
+        </div>
+        <div class="hint">目前以 <strong>50%</strong> 住戶參與結構與專案資料中的收益規則進行估算，參考值包含 <strong>IRR {{ "{:.2%}".format(reference_irr) }}</strong> 與股東股利池比例。</div>
+      </section>
+      <section class="card">
+        <h2>試算結果</h2>
+        <div class="summary">
+          <div class="summary-item"><span>投資金額</span><strong>NT$ {{ "{:,.0f}".format(amount) }}</strong></div>
+          <div class="summary-item"><span>年化參考回報</span><strong>NT$ {{ "{:,.0f}".format(annual_reference_return) }}</strong><small>以 {{ "{:.2%}".format(reference_irr) }} 的參考 IRR 粗估，方便快速理解金額級距。</small></div>
+          <div class="summary-item"><span>預估年度股利分配</span><strong>NT$ {{ "{:,.0f}".format(annual_dividend_share) }}</strong><small>來自年度股利池 NT$ {{ "{:,.0f}".format(annual_dividend_pool) }}，依你的持有占比 {{ "{:.2%}".format(ownership_ratio) }} 換算。</small></div>
+        </div>
+        <div class="stat-grid">
+          <div class="mini-card"><span>20 年參考回報</span><strong>NT$ {{ "{:,.0f}".format(estimated_20y_reference_return) }}</strong></div>
+          <div class="mini-card"><span>年發電量</span><strong>{{ "{:,.0f}".format(annual_generation_kwh) }} 度</strong></div>
+          <div class="mini-card"><span>平均年收入</span><strong>NT$ {{ "{:,.0f}".format(average_annual_income) }}</strong></div>
+          <div class="mini-card"><span>已建置容量</span><strong>{{ "{:,.3f}".format(actual_built_capacity_kw) }} kW</strong></div>
+          <div class="mini-card"><span>實際年發電量</span><strong>{{ "{:,.0f}".format(actual_annual_generation_kwh) }} 度</strong></div>
+          <div class="mini-card"><span>實際年營收</span><strong>NT$ {{ "{:,.0f}".format(actual_annual_revenue_twd) }}</strong></div>
+        </div>
+        <div class="detail-list" style="margin-top: 18px;">
+          <div class="detail-item"><span>政府補助比例</span><strong>{{ "{:.0%}".format(government_subsidy_ratio) }}</strong></div>
+          <div class="detail-item"><span>政府補助金額</span><strong>NT$ {{ "{:,.0f}".format(government_subsidy) }}</strong></div>
+          <div class="detail-item"><span>專案年期</span><strong>{{ project_years }} 年</strong></div>
+          <div class="detail-item"><span>20 年淨收益</span><strong>NT$ {{ "{:,.0f}".format(total_20y_net_income) }}</strong></div>
+          <div class="detail-item"><span>目標規模</span><strong>{{ "{:,.0f}".format(target_capacity_kw) }} kW / {{ target_site_count }} 處</strong></div>
+          <div class="detail-item"><span>回本年限</span><strong>{% if payback_years %}{{ "{:.1f}".format(payback_years) }} 年{% else %}尚無法估算{% endif %}</strong></div>
+        </div>
+      </section>
+    </section>
+    <section class="card" style="margin-top: 18px;">
+      <h2>收益分配結構</h2>
+      <p>下列比例來自目前專案資料中的收益分配規則，可用來理解淨收益如何在股東、營運與社區之間配置。</p>
+      <div class="distribution-list" style="margin-top: 16px;">
+        {% for row in distribution_rows %}
+        <div class="distribution-item"><span>{{ row.item_name }}</span><strong>{{ "{:.0%}".format(row.ratio) }}</strong></div>
+        {% endfor %}
+      </div>
+    </section>
+    <a class="back-link" href="/menu">回到產品首頁</a>
+  </main>
+</body>
+</html>

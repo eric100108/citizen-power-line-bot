@@ -1,0 +1,428 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>南寮 SOP 追蹤</title>
+  <style>
+    :root {
+      --bg: #eef5f9;
+      --surface: #ffffff;
+      --text: #183142;
+      --sub: #5b7180;
+      --line: #d7e4ec;
+      --brand: #1177cc;
+      --brand-dark: #0b5ea3;
+      --brand-soft: #e9f4ff;
+      --success: #138b5a;
+      --success-soft: #e8f8f0;
+      --warning: #c97a0a;
+      --warning-soft: #fff3de;
+      --shadow: 0 18px 42px rgba(17, 56, 86, 0.12);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background: linear-gradient(180deg, #f8fbfd 0%, var(--bg) 100%);
+      color: var(--text);
+      padding: 20px 12px 40px;
+    }
+    .page { max-width: 1160px; margin: 0 auto; }
+    .hero {
+      background: linear-gradient(135deg, #56adff 0%, var(--brand) 58%, var(--brand-dark) 100%);
+      color: #fff;
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: var(--shadow);
+    }
+    .badge {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .hero h1 { margin: 12px 0 10px; font-size: 34px; }
+    .hero p { margin: 0; max-width: 760px; line-height: 1.8; color: rgba(255,255,255,.95); }
+    .grid { display: grid; gap: 18px; margin-top: 18px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 { margin: 0 0 14px; font-size: 22px; }
+    .card p { margin: 0; line-height: 1.8; color: var(--sub); }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand-dark);
+      font-weight: 700;
+    }
+    .step-card {
+      margin-top: 16px;
+      padding: 18px;
+      border-radius: 20px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+    }
+    .step-card strong { display: block; font-size: 22px; margin-bottom: 8px; }
+    .step-meta { font-size: 14px; color: var(--sub); margin-bottom: 10px; }
+    .ratio { margin-top: 14px; }
+    .ratio-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #e4edf4;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .ratio-fill { height: 100%; background: linear-gradient(90deg, #61b5ff, var(--brand)); }
+    .mini-grid { display: grid; gap: 12px; }
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fbfdff;
+    }
+    .mini-card strong { display: block; margin-bottom: 6px; }
+    .message { margin-top: 14px; padding: 12px 14px; border-radius: 16px; font-size: 14px; }
+    .message.success { background: var(--success-soft); color: var(--success); }
+    .message.warning { background: var(--warning-soft); color: var(--warning); }
+    .form-grid { display: grid; gap: 14px; }
+    label { display: block; margin-bottom: 8px; color: var(--sub); font-size: 14px; }
+    input, select {
+      width: 100%;
+      border: 1px solid #d0dee8;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #fff;
+    }
+    .button {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 18px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .button[disabled] { opacity: .55; cursor: not-allowed; }
+    .user-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #f7fbff;
+      border: 1px solid var(--line);
+      color: var(--sub);
+      line-height: 1.7;
+    }
+    .user-box strong { color: var(--text); }
+    .timeline { display: grid; gap: 12px; }
+    .timeline-item {
+      position: relative;
+      padding: 16px 18px 16px 48px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fbfdff;
+    }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--brand);
+      box-shadow: 0 0 0 6px rgba(17,119,204,.14);
+    }
+    .timeline-item strong { display: block; margin-bottom: 6px; }
+    .timeline-item span { display: block; color: var(--sub); line-height: 1.7; font-size: 14px; }
+    .sop-list { display: grid; gap: 12px; }
+    .sop-step {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fbfdff;
+    }
+    .sop-step.completed { background: var(--success-soft); border-color: #c9ead9; }
+    .sop-step.current { background: var(--brand-soft); border-color: #b9daf6; }
+    .sop-step.upcoming { opacity: .92; }
+    .sop-step strong { display: block; margin-bottom: 6px; }
+    .sop-kicker { font-size: 13px; color: var(--sub); margin-bottom: 6px; }
+    .sop-hint { margin-top: 8px; font-size: 14px; color: var(--sub); }
+    .empty-state {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px dashed #c9d7e3;
+      background: #f8fbff;
+      color: var(--sub);
+      line-height: 1.8;
+    }
+    .back-link { display: inline-block; margin-top: 18px; color: var(--brand-dark); text-decoration: none; font-weight: 700; }
+    @media (min-width: 900px) {
+      body { padding: 24px 18px 40px; }
+      .hero { padding: 34px 30px; }
+      .hero h1 { font-size: 40px; }
+      .grid.two { grid-template-columns: 1fr 1fr; }
+      .mini-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">Nanliao Playbook</div>
+      <h1>南寮公民電廠 SOP 對位</h1>
+      <p>這頁會把使用者的目前進度，直接對應到南寮公民電廠的可複製 SOP。你不只知道自己在哪個大階段，還會看到相對應的當前步驟、已完成步驟與下一步建議。</p>
+    </section>
+
+    <section class="grid two">
+      <section class="card">
+        <h2>目前對位結果</h2>
+        <div id="sop-source" class="status-pill">以南寮案最新進度作為預設基準</div>
+        <div class="step-card">
+          <div class="step-meta" id="current-stage-label">目前專案階段：{{ default_sop_status.current_stage }}</div>
+          <strong id="current-step-title">{{ default_sop_status.current_step.title if default_sop_status.current_step else '尚未建立 SOP 步驟' }}</strong>
+          <p id="current-step-summary">{{ default_sop_status.current_step.summary if default_sop_status.current_step else '目前沒有可顯示的 SOP 資料。' }}</p>
+          <p class="sop-hint" id="current-step-action">下一個建議動作：{{ default_sop_status.current_step.recommended_action if default_sop_status.current_step else '請先建立服務步驟資料。' }}</p>
+          <div class="ratio">
+            <div id="progress-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</div>
+            <div class="ratio-bar"><div class="ratio-fill" id="ratio-fill" style="width: {{ (default_sop_status.completion_ratio * 100)|round(1) }}%;"></div></div>
+          </div>
+        </div>
+        {% if latest_record %}
+          <p class="sop-hint" id="latest-record-text">最近一次填報：{{ latest_record.updated_at }}，階段為「{{ latest_record.stage }}」{% if latest_record.display_name %}，填報者 {{ latest_record.display_name }}{% endif %}。</p>
+        {% else %}
+          <p class="sop-hint" id="latest-record-text">目前尚未收到使用者進度，先以南寮專案預設進度呈現。</p>
+        {% endif %}
+        {% if saved == "1" %}<div class="message success">進度已更新，系統會依新階段重新對位南寮 SOP。</div>{% elif saved == "0" %}<div class="message warning">更新失敗，請確認日期、階段與 LINE 身分資訊是否完整。</div>{% endif %}
+      </section>
+
+      <section class="card">
+        <h2>填報你的目前進度</h2>
+        <div id="line-user-box" class="user-box">
+          <strong>等待 LINE 身分驗證</strong>
+          <div>登入後系統會知道你是誰，並把你的填報進度對應到南寮 SOP 的相對位置。</div>
+        </div>
+        <form method="post" action="/progress" class="form-grid" id="progress-form">
+          <input type="hidden" name="line_user_id" id="line_user_id">
+          <input type="hidden" name="display_name" id="display_name">
+          <div>
+            <label for="stage">目前階段</label>
+            <select id="stage" name="stage" required>
+              {% for stage in progress_stages %}
+              <option value="{{ stage }}">{{ stage }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="updated_at">更新日期</label>
+            <input id="updated_at" name="updated_at" type="date" required>
+          </div>
+          <button class="button" type="submit" id="submit-button" disabled>等待 LINE 驗證</button>
+        </form>
+      </section>
+    </section>
+
+    <section class="grid two">
+      <section class="card">
+        <h2>南寮 SOP 全流程</h2>
+        {% if service_steps %}
+        <div class="sop-list" id="sop-list">
+          {% for step in service_steps %}
+          <div class="sop-step{% if default_sop_status.current_step and step.step_code == default_sop_status.current_step.step_code %} current{% elif default_sop_status.completed_steps | selectattr('step_code', 'equalto', step.step_code) | list %} completed{% else %} upcoming{% endif %}" data-step-code="{{ step.step_code }}">
+            <div class="sop-kicker">{{ loop.index }}. {{ step.stage_group }} / 對象：{{ step.audience }}</div>
+            <strong>{{ step.title }}</strong>
+            <div>{{ step.summary }}</div>
+            <div class="sop-hint">建議動作：{{ step.recommended_action }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">目前還沒有建立南寮 SOP 步驟。</div>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>下一步提醒</h2>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>已完成步驟</strong>
+            <div id="completed-steps-text">{{ default_sop_status.completed_steps | map(attribute='title') | join('、') if default_sop_status.completed_steps else '目前從第一步開始。' }}</div>
+          </div>
+          <div class="mini-card">
+            <strong>接下來要做</strong>
+            <div id="upcoming-steps-text">{{ default_sop_status.upcoming_steps[0].title if default_sop_status.upcoming_steps else '目前已到最後一步，重點轉為營運與回饋。' }}</div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="grid two">
+      <section class="card">
+        <h2>歷次填報紀錄</h2>
+        {% if progress_rows %}
+        <div class="timeline">
+          {% for item in progress_rows %}
+          <div class="timeline-item">
+            <strong>{{ item.stage }}</strong>
+            <span>日期：{{ item.updated_at }}</span>
+            {% if item.display_name %}<span>填報者：{{ item.display_name }}</span>{% endif %}
+            {% if item.note %}<span>{{ item.note }}</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">目前還沒有任何進度紀錄。</div>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>預估後續階段</h2>
+        {% if predicted_rows %}
+        <div class="timeline">
+          {% for item in predicted_rows %}
+          <div class="timeline-item">
+            <strong>{{ item.stage }}</strong>
+            <span>預估日期：{{ item.predicted_date }}</span>
+            <span>距離上一階段約 {{ item.days_after }} 天</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">目前已進入最後階段，預測重點改為營運揭露、回饋追蹤與複製經驗整理。</div>
+        {% endif %}
+      </section>
+    </section>
+
+    <a class="back-link" href="/menu">返回功能選單</a>
+  </main>
+
+  <script>
+    const defaultSopStatus = {{ default_sop_status|tojson }};
+
+    function renderSopStatus(payload, sourceLabel) {
+      const status = payload?.sop_status || defaultSopStatus;
+      const latestRecord = payload?.latest_record || null;
+      const currentStep = status?.current_step || null;
+      const completedTitles = (status?.completed_steps || []).map(item => item.title);
+      const upcomingTitles = (status?.upcoming_steps || []).map(item => item.title);
+
+      document.getElementById("sop-source").textContent = sourceLabel;
+      document.getElementById("current-stage-label").textContent = `目前專案階段：${status?.current_stage || '尚未填報'}`;
+      document.getElementById("current-step-title").textContent = currentStep?.title || "尚未建立 SOP 步驟";
+      document.getElementById("current-step-summary").textContent = currentStep?.summary || "目前沒有可顯示的 SOP 資料。";
+      document.getElementById("current-step-action").textContent = `下一個建議動作：${currentStep?.recommended_action || '請先建立服務步驟資料。'}`;
+      document.getElementById("progress-order").textContent = `第 ${status?.current_order || 0} / ${status?.step_count || 0} 步`;
+      document.getElementById("ratio-fill").style.width = `${((status?.completion_ratio || 0) * 100).toFixed(1)}%`;
+      document.getElementById("completed-steps-text").textContent = completedTitles.length ? completedTitles.join('、') : '目前從第一步開始。';
+      document.getElementById("upcoming-steps-text").textContent = upcomingTitles.length ? upcomingTitles[0] : '目前已到最後一步，重點轉為營運與回饋。';
+
+      if (latestRecord) {
+        const displayNameText = latestRecord.display_name ? `，填報者 ${latestRecord.display_name}` : "";
+        document.getElementById("latest-record-text").textContent = `最近一次填報：${latestRecord.updated_at}，階段為「${latestRecord.stage}」${displayNameText}。`;
+      }
+
+      const currentCode = currentStep?.step_code || "";
+      const completedCodes = new Set((status?.completed_steps || []).map(item => item.step_code));
+      document.querySelectorAll(".sop-step").forEach(card => {
+        const stepCode = card.dataset.stepCode;
+        card.classList.remove("completed", "current", "upcoming");
+        if (stepCode === currentCode) {
+          card.classList.add("current");
+        } else if (completedCodes.has(stepCode)) {
+          card.classList.add("completed");
+        } else {
+          card.classList.add("upcoming");
+        }
+      });
+    }
+
+    renderSopStatus({ sop_status: defaultSopStatus }, "以南寮案最新進度作為預設基準");
+  </script>
+
+  {% if liff_id %}
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    const liffId = {{ liff_id|tojson }};
+    const userBox = document.getElementById("line-user-box");
+    const lineUserIdInput = document.getElementById("line_user_id");
+    const displayNameInput = document.getElementById("display_name");
+    const submitButton = document.getElementById("submit-button");
+    const updatedAtInput = document.getElementById("updated_at");
+    if (!updatedAtInput.value) {
+      updatedAtInput.value = new Date().toISOString().slice(0, 10);
+    }
+
+    async function fetchSopProgress(lineUserId, displayName) {
+      const response = await fetch(`/api/progress-sop?line_user_id=${encodeURIComponent(lineUserId)}`);
+      const result = await response.json();
+      if (!result.ok) {
+        return;
+      }
+      const sourceLabel = result.has_user_progress
+        ? `${displayName} 目前對應到的南寮 SOP`
+        : `${displayName} 尚未填報，先以南寮案最新進度作為參考`;
+      renderSopStatus(result, sourceLabel);
+    }
+
+    async function setupLiff() {
+      try {
+        await liff.init({ liffId });
+        if (!liff.isLoggedIn()) {
+          userBox.innerHTML = "<strong>請先登入 LINE</strong><div>登入後系統才能辨識你的身分，並把你的填報進度對應到南寮 SOP。</div>";
+          liff.login();
+          return;
+        }
+
+        const accessToken = liff.getAccessToken();
+        const response = await fetch("/api/line-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessToken }),
+        });
+        const result = await response.json();
+        if (!result.ok) {
+          userBox.innerHTML = "<strong>LINE 身分驗證失敗</strong><div>請重新整理或重新登入 LINE 後再試一次。</div>";
+          return;
+        }
+
+        const profile = result.profile;
+        lineUserIdInput.value = profile.line_user_id;
+        displayNameInput.value = profile.display_name;
+        submitButton.disabled = false;
+        submitButton.textContent = "更新我的目前進度";
+        userBox.innerHTML = `<strong>${profile.display_name} 已登入</strong><div>你現在填報的階段，會直接對應到南寮電廠的 SOP 步驟，方便判斷你目前走到哪裡。</div>`;
+        await fetchSopProgress(profile.line_user_id, profile.display_name);
+      } catch (error) {
+        userBox.innerHTML = "<strong>LIFF 初始化失敗</strong><div>請重新開啟 LINE 頁面，讓系統重新取得你的身分資訊。</div>";
+      }
+    }
+
+    setupLiff();
+  </script>
+  {% else %}
+  <script>
+    document.getElementById("line-user-box").innerHTML = "<strong>尚未設定 LINE LIFF</strong><div>目前仍可查看南寮 SOP，但若要看到個人對位結果，需要先完成 LIFF 設定。</div>";
+    const updatedAtInput = document.getElementById("updated_at");
+    if (!updatedAtInput.value) {
+      updatedAtInput.value = new Date().toISOString().slice(0, 10);
+    }
+  </script>
+  {% endif %}
+</body>
+</html>
