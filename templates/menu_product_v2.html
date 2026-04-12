@@ -3,134 +3,437 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>公民電廠功能選單</title>
+  <title>公民電廠陪伴式平台</title>
   <style>
     :root {
-      --bg: #eef3f1;
-      --surface: #ffffff;
-      --text: #1f2a24;
-      --sub: #607065;
-      --line: #d9e6df;
-      --brand: #06c755;
-      --brand-dark: #0b8f4b;
-      --shadow: 0 18px 44px rgba(19, 52, 36, .12);
-      --radius: 24px;
+      --bg: #f5f4ee;
+      --surface: rgba(255, 255, 255, 0.86);
+      --surface-solid: #ffffff;
+      --text: #1d2b24;
+      --sub: #5f6d65;
+      --muted: #7e8d85;
+      --line: rgba(210, 223, 214, 0.95);
+      --green: #10b45b;
+      --green-dark: #0d7d42;
+      --green-soft: #e9fbf0;
+      --amber: #f2b63d;
+      --amber-soft: #fff3d9;
+      --blue: #2188d9;
+      --blue-soft: #e8f3ff;
+      --coral: #f27d68;
+      --coral-soft: #fff0eb;
+      --teal: #129a88;
+      --shadow: 0 24px 64px rgba(23, 54, 39, 0.13);
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
-      background: linear-gradient(180deg, #f8fbf9 0%, var(--bg) 100%);
       color: var(--text);
-      padding: 20px 12px 40px;
+      background:
+        radial-gradient(circle at top left, rgba(16, 180, 91, 0.14), transparent 30%),
+        radial-gradient(circle at top right, rgba(33, 136, 217, 0.12), transparent 24%),
+        radial-gradient(circle at 20% 80%, rgba(242, 182, 61, 0.12), transparent 28%),
+        linear-gradient(180deg, #fbfcf8 0%, var(--bg) 100%);
+      padding: 18px 12px 40px;
     }
-    .page { max-width: 1120px; margin: 0 auto; }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
     .hero {
-      background: linear-gradient(135deg, var(--brand), #35d988 58%, var(--brand-dark));
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      padding: 30px 22px;
+      background:
+        linear-gradient(135deg, rgba(16,180,91,0.96) 0%, rgba(18,154,136,0.96) 44%, rgba(33,136,217,0.95) 100%);
       color: #fff;
-      border-radius: 30px;
-      padding: 28px 22px;
       box-shadow: var(--shadow);
     }
-    .badge {
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      pointer-events: none;
+    }
+    .hero::before {
+      width: 260px;
+      height: 260px;
+      right: -80px;
+      top: -70px;
+    }
+    .hero::after {
+      width: 220px;
+      height: 220px;
+      right: 18%;
+      bottom: -110px;
+    }
+    .hero-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 18px;
+    }
+    .hero-copy {
+      max-width: 720px;
+    }
+    .hero-badge {
       display: inline-flex;
+      align-items: center;
+      gap: 8px;
       padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(255,255,255,.16);
+      background: rgba(255,255,255,.15);
       font-size: 13px;
       font-weight: 700;
+      letter-spacing: .02em;
     }
-    .hero h1 { margin: 14px 0 10px; font-size: 34px; }
-    .hero p { margin: 0; line-height: 1.7; color: rgba(255,255,255,.94); }
-    .grid { display: grid; gap: 18px; margin-top: 18px; }
+    .hero h1 {
+      margin: 16px 0 12px;
+      font-size: 34px;
+      line-height: 1.12;
+    }
+    .hero p {
+      margin: 0;
+      line-height: 1.8;
+      color: rgba(255,255,255,.94);
+      font-size: 15px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .hero-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 148px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    .hero-action:hover { transform: translateY(-1px); }
+    .hero-action.primary {
+      background: #fff;
+      color: var(--green-dark);
+    }
+    .hero-action.secondary {
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.24);
+    }
+    .hero-side {
+      display: grid;
+      gap: 12px;
+    }
+    .hero-chip {
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(10px);
+    }
+    .hero-chip span {
+      display: block;
+      font-size: 12px;
+      opacity: .86;
+      margin-bottom: 6px;
+    }
+    .hero-chip strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+    .section {
+      display: grid;
+      gap: 18px;
+      margin-top: 18px;
+    }
     .panel {
       background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: var(--radius-lg);
       padding: 22px;
       box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
-    .panel h2 { margin: 0 0 14px; font-size: 22px; }
-    .feature-grid { display: grid; gap: 14px; }
+    .panel-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .panel-head h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .panel-head span {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .panel p.lead {
+      margin: 0;
+      line-height: 1.8;
+      color: var(--sub);
+    }
+    .feature-grid,
+    .principle-grid,
+    .status-grid,
+    .journey-grid {
+      display: grid;
+      gap: 14px;
+    }
+    .feature-card,
+    .principle-card,
+    .status-card,
+    .journey-card {
+      border-radius: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+    }
     .feature-card {
-      display: block;
       text-decoration: none;
       color: inherit;
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 18px;
-      background: #fbfefd;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfefc 100%);
+      transition: transform .2s ease, box-shadow .2s ease;
     }
-    .feature-card strong { display: block; font-size: 20px; margin-bottom: 8px; }
-    .feature-card p { margin: 0; color: var(--sub); line-height: 1.7; }
-    .summary-grid { display: grid; gap: 12px; }
-    .summary-card {
-      border: 1px solid var(--line);
+    .feature-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(23, 54, 39, 0.10);
+    }
+    .feature-tag,
+    .principle-tag,
+    .status-tag,
+    .journey-tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .feature-card:nth-child(1) .feature-tag,
+    .status-card:nth-child(1) .status-tag { background: var(--green-soft); color: var(--green-dark); }
+    .feature-card:nth-child(2) .feature-tag,
+    .principle-card:nth-child(2) .principle-tag { background: var(--amber-soft); color: #9a6600; }
+    .feature-card:nth-child(3) .feature-tag,
+    .status-card:nth-child(2) .status-tag { background: var(--blue-soft); color: #155d99; }
+    .principle-card:nth-child(1) .principle-tag,
+    .journey-card:nth-child(1) .journey-tag { background: var(--coral-soft); color: #a94a38; }
+    .principle-card:nth-child(3) .principle-tag,
+    .status-card:nth-child(3) .status-tag,
+    .journey-card:nth-child(2) .journey-tag { background: #e8f8f5; color: #0f776b; }
+    .journey-card:nth-child(3) .journey-tag { background: var(--amber-soft); color: #9a6600; }
+    .feature-card strong,
+    .principle-card strong,
+    .status-card strong,
+    .journey-card strong {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+    .feature-card p,
+    .principle-card p,
+    .status-card p,
+    .journey-card p {
+      margin: 0;
+      color: var(--sub);
+      line-height: 1.75;
+    }
+    .feature-arrow {
+      margin-top: 14px;
+      color: var(--green-dark);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .tool-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .tool-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
       border-radius: 18px;
-      padding: 16px;
-      background: #fbfefd;
+      background: #f9fcfa;
+      border: 1px solid var(--line);
+      color: var(--sub);
+      line-height: 1.6;
     }
-    .summary-card span { display: block; font-size: 12px; color: var(--sub); margin-bottom: 6px; }
-    .summary-card strong { display: block; font-size: 18px; margin-bottom: 6px; }
-    .summary-card p { margin: 0; color: var(--sub); line-height: 1.7; }
-    .footer { margin-top: 18px; text-align: center; color: #7b8f84; font-size: 12px; }
-    @media (min-width: 900px) {
-      body { padding: 24px 18px 40px; }
-      .hero { padding: 34px 30px; }
-      .hero h1 { font-size: 42px; }
-      .grid.two { grid-template-columns: 1.15fr .85fr; }
-      .feature-grid { grid-template-columns: repeat(3, 1fr); }
+    .tool-item strong {
+      color: var(--text);
+      font-size: 16px;
+    }
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (min-width: 920px) {
+      body { padding: 22px 18px 40px; }
+      .hero { padding: 36px 30px; }
+      .hero h1 { font-size: 48px; }
+      .hero-grid { grid-template-columns: 1.08fr .92fr; align-items: end; }
+      .section.two { grid-template-columns: 1.08fr .92fr; }
+      .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .principle-grid,
+      .journey-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .status-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <main class="page">
     <section class="hero">
-      <div class="badge">Citizen Power</div>
-      <h1>公民電廠建造服務</h1>
-      <p>快速進入案場、試算與 SOP 追蹤。</p>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="hero-badge">Citizen Power Platform</div>
+          <h1>公民電廠陪伴式平台</h1>
+          <p>這是一個把案場資訊、投資試算、SOP 對位與 LINE 互動整合在一起的服務平台，目的是讓居民、社區與推動者都能更清楚地理解公民電廠怎麼開始、怎麼推進、現在走到哪裡。</p>
+          <div class="hero-actions">
+            <a class="hero-action primary" href="/project">查看南寮案例</a>
+            <a class="hero-action secondary" href="/progress">查看目前 SOP</a>
+          </div>
+        </div>
+        <div class="hero-side">
+          <div class="hero-chip">
+            <span>平台核心</span>
+            <strong>把複雜流程轉成可理解、可追蹤、可陪伴的產品體驗</strong>
+          </div>
+          <div class="hero-chip">
+            <span>目前可用</span>
+            <strong>案場總覽、投資試算、SOP 對位、LINE FAQ 入口</strong>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="grid two">
+    <section class="section">
       <section class="panel">
-        <h2>主要功能</h2>
+        <div class="panel-head">
+          <h2>平台能幫你做什麼</h2>
+          <span>服務入口</span>
+        </div>
         <div class="feature-grid">
           <a class="feature-card" href="/project">
-            <strong>案場總覽</strong>
-            <p>查看南寮案例、容量、里程碑與營運成果。</p>
+            <div class="feature-tag">Case</div>
+            <strong>看懂一個真實公民電廠怎麼成形</strong>
+            <p>用南寮案例整理案場背景、里程碑、容量與營運成果，讓使用者先看見一個實際可參考的版本。</p>
+            <div class="feature-arrow">前往案場總覽</div>
           </a>
           <a class="feature-card" href="/calc?amount=10000">
-            <strong>投資試算</strong>
-            <p>用同一套案場資料試算投入金額與回報。</p>
+            <div class="feature-tag">Calculator</div>
+            <strong>把投入與回報說清楚</strong>
+            <p>用同一套案場資料試算投入金額、參與比例與參考收益，幫助使用者更快理解決策基礎。</p>
+            <div class="feature-arrow">前往投資試算</div>
           </a>
           <a class="feature-card" href="/progress">
-            <strong>SOP 追蹤</strong>
-            <p>查看目前對應的南寮 SOP 步驟。</p>
+            <div class="feature-tag">SOP</div>
+            <strong>把現在的位置對回南寮 SOP</strong>
+            <p>不只記錄進度，也直接告訴使用者目前對應到哪一步，以及接下來應該往哪裡走。</p>
+            <div class="feature-arrow">前往 SOP 追蹤</div>
           </a>
+        </div>
+      </section>
+    </section>
+
+    <section class="section two">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>設計初衷</h2>
+          <span>平台定位</span>
+        </div>
+        <div class="principle-grid">
+          <div class="principle-card">
+            <div class="principle-tag">陪伴</div>
+            <strong>不是只給答案，而是陪使用者往前走</strong>
+            <p>這個平台不是文件倉庫，而是把問題拆成下一步可行動的指引，幫助不同角色在同一條路徑上推進。</p>
+          </div>
+          <div class="principle-card">
+            <div class="principle-tag">轉譯</div>
+            <strong>把專業資料轉成可理解的產品內容</strong>
+            <p>把案場文件、補助資訊與營運資料轉成案例、FAQ、試算與 SOP，讓資訊不再停留在文件裡。</p>
+          </div>
+          <div class="principle-card">
+            <div class="principle-tag">實用</div>
+            <strong>每個入口都要能直接幫助決策或行動</strong>
+            <p>首頁不講無關介紹，所有入口都直接服務「理解案場、判斷投資、追蹤進度、啟動下一步」這四件事。</p>
+          </div>
         </div>
       </section>
 
       <aside class="panel">
-        <h2>目前狀態</h2>
-        <div class="summary-grid">
-          <div class="summary-card">
-            <span>系統狀態</span>
-            <strong>南寮案例已可對位 SOP</strong>
-            <p>使用者進度可以直接映射到南寮的可複製流程。</p>
+        <div class="panel-head">
+          <h2>目前狀態</h2>
+          <span>線上版本</span>
+        </div>
+        <div class="status-grid">
+          <div class="status-card">
+            <div class="status-tag">Case Ready</div>
+            <strong>南寮案例已整合進平台</strong>
+            <p>案場資料、里程碑與營運摘要已可作為平台中的示範案例。</p>
           </div>
-          <div class="summary-card">
-            <span>資料重點</span>
-            <strong>案場、試算、進度已整合</strong>
-            <p>同一套資料已供案場總覽、試算與進度追蹤使用。</p>
+          <div class="status-card">
+            <div class="status-tag">SOP Ready</div>
+            <strong>使用者進度已可對位 SOP</strong>
+            <p>系統可以把進度映射到南寮的可複製流程，並提供下一步建議。</p>
           </div>
-          <div class="summary-card">
-            <span>操作方式</span>
-            <strong>從 LINE 或頁面直接進入</strong>
-            <p>FAQ、建立流程與 SOP 追蹤都可以從 LINE 分流進來。</p>
+          <div class="status-card">
+            <div class="status-tag">LINE Ready</div>
+            <strong>LINE 已能作為服務入口</strong>
+            <p>使用者可以從 LINE 進入 FAQ、建立流程與進度判讀，而不是只收到靜態文字回覆。</p>
           </div>
         </div>
       </aside>
+    </section>
+
+    <section class="section">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>使用方式</h2>
+          <span>快速開始</span>
+        </div>
+        <div class="journey-grid">
+          <div class="journey-card">
+            <div class="journey-tag">Step 1</div>
+            <strong>先看案例</strong>
+            <p>從南寮案例開始，快速理解一個公民電廠的規模、節奏與成果。</p>
+          </div>
+          <div class="journey-card">
+            <div class="journey-tag">Step 2</div>
+            <strong>再做試算</strong>
+            <p>把投入金額與參考回報關係先看懂，降低參與門檻。</p>
+          </div>
+          <div class="journey-card">
+            <div class="journey-tag">Step 3</div>
+            <strong>最後追蹤目前位置</strong>
+            <p>透過 SOP 對位，知道現在在流程中的哪一步，以及下一步該做什麼。</p>
+          </div>
+        </div>
+        <div class="tool-list">
+          <div class="tool-item"><strong>案場總覽</strong><span>適合第一次理解南寮案例的人</span></div>
+          <div class="tool-item"><strong>投資試算</strong><span>適合想先看投入與參考收益的人</span></div>
+          <div class="tool-item"><strong>SOP 追蹤</strong><span>適合想判斷目前進度與下一步的人</span></div>
+        </div>
+      </section>
     </section>
 
     <div class="footer">Citizen Power Workspace</div>
