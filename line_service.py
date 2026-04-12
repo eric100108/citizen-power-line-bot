@@ -86,12 +86,36 @@ def reply_faq_quick_reply(reply_token):
             "type": "action",
             "action": {
                 "type": "message",
-                "label": "為什麼要推動公民電廠？",
-                "text": "為什麼要推動公民電廠？",
+                "label": "開始建立電廠",
+                "text": "開始建立電廠要做什麼？",
+            },
+        },
+        {
+            "type": "action",
+            "action": {
+                "type": "message",
+                "label": "有補助嗎",
+                "text": "有補助可以申請嗎？",
+            },
+        },
+        {
+            "type": "action",
+            "action": {
+                "type": "message",
+                "label": "場址怎麼看",
+                "text": "場址要怎麼評估？",
+            },
+        },
+        {
+            "type": "action",
+            "action": {
+                "type": "message",
+                "label": "我到哪一步",
+                "text": "我現在進行到哪一步？",
             },
         },
     ]
-    reply_line_quick_reply(reply_token, "請選擇想了解的問題：", items)
+    reply_line_quick_reply(reply_token, "請選擇想了解的常見問題：", items)
 
 
 def reply_start_build_quick_reply(reply_token, text):
