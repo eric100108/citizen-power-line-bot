@@ -3,313 +3,771 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>南寮 SOP 追蹤</title>
+  <title>南寮公民電廠 SOP 對位</title>
   <style>
     :root {
-      --bg: #eef5f9;
-      --surface: #ffffff;
-      --text: #183142;
-      --sub: #5b7180;
-      --line: #d7e4ec;
-      --brand: #1177cc;
-      --brand-dark: #0b5ea3;
-      --brand-soft: #e9f4ff;
-      --success: #138b5a;
-      --success-soft: #e8f8f0;
-      --warning: #c97a0a;
-      --warning-soft: #fff3de;
-      --shadow: 0 18px 42px rgba(17, 56, 86, 0.12);
-      --radius: 24px;
+      --bg: #f3f7fb;
+      --surface: rgba(255,255,255,.92);
+      --surface-solid: #ffffff;
+      --text: #163142;
+      --sub: #5d7381;
+      --muted: #7c919d;
+      --line: rgba(207, 221, 231, .96);
+      --nav: #103745;
+      --nav-dark: #0c2a33;
+      --blue: #2086de;
+      --blue-dark: #0f5f9e;
+      --blue-soft: #eaf4ff;
+      --green: #34be75;
+      --green-dark: #166f49;
+      --green-soft: #eaf8f0;
+      --amber: #c88712;
+      --amber-soft: #fff4dd;
+      --shadow: 0 28px 72px rgba(17, 51, 78, .12);
+      --radius-xl: 34px;
+      --radius-lg: 26px;
+      --radius-md: 20px;
+      --shell: min(1380px, calc(100% - 40px));
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
-      background: linear-gradient(180deg, #f8fbfd 0%, var(--bg) 100%);
       color: var(--text);
-      padding: 20px 12px 40px;
+      background:
+        radial-gradient(circle at top left, rgba(32, 134, 222, .15), transparent 24%),
+        radial-gradient(circle at top right, rgba(52, 190, 117, .10), transparent 28%),
+        linear-gradient(180deg, #fbfdff 0%, var(--bg) 100%);
     }
-    .page { max-width: 1160px; margin: 0 auto; }
-    .hero {
-      background: linear-gradient(135deg, #56adff 0%, var(--brand) 58%, var(--brand-dark) 100%);
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: linear-gradient(90deg, var(--nav) 0%, #1a556d 42%, var(--nav-dark) 100%);
       color: #fff;
-      border-radius: 28px;
-      padding: 28px 22px;
+      box-shadow: 0 10px 28px rgba(11, 31, 40, .18);
+    }
+    .shell {
+      width: var(--shell);
+      margin: 0 auto;
+    }
+    .topbar-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #43d14a 0%, #1f8bf4 100%);
+      color: #fff;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.16);
+    }
+    .brand-copy strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+    .brand-copy span {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255,255,255,.76);
+      letter-spacing: .08em;
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .top-actions a {
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .top-actions a.primary {
+      background: var(--green);
+      border-color: transparent;
+    }
+    .hero-band {
+      position: relative;
+      overflow: hidden;
+      padding: 34px 0 30px;
+    }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 64vh;
+      padding: clamp(34px, 7vw, 74px);
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(120deg, rgba(8, 23, 36, .72), rgba(11, 71, 92, .46)),
+        linear-gradient(135deg, #1c71b8 0%, #2990e3 48%, #35c67b 100%);
+      color: #fff;
       box-shadow: var(--shadow);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      left: -120px;
+      bottom: -120px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.22), rgba(255,255,255,0));
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -70px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.18), rgba(255,255,255,0));
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 26px;
+      align-items: end;
+    }
+    .hero-copy {
+      max-width: 860px;
     }
     .badge {
       display: inline-flex;
-      padding: 8px 12px;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
       border-radius: 999px;
-      background: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.14);
       font-size: 13px;
       font-weight: 700;
+      letter-spacing: .04em;
     }
-    .hero h1 { margin: 12px 0 10px; font-size: 34px; }
-    .hero p { margin: 0; max-width: 760px; line-height: 1.8; color: rgba(255,255,255,.95); }
-    .grid { display: grid; gap: 18px; margin-top: 18px; }
-    .card {
+    .hero h1 {
+      margin: 16px 0 12px;
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 1.02;
+      letter-spacing: -.03em;
+    }
+    .hero p {
+      margin: 0;
+      max-width: 760px;
+      color: rgba(255,255,255,.92);
+      line-height: 1.85;
+      font-size: 17px;
+    }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .hero-stat {
+      padding: 16px 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+    }
+    .hero-stat span {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: rgba(255,255,255,.74);
+    }
+    .hero-stat strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+    .section-band {
+      padding: 22px 0;
+    }
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+    .grid.two {
+      grid-template-columns: 1.04fr .96fr;
+    }
+    .panel {
       background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 22px;
+      border: 1px solid rgba(255,255,255,.88);
+      border-radius: var(--radius-xl);
+      padding: 28px;
       box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
-    .card h2 { margin: 0 0 14px; font-size: 22px; }
-    .card p { margin: 0; line-height: 1.8; color: var(--sub); }
+    .panel.result-panel {
+      background:
+        linear-gradient(180deg, rgba(234, 244, 255, .94) 0%, rgba(255,255,255,.98) 100%),
+        var(--surface);
+    }
+    .panel.form-panel {
+      background:
+        linear-gradient(180deg, rgba(236, 249, 241, .92) 0%, rgba(255,255,255,.98) 100%),
+        var(--surface);
+    }
+    .panel.roadmap-panel {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(239, 247, 252, .96) 100%),
+        var(--surface);
+    }
+    .panel.timeline-panel {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(249, 252, 255, .96) 100%),
+        var(--surface);
+    }
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1.08;
+      letter-spacing: -.03em;
+    }
+    .section-head span {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .lead {
+      margin: 0 0 18px;
+      color: var(--sub);
+      line-height: 1.85;
+      max-width: 760px;
+    }
     .status-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 10px 14px;
       border-radius: 999px;
-      background: var(--brand-soft);
-      color: var(--brand-dark);
-      font-weight: 700;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-weight: 800;
+      border: 1px solid #cde1f5;
     }
     .step-card {
-      margin-top: 16px;
-      padding: 18px;
-      border-radius: 20px;
-      background: #f8fbff;
+      margin-top: 18px;
+      padding: 22px;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
       border: 1px solid var(--line);
+      box-shadow: 0 18px 40px rgba(23, 78, 115, .08);
     }
-    .step-card strong { display: block; font-size: 22px; margin-bottom: 8px; }
-    .step-meta { font-size: 14px; color: var(--sub); margin-bottom: 10px; }
-    .ratio { margin-top: 14px; }
+    .step-card strong {
+      display: block;
+      font-size: clamp(26px, 3vw, 38px);
+      margin-bottom: 10px;
+      line-height: 1.12;
+    }
+    .step-meta {
+      font-size: 14px;
+      color: var(--sub);
+      margin-bottom: 10px;
+    }
+    .sop-hint {
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.75;
+    }
+    .ratio {
+      margin-top: 20px;
+    }
+    .ratio-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      font-size: 14px;
+      color: var(--sub);
+    }
     .ratio-bar {
       width: 100%;
-      height: 12px;
+      height: 14px;
       border-radius: 999px;
-      background: #e4edf4;
+      background: #dfebf3;
       overflow: hidden;
-      margin-top: 8px;
+      margin-top: 10px;
     }
-    .ratio-fill { height: 100%; background: linear-gradient(90deg, #61b5ff, var(--brand)); }
-    .mini-grid { display: grid; gap: 12px; }
-    .mini-card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-      background: #fbfdff;
+    .ratio-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #65b6ff 0%, var(--blue) 60%, #22c57c 100%);
+      transition: width .3s ease;
     }
-    .mini-card strong { display: block; margin-bottom: 6px; }
-    .message { margin-top: 14px; padding: 12px 14px; border-radius: 16px; font-size: 14px; }
-    .message.success { background: var(--success-soft); color: var(--success); }
-    .message.warning { background: var(--warning-soft); color: var(--warning); }
-    .form-grid { display: grid; gap: 14px; }
-    label { display: block; margin-bottom: 8px; color: var(--sub); font-size: 14px; }
-    input, select {
-      width: 100%;
-      border: 1px solid #d0dee8;
-      border-radius: 16px;
-      padding: 14px 16px;
-      font-size: 15px;
-      font-family: inherit;
-      background: #fff;
-    }
-    .button {
-      border: none;
-      border-radius: 16px;
-      padding: 14px 18px;
-      background: var(--brand);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .button[disabled] { opacity: .55; cursor: not-allowed; }
-    .user-box {
-      margin-top: 14px;
+    .message {
+      margin-top: 16px;
       padding: 14px 16px;
       border-radius: 18px;
-      background: #f7fbff;
-      border: 1px solid var(--line);
-      color: var(--sub);
+      font-size: 14px;
       line-height: 1.7;
     }
-    .user-box strong { color: var(--text); }
-    .timeline { display: grid; gap: 12px; }
+    .message.success {
+      background: var(--green-soft);
+      color: var(--green-dark);
+      border: 1px solid #cdeedb;
+    }
+    .message.warning {
+      background: var(--amber-soft);
+      color: #a56b08;
+      border: 1px solid #f1ddaa;
+    }
+    .user-box {
+      margin-top: 16px;
+      padding: 18px 20px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f7fff9 0%, #ffffff 100%);
+      border: 1px solid #d7ebdf;
+      color: var(--sub);
+      line-height: 1.8;
+      box-shadow: 0 16px 34px rgba(24, 92, 55, .06);
+    }
+    .user-box strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .form-grid,
+    .mini-grid,
+    .timeline,
+    .sop-list {
+      display: grid;
+      gap: 14px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--sub);
+      font-weight: 700;
+    }
+    input,
+    select {
+      width: 100%;
+      border: 1px solid #d3e2ea;
+      border-radius: 18px;
+      padding: 15px 18px;
+      font-size: 16px;
+      font-family: inherit;
+      background: rgba(255,255,255,.98);
+      color: var(--text);
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 54px;
+      border: none;
+      border-radius: 18px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, var(--blue) 0%, #136ab2 100%);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 14px 28px rgba(34, 135, 221, .22);
+    }
+    .button[disabled] {
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .mini-grid {
+      grid-template-columns: 1fr 1fr;
+      margin-top: 18px;
+    }
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 20px;
+      background: var(--surface-solid);
+      box-shadow: 0 16px 34px rgba(18, 57, 80, .06);
+    }
+    .mini-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 20px;
+    }
+    .mini-card div {
+      color: var(--sub);
+      line-height: 1.8;
+    }
+    .sop-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .sop-step,
+    .timeline-item,
+    .empty-state {
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+      box-shadow: 0 16px 34px rgba(18, 57, 80, .05);
+    }
+    .sop-step {
+      padding: 18px 18px 16px;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .sop-step:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px rgba(18, 57, 80, .08);
+    }
+    .sop-step.completed {
+      background: linear-gradient(180deg, #effbf4 0%, #ffffff 100%);
+      border-color: #cce9d9;
+    }
+    .sop-step.current {
+      background: linear-gradient(180deg, #eef6ff 0%, #ffffff 100%);
+      border-color: #c8def3;
+    }
+    .sop-step.upcoming {
+      background: linear-gradient(180deg, #fffaf0 0%, #ffffff 100%);
+      border-color: #ecdab0;
+    }
+    .sop-kicker {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    .sop-step strong,
+    .timeline-item strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 21px;
+      line-height: 1.3;
+    }
+    .sop-step div,
+    .timeline-item span {
+      color: var(--sub);
+      line-height: 1.75;
+    }
+    .timeline {
+      margin-top: 6px;
+    }
     .timeline-item {
       position: relative;
-      padding: 16px 18px 16px 48px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fbfdff;
+      padding: 18px 18px 18px 54px;
+      overflow: hidden;
     }
     .timeline-item::before {
       content: "";
       position: absolute;
-      left: 20px;
-      top: 20px;
+      left: 22px;
+      top: 24px;
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: var(--brand);
-      box-shadow: 0 0 0 6px rgba(17,119,204,.14);
+      background: var(--blue);
+      box-shadow: 0 0 0 7px rgba(34, 135, 221, .14);
     }
-    .timeline-item strong { display: block; margin-bottom: 6px; }
-    .timeline-item span { display: block; color: var(--sub); line-height: 1.7; font-size: 14px; }
-    .sop-list { display: grid; gap: 12px; }
-    .sop-step {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 16px;
-      background: #fbfdff;
-    }
-    .sop-step.completed { background: var(--success-soft); border-color: #c9ead9; }
-    .sop-step.current { background: var(--brand-soft); border-color: #b9daf6; }
-    .sop-step.upcoming { opacity: .92; }
-    .sop-step strong { display: block; margin-bottom: 6px; }
-    .sop-kicker { font-size: 13px; color: var(--sub); margin-bottom: 6px; }
-    .sop-hint { margin-top: 8px; font-size: 14px; color: var(--sub); }
     .empty-state {
-      padding: 18px;
-      border-radius: 18px;
-      border: 1px dashed #c9d7e3;
-      background: #f8fbff;
+      padding: 20px 22px;
+      line-height: 1.85;
       color: var(--sub);
-      line-height: 1.8;
+      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
     }
-    .back-link { display: inline-block; margin-top: 18px; color: var(--brand-dark); text-decoration: none; font-weight: 700; }
-    @media (min-width: 900px) {
-      body { padding: 24px 18px 40px; }
-      .hero { padding: 34px 30px; }
-      .hero h1 { font-size: 40px; }
-      .grid.two { grid-template-columns: 1fr 1fr; }
-      .mini-grid { grid-template-columns: 1fr 1fr; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      color: var(--blue-dark);
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .75s ease, transform .75s ease;
+      will-change: opacity, transform;
+    }
+    .reveal.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal[data-delay="1"] { transition-delay: .08s; }
+    .reveal[data-delay="2"] { transition-delay: .16s; }
+    .reveal[data-delay="3"] { transition-delay: .24s; }
+    .reveal[data-delay="4"] { transition-delay: .32s; }
+    @media (max-width: 1120px) {
+      .hero-stats,
+      .grid.two,
+      .sop-list,
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+      .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    @media (max-width: 720px) {
+      :root { --shell: calc(100% - 24px); }
+      .topbar-inner {
+        min-height: 68px;
+      }
+      .brand-copy strong {
+        font-size: 18px;
+      }
+      .top-actions a {
+        padding: 10px 14px;
+      }
+      .hero {
+        min-height: auto;
+        padding: 30px 22px;
+      }
+      .panel {
+        padding: 22px;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal,
+      .reveal.in-view {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      .ratio-fill {
+        transition: none;
+      }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <section class="hero">
-      <div class="badge">Nanliao Playbook</div>
-      <h1>南寮公民電廠 SOP 對位</h1>
-      <p>????????? SOP ???</p>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">CP</div>
+        <div class="brand-copy">
+          <strong>公民電廠</strong>
+          <span>CITIZEN POWER PLATFORM</span>
+        </div>
+      </div>
+      <nav class="top-actions" aria-label="頁面導覽">
+        <a href="/project">看案例</a>
+        <a href="/calc?amount=10000">投資試算</a>
+        <a class="primary" href="/menu">返回首頁</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-band">
+      <div class="shell hero">
+        <div class="hero-inner">
+          <div class="hero-copy reveal">
+            <div class="badge">Nanliao Playbook</div>
+            <h1>把使用者的現在位置，<br>直接對位到南寮 SOP</h1>
+            <p>這一頁不是只有記錄進度，而是幫使用者看懂自己在陪伴流程中的相對位置，清楚知道現在走到哪裡、接下來要往哪裡推進。</p>
+          </div>
+          <div class="hero-stats reveal" data-delay="1">
+            <div class="hero-stat">
+              <span>目前對位步驟</span>
+              <strong id="hero-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</strong>
+            </div>
+            <div class="hero-stat">
+              <span>目前專案階段</span>
+              <strong id="hero-stage">{{ default_sop_status.current_stage }}</strong>
+            </div>
+            <div class="hero-stat">
+              <span>最近一次填報</span>
+              <strong id="hero-latest">{% if latest_record %}{{ latest_record.updated_at }}{% else %}尚未填報{% endif %}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="grid two">
-      <section class="card">
-        <h2>目前對位結果</h2>
-        <div id="sop-source" class="status-pill">以南寮案最新進度作為預設基準</div>
-        <div class="step-card">
-          <div class="step-meta" id="current-stage-label">目前專案階段：{{ default_sop_status.current_stage }}</div>
-          <strong id="current-step-title">{{ default_sop_status.current_step.title if default_sop_status.current_step else '尚未建立 SOP 步驟' }}</strong>
-          <p id="current-step-summary">{{ default_sop_status.current_step.summary if default_sop_status.current_step else '目前沒有可顯示的 SOP 資料。' }}</p>
-          <p class="sop-hint" id="current-step-action">下一個建議動作：{{ default_sop_status.current_step.recommended_action if default_sop_status.current_step else '請先建立服務步驟資料。' }}</p>
-          <div class="ratio">
-            <div id="progress-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</div>
-            <div class="ratio-bar"><div class="ratio-fill" id="ratio-fill" style="width: {{ (default_sop_status.completion_ratio * 100)|round(1) }}%;"></div></div>
+    <section class="section-band">
+      <div class="shell grid two">
+        <section class="panel result-panel reveal" data-delay="1">
+          <div class="section-head">
+            <h2>目前對位結果</h2>
+            <span>與南寮經驗同步比對</span>
           </div>
-        </div>
-        {% if latest_record %}
-          <p class="sop-hint" id="latest-record-text">最近一次填報：{{ latest_record.updated_at }}，階段為「{{ latest_record.stage }}」{% if latest_record.display_name %}，填報者 {{ latest_record.display_name }}{% endif %}。</p>
-        {% else %}
-          <p class="sop-hint" id="latest-record-text">目前尚未收到使用者進度，先以南寮專案預設進度呈現。</p>
-        {% endif %}
-        {% if saved == "1" %}<div class="message success">進度已更新，系統會依新階段重新對位南寮 SOP。</div>{% elif saved == "0" %}<div class="message warning">更新失敗，請確認日期、階段與 LINE 身分資訊是否完整。</div>{% endif %}
-      </section>
+          <p class="lead">先看你現在對應到南寮的哪一步，這樣後面的提醒、文件與行動建議才會有意義。</p>
+          <div id="sop-source" class="status-pill">以南寮案最新進度作為預設基準</div>
+          <div class="step-card">
+            <div class="step-meta" id="current-stage-label">目前專案階段：{{ default_sop_status.current_stage }}</div>
+            <strong id="current-step-title">{{ default_sop_status.current_step.title if default_sop_status.current_step else "尚未建立 SOP 步驟" }}</strong>
+            <p id="current-step-summary">{{ default_sop_status.current_step.summary if default_sop_status.current_step else "目前沒有可顯示的 SOP 資料。" }}</p>
+            <p class="sop-hint" id="current-step-action">下一個建議動作：{{ default_sop_status.current_step.recommended_action if default_sop_status.current_step else "請先建立服務步驟資料。" }}</p>
+            <div class="ratio">
+              <div class="ratio-row">
+                <div id="progress-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</div>
+                <div id="progress-percent">{{ (default_sop_status.completion_ratio * 100)|round(1) }}%</div>
+              </div>
+              <div class="ratio-bar"><div class="ratio-fill" id="ratio-fill" style="width: {{ (default_sop_status.completion_ratio * 100)|round(1) }}%;"></div></div>
+            </div>
+          </div>
+          {% if latest_record %}
+            <p class="sop-hint" id="latest-record-text">最近一次填報：{{ latest_record.updated_at }}，階段為「{{ latest_record.stage }}」{% if latest_record.display_name %}，填報者 {{ latest_record.display_name }}{% endif %}。</p>
+          {% else %}
+            <p class="sop-hint" id="latest-record-text">目前尚未收到使用者進度，先以南寮專案預設進度呈現。</p>
+          {% endif %}
+          {% if saved == "1" %}<div class="message success">進度已更新，系統會依新階段重新對位南寮 SOP。</div>{% elif saved == "0" %}<div class="message warning">更新失敗，請確認日期、階段與 LINE 身分資訊是否完整。</div>{% endif %}
+        </section>
 
-      <section class="card">
-        <h2>填報你的目前進度</h2>
-        <div id="line-user-box" class="user-box">
-          <strong>等待 LINE 身分驗證</strong>
-          <div>登入後系統會知道你是誰，並把你的填報進度對應到南寮 SOP 的相對位置。</div>
-        </div>
-        <form method="post" action="/progress" class="form-grid" id="progress-form">
-          <input type="hidden" name="line_user_id" id="line_user_id">
-          <input type="hidden" name="display_name" id="display_name">
-          <div>
-            <label for="stage">目前階段</label>
-            <select id="stage" name="stage" required>
-              {% for stage in progress_stages %}
-              <option value="{{ stage }}">{{ stage }}</option>
-              {% endfor %}
-            </select>
+        <section class="panel form-panel reveal" data-delay="2">
+          <div class="section-head">
+            <h2>填報你的目前進度</h2>
+            <span>LINE 使用者專屬</span>
           </div>
-          <div>
-            <label for="updated_at">更新日期</label>
-            <input id="updated_at" name="updated_at" type="date" required>
+          <p class="lead">登入 LINE 後，系統就能把你的填報和南寮電廠的陪伴路徑對位起來，讓進度判讀更準確。</p>
+          <div id="line-user-box" class="user-box">
+            <strong>等待 LINE 身分驗證</strong>
+            <div>登入後系統會知道你是誰，並把你的填報進度對應到南寮 SOP 的相對位置。</div>
           </div>
-          <button class="button" type="submit" id="submit-button" disabled>等待 LINE 驗證</button>
-        </form>
-      </section>
+          <form method="post" action="/progress" class="form-grid" id="progress-form">
+            <input type="hidden" name="line_user_id" id="line_user_id">
+            <input type="hidden" name="display_name" id="display_name">
+            <div>
+              <label for="stage">目前階段</label>
+              <select id="stage" name="stage" required>
+                {% for stage in progress_stages %}
+                <option value="{{ stage }}">{{ stage }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="updated_at">更新日期</label>
+              <input id="updated_at" name="updated_at" type="date" required>
+            </div>
+            <button class="button" type="submit" id="submit-button" disabled>等待 LINE 驗證</button>
+          </form>
+        </section>
+      </div>
     </section>
 
-    <section class="grid two">
-      <section class="card">
-        <h2>南寮 SOP 全流程</h2>
-        {% if service_steps %}
-        <div class="sop-list" id="sop-list">
-          {% for step in service_steps %}
-          <div class="sop-step{% if default_sop_status.current_step and step.step_code == default_sop_status.current_step.step_code %} current{% elif default_sop_status.completed_steps | selectattr('step_code', 'equalto', step.step_code) | list %} completed{% else %} upcoming{% endif %}" data-step-code="{{ step.step_code }}">
-            <div class="sop-kicker">{{ loop.index }}. {{ step.stage_group }} / 對象：{{ step.audience }}</div>
-            <strong>{{ step.title }}</strong>
-            <div>{{ step.summary }}</div>
-            <div class="sop-hint">建議動作：{{ step.recommended_action }}</div>
+    <section class="section-band">
+      <div class="shell grid two">
+        <section class="panel roadmap-panel reveal" data-delay="1">
+          <div class="section-head">
+            <h2>南寮 SOP 全流程</h2>
+            <span>可複製的陪伴路徑</span>
           </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <div class="empty-state">目前還沒有建立南寮 SOP 步驟。</div>
-        {% endif %}
-      </section>
+          <p class="lead">把南寮案例拆成一條清楚的公民電廠陪伴流程，讓使用者知道自己在哪一格，而不是只看一串資料。</p>
+          {% if service_steps %}
+          <div class="sop-list" id="sop-list">
+            {% for step in service_steps %}
+            <div class="sop-step reveal{% if default_sop_status.current_step and step.step_code == default_sop_status.current_step.step_code %} current{% elif default_sop_status.completed_steps | selectattr('step_code', 'equalto', step.step_code) | list %} completed{% else %} upcoming{% endif %}" data-delay="{{ (loop.index0 % 4) + 1 }}" data-step-code="{{ step.step_code }}">
+              <div class="sop-kicker">{{ loop.index }}. {{ step.stage_group }} / 對象：{{ step.audience }}</div>
+              <strong>{{ step.title }}</strong>
+              <div>{{ step.summary }}</div>
+              <div class="sop-hint">建議動作：{{ step.recommended_action }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state">目前還沒有建立南寮 SOP 步驟。</div>
+          {% endif %}
+        </section>
 
-      <section class="card">
-        <h2>下一步提醒</h2>
-        <div class="mini-grid">
-          <div class="mini-card">
-            <strong>已完成步驟</strong>
-            <div id="completed-steps-text">{{ default_sop_status.completed_steps | map(attribute='title') | join('、') if default_sop_status.completed_steps else '目前從第一步開始。' }}</div>
-          </div>
-          <div class="mini-card">
-            <strong>接下來要做</strong>
-            <div id="upcoming-steps-text">{{ default_sop_status.upcoming_steps[0].title if default_sop_status.upcoming_steps else '目前已到最後一步，重點轉為營運與回饋。' }}</div>
-          </div>
-        </div>
-      </section>
+        <section class="grid">
+          <section class="panel reveal" data-delay="2">
+            <div class="section-head">
+              <h2>下一步提醒</h2>
+              <span>現在就能採取的動作</span>
+            </div>
+            <div class="mini-grid">
+              <div class="mini-card">
+                <strong>已完成步驟</strong>
+                <div id="completed-steps-text">{{ default_sop_status.completed_steps | map(attribute='title') | join('、') if default_sop_status.completed_steps else "目前從第一步開始。" }}</div>
+              </div>
+              <div class="mini-card">
+                <strong>接下來要做</strong>
+                <div id="upcoming-steps-text">{{ default_sop_status.upcoming_steps[0].title if default_sop_status.upcoming_steps else "目前已到最後一步，重點轉為營運與回饋。" }}</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel reveal" data-delay="3">
+            <div class="section-head">
+              <h2>使用方式</h2>
+              <span>陪伴頁不是紀錄頁</span>
+            </div>
+            <div class="empty-state">先透過 LINE 驗證身分並填報目前階段，系統就會把你的進度映射到南寮案例的相對步驟。這樣你不只知道目前在哪裡，也會知道下一步該往哪裡推進。</div>
+          </section>
+        </section>
+      </div>
     </section>
 
-    <section class="grid two">
-      <section class="card">
-        <h2>歷次填報紀錄</h2>
-        {% if progress_rows %}
-        <div class="timeline">
-          {% for item in progress_rows %}
-          <div class="timeline-item">
-            <strong>{{ item.stage }}</strong>
-            <span>日期：{{ item.updated_at }}</span>
-            {% if item.display_name %}<span>填報者：{{ item.display_name }}</span>{% endif %}
-            {% if item.note %}<span>{{ item.note }}</span>{% endif %}
+    <section class="section-band">
+      <div class="shell grid two">
+        <section class="panel timeline-panel reveal" data-delay="1">
+          <div class="section-head">
+            <h2>歷次填報紀錄</h2>
+            <span>真實互動軌跡</span>
           </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <div class="empty-state">目前還沒有任何進度紀錄。</div>
-        {% endif %}
-      </section>
+          {% if progress_rows %}
+          <div class="timeline">
+            {% for item in progress_rows %}
+            <div class="timeline-item reveal" data-delay="{{ (loop.index0 % 4) + 1 }}">
+              <strong>{{ item.stage }}</strong>
+              <span>日期：{{ item.updated_at }}</span>
+              {% if item.display_name %}<span>填報者：{{ item.display_name }}</span>{% endif %}
+              {% if item.note %}<span>{{ item.note }}</span>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state">目前還沒有任何進度紀錄。</div>
+          {% endif %}
+        </section>
 
-      <section class="card">
-        <h2>預估後續階段</h2>
-        {% if predicted_rows %}
-        <div class="timeline">
-          {% for item in predicted_rows %}
-          <div class="timeline-item">
-            <strong>{{ item.stage }}</strong>
-            <span>預估日期：{{ item.predicted_date }}</span>
-            <span>距離上一階段約 {{ item.days_after }} 天</span>
+        <section class="panel timeline-panel reveal" data-delay="2">
+          <div class="section-head">
+            <h2>預估後續階段</h2>
+            <span>從現在往後看</span>
           </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <div class="empty-state">目前已進入最後階段，預測重點改為營運揭露、回饋追蹤與複製經驗整理。</div>
-        {% endif %}
-      </section>
+          {% if predicted_rows %}
+          <div class="timeline">
+            {% for item in predicted_rows %}
+            <div class="timeline-item reveal" data-delay="{{ (loop.index0 % 4) + 1 }}">
+              <strong>{{ item.stage }}</strong>
+              <span>預估日期：{{ item.predicted_date }}</span>
+              <span>距離上一階段約 {{ item.days_after }} 天</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state">目前已進入最後階段，預測重點改為營運揭露、回饋追蹤與複製經驗整理。</div>
+          {% endif %}
+          <a class="back-link" href="/menu">返回功能選單</a>
+        </section>
+      </div>
     </section>
-
-    <a class="back-link" href="/menu">返回功能選單</a>
   </main>
 
   <script>
@@ -321,25 +779,32 @@
       const currentStep = status?.current_step || null;
       const completedTitles = (status?.completed_steps || []).map(item => item.title);
       const upcomingTitles = (status?.upcoming_steps || []).map(item => item.title);
+      const completionRatio = ((status?.completion_ratio || 0) * 100).toFixed(1);
 
       document.getElementById("sop-source").textContent = sourceLabel;
-      document.getElementById("current-stage-label").textContent = `目前專案階段：${status?.current_stage || '尚未填報'}`;
+      document.getElementById("current-stage-label").textContent = `目前專案階段：${status?.current_stage || "尚未填報"}`;
       document.getElementById("current-step-title").textContent = currentStep?.title || "尚未建立 SOP 步驟";
       document.getElementById("current-step-summary").textContent = currentStep?.summary || "目前沒有可顯示的 SOP 資料。";
-      document.getElementById("current-step-action").textContent = `下一個建議動作：${currentStep?.recommended_action || '請先建立服務步驟資料。'}`;
+      document.getElementById("current-step-action").textContent = `下一個建議動作：${currentStep?.recommended_action || "請先建立服務步驟資料。"}`;
       document.getElementById("progress-order").textContent = `第 ${status?.current_order || 0} / ${status?.step_count || 0} 步`;
-      document.getElementById("ratio-fill").style.width = `${((status?.completion_ratio || 0) * 100).toFixed(1)}%`;
-      document.getElementById("completed-steps-text").textContent = completedTitles.length ? completedTitles.join('、') : '目前從第一步開始。';
-      document.getElementById("upcoming-steps-text").textContent = upcomingTitles.length ? upcomingTitles[0] : '目前已到最後一步，重點轉為營運與回饋。';
+      document.getElementById("progress-percent").textContent = `${completionRatio}%`;
+      document.getElementById("ratio-fill").style.width = `${completionRatio}%`;
+      document.getElementById("completed-steps-text").textContent = completedTitles.length ? completedTitles.join("、") : "目前從第一步開始。";
+      document.getElementById("upcoming-steps-text").textContent = upcomingTitles.length ? upcomingTitles[0] : "目前已到最後一步，重點轉為營運與回饋。";
+      document.getElementById("hero-order").textContent = `第 ${status?.current_order || 0} / ${status?.step_count || 0} 步`;
+      document.getElementById("hero-stage").textContent = status?.current_stage || "尚未填報";
 
       if (latestRecord) {
         const displayNameText = latestRecord.display_name ? `，填報者 ${latestRecord.display_name}` : "";
         document.getElementById("latest-record-text").textContent = `最近一次填報：${latestRecord.updated_at}，階段為「${latestRecord.stage}」${displayNameText}。`;
+        document.getElementById("hero-latest").textContent = latestRecord.updated_at;
+      } else {
+        document.getElementById("hero-latest").textContent = "尚未填報";
       }
 
       const currentCode = currentStep?.step_code || "";
       const completedCodes = new Set((status?.completed_steps || []).map(item => item.step_code));
-      document.querySelectorAll(".sop-step").forEach(card => {
+      document.querySelectorAll(".sop-step").forEach((card) => {
         const stepCode = card.dataset.stepCode;
         card.classList.remove("completed", "current", "upcoming");
         if (stepCode === currentCode) {
@@ -353,6 +818,23 @@
     }
 
     renderSopStatus({ sop_status: defaultSopStatus }, "以南寮案最新進度作為預設基準");
+
+    const observer = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14 }) : null;
+
+    document.querySelectorAll(".reveal").forEach((node) => {
+      if (!observer) {
+        node.classList.add("in-view");
+        return;
+      }
+      observer.observe(node);
+    });
   </script>
 
   {% if liff_id %}
