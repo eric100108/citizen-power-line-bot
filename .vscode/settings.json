@@ -1,7 +1,0 @@
-﻿{
-  "workbench.editor.enablePreview": false,
-  "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.startupEditor": "none",
-  "window.restoreWindows": "all",
-  "files.hotExit": "onExitAndWindowClose"
-}
