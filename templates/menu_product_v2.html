@@ -1,162 +1,139 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>公民電廠產品首頁</title>
+  <title>公民電廠功能選單</title>
   <style>
-    :root { --bg:#eef3f1; --surface:rgba(255,255,255,.84); --surface-solid:#fff; --text-main:#1f2a24; --text-sub:#5f6f66; --text-soft:#7b8f84; --brand-1:#06c755; --brand-2:#26a96c; --line:rgba(212,225,217,.96); --shadow:0 18px 44px rgba(19,52,36,.12); --radius-xl:30px; --radius-lg:22px; --sidebar-width:286px; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; font-family:"Microsoft JhengHei","PingFang TC",sans-serif; background:radial-gradient(circle at top left, rgba(6,199,85,.18), transparent 24%), radial-gradient(circle at right top, rgba(38,169,108,.12), transparent 20%), linear-gradient(180deg,#f8fbf9 0%,var(--bg) 100%); color:var(--text-main); }
-    .layout { min-height:100vh; display:grid; grid-template-columns:1fr; gap:16px; padding:12px; }
-    .sidebar { display:none; }
-    .sidebar-shell { position:sticky; top:14px; height:calc(100vh - 28px); border-radius:28px; background:rgba(255,255,255,.76); border:1px solid rgba(255,255,255,.75); box-shadow:0 24px 60px rgba(17,47,32,.1); backdrop-filter:blur(12px); padding:16px 14px; display:flex; flex-direction:column; gap:18px; }
-    .brand { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:18px; background:rgba(6,199,85,.08); }
-    .brand-mark { width:42px; height:42px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg,var(--brand-1),var(--brand-2)); color:#fff; font-size:20px; font-weight:700; box-shadow:0 12px 24px rgba(6,199,85,.22); }
-    .brand-copy strong { display:block; font-size:15px; }
-    .brand-copy span { display:block; margin-top:4px; color:var(--text-soft); font-size:12px; line-height:1.5; }
-    .side-nav { display:grid; gap:8px; }
-    .nav-label { padding:4px 12px 0; color:var(--text-soft); font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
-    .nav-link { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; color:inherit; text-decoration:none; transition:background .2s ease, transform .2s ease; }
-    .nav-link:hover, .nav-link.active { background:rgba(6,199,85,.1); transform:translateX(2px); }
-    .nav-icon { width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:#f4faf7; border:1px solid #e1eee6; font-size:18px; }
-    .nav-copy strong { display:block; font-size:14px; }
-    .nav-copy span { display:block; margin-top:4px; font-size:12px; color:var(--text-soft); line-height:1.4; }
-    .side-panel { margin-top:auto; padding:16px; border-radius:20px; background:linear-gradient(180deg,#f5fff9,#e8fbf0); border:1px solid #d6f0df; }
-    .side-panel strong { display:block; font-size:15px; margin-bottom:8px; }
-    .side-panel p { margin:0; color:#46705a; line-height:1.7; font-size:13px; }
-    .workspace { min-width:0; background:rgba(255,255,255,.78); border:1px solid rgba(255,255,255,.75); border-radius:30px; padding:14px; box-shadow:0 24px 60px rgba(17,47,32,.1); backdrop-filter:blur(12px); }
-    .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 4px 16px; }
-    .crumb { display:flex; align-items:center; gap:10px; min-width:0; }
-    .menu-button, .topbar-button { border:0; background:#fff; color:var(--text-main); width:44px; height:44px; border-radius:14px; box-shadow:var(--shadow); cursor:pointer; font-size:18px; }
-    .crumb-copy span { display:block; color:var(--text-soft); font-size:12px; margin-bottom:4px; }
-    .crumb-copy strong { display:block; font-size:22px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .hero { position:relative; overflow:hidden; border-radius:var(--radius-xl); padding:24px 20px; background:linear-gradient(135deg,var(--brand-1),#39d98a 55%,var(--brand-2)); color:#fff; box-shadow:var(--shadow); }
-    .hero::after { content:""; position:absolute; right:-70px; bottom:-74px; width:220px; height:220px; border-radius:50%; background:rgba(255,255,255,.14); }
-    .hero-copy { max-width:760px; position:relative; z-index:1; }
-    .hero-badge { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.16); font-size:13px; font-weight:700; }
-    .hero h1 { margin:16px 0 12px; font-size:30px; line-height:1.18; }
-    .hero p { margin:0; font-size:15px; line-height:1.75; color:rgba(255,255,255,.92); }
-    .hero-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
-    .hero-action { display:inline-flex; align-items:center; gap:8px; padding:12px 14px; border-radius:16px; text-decoration:none; color:#fff; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.18); font-weight:700; }
-    .hero-action.secondary { background:rgba(17,50,34,.18); }
-    .main-grid { display:grid; gap:18px; margin-top:18px; }
-    .panel { background:var(--surface-solid); border-radius:24px; padding:22px; border:1px solid var(--line); box-shadow:var(--shadow); }
-    .section-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
-    .section-title h2 { margin:0; font-size:22px; }
-    .section-title span { color:var(--text-soft); font-size:13px; }
-    .feature-grid { display:grid; gap:14px; }
-    .feature-card { display:flex; align-items:flex-start; gap:14px; text-decoration:none; color:inherit; padding:18px; border-radius:22px; background:#fbfefd; border:1px solid var(--line); transition:transform .2s ease, box-shadow .2s ease; }
-    .feature-card:hover { transform:translateY(-2px); box-shadow:0 18px 40px rgba(19,52,36,.12); }
-    .icon-wrap { flex:0 0 58px; width:58px; height:58px; display:grid; place-items:center; border-radius:18px; font-size:28px; background:linear-gradient(180deg,#fff9ea,#ffefbf); }
-    .feature-card:nth-child(2) .icon-wrap { background:linear-gradient(180deg,#eef7ff,#d6e9ff); }
-    .feature-card:nth-child(3) .icon-wrap { background:linear-gradient(180deg,#f4efff,#e3d8ff); }
-    .feature-content h3 { margin:0 0 6px; font-size:18px; }
-    .feature-content p { margin:0; font-size:14px; line-height:1.65; color:var(--text-sub); }
-    .feature-meta { margin-top:10px; font-size:12px; color:var(--text-soft); }
-    .feature-arrow { font-size:20px; color:#9ab1a4; padding-top:6px; }
-    .overview-stack, .drawer-links { display:grid; gap:12px; }
-    .overview-card, .drawer-link { padding:16px 18px; border-radius:18px; background:#fbfefd; border:1px solid var(--line); }
-    .overview-card span, .drawer-link span { display:block; color:var(--text-soft); font-size:12px; margin-bottom:6px; }
-    .overview-card strong, .drawer-link strong { display:block; font-size:18px; margin-bottom:6px; }
-    .overview-card p, .drawer-link p { margin:0; color:var(--text-sub); line-height:1.65; font-size:13px; }
-    .overview-card.accent { background:linear-gradient(180deg,#f1fff6,#e7f9ee); border-color:#d2eedc; }
-    .footer { margin-top:18px; text-align:center; color:var(--text-soft); font-size:12px; }
-    .drawer { position:fixed; inset:0; opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:30; }
-    .drawer.open { opacity:1; pointer-events:auto; }
-    .drawer-backdrop { position:absolute; inset:0; background:rgba(16,33,24,.35); backdrop-filter:blur(2px); }
-    .drawer-panel { position:absolute; top:14px; right:14px; bottom:14px; width:min(92vw,360px); padding:18px; border-radius:28px; background:rgba(255,255,255,.96); border:1px solid rgba(255,255,255,.86); box-shadow:0 26px 70px rgba(13,39,27,.2); display:flex; flex-direction:column; gap:18px; overflow:auto; }
-    .drawer-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .drawer-top h3 { margin:0; font-size:20px; }
-    .drawer-close { border:0; background:#f2f7f4; width:42px; height:42px; border-radius:14px; font-size:20px; cursor:pointer; }
-    .drawer-link { display:block; text-decoration:none; color:inherit; }
-    .drawer-bottom { margin-top:auto; padding:16px; border-radius:20px; background:linear-gradient(180deg,#f5fff9,#e8fbf0); border:1px solid #d6f0df; }
-    .drawer-bottom strong { display:block; font-size:15px; margin-bottom:8px; }
-    .drawer-bottom p { margin:0; color:#46705a; line-height:1.7; font-size:13px; }
-    @media (min-width:960px) { .layout { grid-template-columns:var(--sidebar-width) minmax(0,1fr); padding:14px; } .sidebar{display:block;} .menu-button{display:none;} .main-grid{grid-template-columns:1.18fr .82fr;} .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .feature-grid .feature-card:first-child{grid-column:span 2;} .hero h1{font-size:42px;} }
+    :root {
+      --bg: #eef3f1;
+      --surface: #ffffff;
+      --text: #1f2a24;
+      --sub: #607065;
+      --line: #d9e6df;
+      --brand: #06c755;
+      --brand-dark: #0b8f4b;
+      --shadow: 0 18px 44px rgba(19, 52, 36, .12);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+      background: linear-gradient(180deg, #f8fbf9 0%, var(--bg) 100%);
+      color: var(--text);
+      padding: 20px 12px 40px;
+    }
+    .page { max-width: 1120px; margin: 0 auto; }
+    .hero {
+      background: linear-gradient(135deg, var(--brand), #35d988 58%, var(--brand-dark));
+      color: #fff;
+      border-radius: 30px;
+      padding: 28px 22px;
+      box-shadow: var(--shadow);
+    }
+    .badge {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .hero h1 { margin: 14px 0 10px; font-size: 34px; }
+    .hero p { margin: 0; line-height: 1.7; color: rgba(255,255,255,.94); }
+    .grid { display: grid; gap: 18px; margin-top: 18px; }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .panel h2 { margin: 0 0 14px; font-size: 22px; }
+    .feature-grid { display: grid; gap: 14px; }
+    .feature-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      background: #fbfefd;
+    }
+    .feature-card strong { display: block; font-size: 20px; margin-bottom: 8px; }
+    .feature-card p { margin: 0; color: var(--sub); line-height: 1.7; }
+    .summary-grid { display: grid; gap: 12px; }
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: #fbfefd;
+    }
+    .summary-card span { display: block; font-size: 12px; color: var(--sub); margin-bottom: 6px; }
+    .summary-card strong { display: block; font-size: 18px; margin-bottom: 6px; }
+    .summary-card p { margin: 0; color: var(--sub); line-height: 1.7; }
+    .footer { margin-top: 18px; text-align: center; color: #7b8f84; font-size: 12px; }
+    @media (min-width: 900px) {
+      body { padding: 24px 18px 40px; }
+      .hero { padding: 34px 30px; }
+      .hero h1 { font-size: 42px; }
+      .grid.two { grid-template-columns: 1.15fr .85fr; }
+      .feature-grid { grid-template-columns: repeat(3, 1fr); }
+    }
   </style>
 </head>
 <body>
-  <div class="layout">
-    <aside class="sidebar" aria-label="主選單">
-      <div class="sidebar-shell">
-        <div class="brand">
-          <div class="brand-mark">CP</div>
-          <div class="brand-copy">
-            <strong>公民電廠工作台</strong>
-            <span>整合案場介紹、投資試算與進度回報的社區能源入口。</span>
-          </div>
-        </div>
-        <nav class="side-nav">
-          <div class="nav-label">Workspace</div>
-          <a class="nav-link active" href="/menu"><div class="nav-icon">⌂</div><div class="nav-copy"><strong>產品首頁</strong><span>快速進入三個核心功能與導覽入口。</span></div></a>
-          <a class="nav-link" href="/project"><div class="nav-icon">▣</div><div class="nav-copy"><strong>案場總覽</strong><span>查看南寮公民電廠的規模、里程碑與回饋設計。</span></div></a>
-          <a class="nav-link" href="/calc?amount=10000"><div class="nav-icon">↗</div><div class="nav-copy"><strong>投資試算</strong><span>輸入金額，快速估算股利分配與參考 IRR。</span></div></a>
-          <a class="nav-link" href="/progress"><div class="nav-icon">✓</div><div class="nav-copy"><strong>進度回報</strong><span>透過 LINE 身分回報最新階段，並查看後續預估。</span></div></a>
-        </nav>
-        <div class="side-panel">
-          <strong>這版升級重點</strong>
-          <p>把原本分散的功能整理成可展示的產品首頁，讓案場資訊、試算與進度更新能在同一個入口被看懂。</p>
-        </div>
-      </div>
-    </aside>
-    <main class="workspace">
-      <header class="topbar">
-        <div class="crumb">
-          <button class="menu-button" type="button" onclick="openDrawer()" aria-label="開啟選單">☰</button>
-          <div class="crumb-copy"><span>Citizen Power Workspace</span><strong>公民電廠產品首頁</strong></div>
-        </div>
-        <div class="topbar-actions"><button class="topbar-button" type="button" onclick="openDrawer()" aria-label="更多導覽">≡</button></div>
-      </header>
-      <section class="hero">
-        <div class="hero-copy">
-          <div class="hero-badge">LINE 社區能源產品 Demo</div>
-          <h1>把案場內容、參與試算與進度回報放進同一個可操作入口</h1>
-          <p>這個工作台聚焦在南寮公民電廠的實際資料，讓住戶、推動者與合作夥伴都能快速理解案場狀態、投資邏輯與目前推進節點。</p>
-          <div class="hero-actions">
-            <a class="hero-action" href="/project">查看案場總覽</a>
-            <a class="hero-action secondary" href="/calc?amount=10000">開始投資試算</a>
-          </div>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">Citizen Power</div>
+      <h1>公民電廠建造服務</h1>
+      <p>快速進入案場、試算與 SOP 追蹤。</p>
+    </section>
+
+    <section class="grid two">
+      <section class="panel">
+        <h2>主要功能</h2>
+        <div class="feature-grid">
+          <a class="feature-card" href="/project">
+            <strong>案場總覽</strong>
+            <p>查看南寮案例、容量、里程碑與營運成果。</p>
+          </a>
+          <a class="feature-card" href="/calc?amount=10000">
+            <strong>投資試算</strong>
+            <p>用同一套案場資料試算投入金額與回報。</p>
+          </a>
+          <a class="feature-card" href="/progress">
+            <strong>SOP 追蹤</strong>
+            <p>查看目前對應的南寮 SOP 步驟。</p>
+          </a>
         </div>
       </section>
-      <section class="main-grid">
-        <section class="panel">
-          <div class="section-title"><h2>核心功能</h2><span>3 個主要入口</span></div>
-          <div class="feature-grid">
-            <a class="feature-card" href="/project"><div class="icon-wrap">▣</div><div class="feature-content"><h3>案場總覽</h3><p>集中呈現案場描述、里程碑、場址與社區回饋，讓使用者先理解專案全貌，再進一步互動。</p><div class="feature-meta">包含容量、預算、參與人數與回饋規則</div></div><div class="feature-arrow">→</div></a>
-            <a class="feature-card" href="/calc?amount=10000"><div class="icon-wrap">↗</div><div class="feature-content"><h3>投資試算</h3><p>依據既有財務規則與參考 IRR，估算年回報、持有占比與 20 年區間收益。</p><div class="feature-meta">支援自訂金額與專案參數帶入</div></div><div class="feature-arrow">→</div></a>
-            <a class="feature-card" href="/progress"><div class="icon-wrap">✓</div><div class="feature-content"><h3>進度回報</h3><p>結合 LIFF 取得 LINE 身分，提交最新階段並同步展示歷史紀錄與預估後續節點。</p><div class="feature-meta">適合現場更新、社區同步與簡易追蹤</div></div><div class="feature-arrow">→</div></a>
+
+      <aside class="panel">
+        <h2>目前狀態</h2>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <span>系統狀態</span>
+            <strong>南寮案例已可對位 SOP</strong>
+            <p>使用者進度可以直接映射到南寮的可複製流程。</p>
           </div>
-        </section>
-        <aside class="panel">
-          <div class="section-title"><h2>本次方向</h2><span>產品化整理</span></div>
-          <div class="overview-stack">
-            <div class="overview-card accent"><span>內容策略</span><strong>先讓人看懂案場，再做互動</strong><p>首頁不只放連結，而是先交代這個產品幫誰解決什麼事，讓每個入口都有清楚上下文。</p></div>
-            <div class="overview-card"><span>資料導向</span><strong>案場資訊與試算邏輯彼此對齊</strong><p>從案場總覽進入試算時，使用者能自然理解容量、預算、股利池與投資占比的關係。</p></div>
-            <div class="overview-card"><span>操作體驗</span><strong>手機與桌面都能快速導覽</strong><p>保留大螢幕側邊欄，也補上小螢幕抽屜選單，讓 LINE 內開頁面仍然好操作。</p></div>
+          <div class="summary-card">
+            <span>資料重點</span>
+            <strong>案場、試算、進度已整合</strong>
+            <p>同一套資料已供案場總覽、試算與進度追蹤使用。</p>
           </div>
-        </aside>
-      </section>
-      <div class="footer">Citizen Power Workspace</div>
-    </main>
-  </div>
-  <div class="drawer" id="toolDrawer" aria-hidden="true">
-    <div class="drawer-backdrop" onclick="closeDrawer()"></div>
-    <aside class="drawer-panel" role="dialog" aria-modal="true" aria-label="導覽選單">
-      <div class="drawer-top"><h3>導覽選單</h3><button class="drawer-close" type="button" onclick="closeDrawer()" aria-label="關閉選單">×</button></div>
-      <div class="drawer-links">
-        <a class="drawer-link" href="/project"><span>案場總覽</span><strong>先看南寮公民電廠全貌</strong><p>包含里程碑、財務摘要、場址分布與社區回饋方案。</p></a>
-        <a class="drawer-link" href="/calc?amount=10000"><span>投資試算</span><strong>輸入金額立即估算</strong><p>用參考 IRR 與股利池比例快速換算個人參與規模與收益。</p></a>
-        <a class="drawer-link" href="/progress"><span>進度回報</span><strong>登入 LINE 後回報最新節點</strong><p>適合專案推動者或現場夥伴即時同步最新進度。</p></a>
-      </div>
-      <div class="drawer-bottom"><strong>產品定位</strong><p>這個 Demo 把公民電廠常見的資訊查詢、參與理解與更新回報整合成一條更容易上手的使用路徑。</p></div>
-    </aside>
-  </div>
-  <script>
-    const toolDrawer = document.getElementById("toolDrawer");
-    function openDrawer() { toolDrawer.classList.add("open"); toolDrawer.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; }
-    function closeDrawer() { toolDrawer.classList.remove("open"); toolDrawer.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; }
-    document.addEventListener("keydown", function (event) { if (event.key === "Escape") { closeDrawer(); } });
-  </script>
+          <div class="summary-card">
+            <span>操作方式</span>
+            <strong>從 LINE 或頁面直接進入</strong>
+            <p>FAQ、建立流程與 SOP 追蹤都可以從 LINE 分流進來。</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="footer">Citizen Power Workspace</div>
+  </main>
 </body>
 </html>
