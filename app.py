@@ -3,7 +3,7 @@ from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 from calc_repo import build_calculator_result
 from db import init_db
-from faq_repo import find_faq_answer, list_faqs
+from faq_repo import find_faq_answer, get_faq_answer_by_question, list_faqs
 from line_service import (
     get_liff_id,
     get_line_profile_from_access_token,
@@ -78,6 +78,18 @@ def build_human_help_message():
         "\n你可以先準備：社區名稱、目前卡住的步驟、可用場址概況、是否要申請補助。"
         "\n這樣後續就能更快判斷你現在對應南寮 SOP 的哪一步。"
     )
+
+
+def build_subsidy_guidance_message():
+    intro = get_faq_answer_by_question("這個案子有補助嗎？")
+    source = get_faq_answer_by_question("公民電廠補助通常要去哪裡找？")
+    prep = get_faq_answer_by_question("申請補助前要先準備什麼？")
+
+    parts = [part for part in [intro, source, prep] if part]
+    if parts:
+        return "補助資訊整理：\n\n" + "\n\n".join(parts)
+
+    return "補助準備建議先確認申請窗口、截止日期、附件清單與預算拆分。"
 
 
 def build_progress_position_message(line_user_id, service_steps, project_rows):
@@ -176,8 +188,7 @@ def webhook():
             continue
 
         if user_message in SUBSIDY_KEYWORDS:
-            subsidy_answer = find_faq_answer("補助") or "補助準備建議先確認申請窗口、截止日期、附件清單與預算拆分。"
-            reply_start_build_quick_reply(reply_token, subsidy_answer)
+            reply_start_build_quick_reply(reply_token, build_subsidy_guidance_message())
             continue
 
         if user_message in SITE_KEYWORDS:
@@ -189,7 +200,7 @@ def webhook():
             continue
 
         if user_message in HUMAN_HELP_KEYWORDS:
-            reply_start_build_quick_reply(reply_token, build_human_help_message())
+            reply_line_message(reply_token, build_human_help_message())
             continue
 
         answer = find_faq_answer(user_message)
@@ -299,3 +310,5 @@ init_db()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
+
