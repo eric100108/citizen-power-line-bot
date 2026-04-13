@@ -64,7 +64,7 @@ def get_faq_answer_by_question(question):
     return row["answer"] if row else None
 
 
-def find_faq_answer(query):
+def find_faq_matches(query, limit=3, min_score=18):
     conn = get_connection()
     rows = conn.execute(
         """
@@ -77,15 +77,24 @@ def find_faq_answer(query):
     ).fetchall()
     conn.close()
 
-    best_row = None
-    best_score = 0
+    scored_rows = []
     for row in rows:
         score = _score_faq_match(query, row["question"], row["answer"], row["category_name"])
-        if score > best_score:
-            best_score = score
-            best_row = row
+        if score >= min_score:
+            scored_rows.append({
+                "question": row["question"],
+                "answer": row["answer"],
+                "category_name": row["category_name"],
+                "score": score,
+            })
 
-    return best_row["answer"] if best_row and best_score >= 18 else None
+    scored_rows.sort(key=lambda item: item["score"], reverse=True)
+    return scored_rows[:limit]
+
+
+def find_faq_answer(query):
+    matches = find_faq_matches(query, limit=1)
+    return matches[0]["answer"] if matches else None
 
 
 def list_faqs(keyword=""):

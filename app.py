@@ -4,12 +4,13 @@ from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 from calc_repo import build_calculator_result
 from db import init_db
-from faq_repo import find_faq_answer, get_faq_answer_by_question, list_faqs
+from faq_repo import find_faq_answer, find_faq_matches, get_faq_answer_by_question, list_faqs
 from line_service import (
     get_liff_id,
     get_line_profile_from_access_token,
     reply_faq_quick_reply,
     reply_line_message,
+    reply_related_faq_quick_reply,
     reply_start_build_quick_reply,
     verify_line_signature,
 )
@@ -118,6 +119,16 @@ def build_subsidy_guidance_message():
         return "補助資訊整理：\n\n" + "\n\n".join(parts)
 
     return "補助準備建議先確認申請窗口、截止日期、附件清單與預算拆分。"
+
+
+def build_faq_suggestion_message(user_message, related_matches):
+    if not related_matches:
+        return "目前找不到夠接近的答案，你可以輸入『開始建立電廠』、FAQ、補助、場址或真人協助。"
+
+    lines = ["我先幫你找到幾個最接近的問題，你可以直接點下面其中一題："]
+    for index, item in enumerate(related_matches[:3], start=1):
+        lines.append(f"{index}. {item['question']}")
+    return "\n".join(lines)
 
 
 def build_progress_position_message(line_user_id, service_steps, project_rows):
@@ -234,8 +245,20 @@ def webhook():
             continue
 
         answer = find_faq_answer(user_message)
-        reply_text = answer if answer else "目前找不到對應答案，你可以輸入『開始建立電廠』、FAQ、補助、場址或真人協助。"
-        reply_line_message(reply_token, reply_text)
+        if answer:
+            reply_line_message(reply_token, answer)
+            continue
+
+        related_matches = find_faq_matches(user_message, limit=3, min_score=10)
+        if related_matches:
+            reply_related_faq_quick_reply(
+                reply_token,
+                build_faq_suggestion_message(user_message, related_matches),
+                [item["question"] for item in related_matches],
+            )
+            continue
+
+        reply_line_message(reply_token, "目前找不到對應答案，你可以輸入『開始建立電廠』、FAQ、補助、場址或真人協助。")
 
     return "OK", 200
 
@@ -340,6 +363,8 @@ init_db()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
+
 
 
 

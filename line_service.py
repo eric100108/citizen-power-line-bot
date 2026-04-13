@@ -156,6 +156,27 @@ def reply_start_build_quick_reply(reply_token, text):
     reply_line_quick_reply(reply_token, text, items)
 
 
+def reply_related_faq_quick_reply(reply_token, text, questions):
+    items = []
+    for question in questions[:4]:
+        items.append(
+            {
+                "type": "action",
+                "action": {
+                    "type": "message",
+                    "label": question[:20],
+                    "text": question,
+                },
+            }
+        )
+
+    if items:
+        reply_line_quick_reply(reply_token, text, items)
+        return
+
+    reply_line_message(reply_token, text)
+
+
 def get_liff_id():
     return os.environ.get("LIFF_ID", "").strip()
 
@@ -207,3 +228,4 @@ def get_line_profile_from_access_token(access_token):
         "display_name": profile.get("displayName", ""),
         "picture_url": profile.get("pictureUrl", ""),
     }
+
