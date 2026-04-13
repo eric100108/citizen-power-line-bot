@@ -541,6 +541,52 @@
 
     <div class="footer">Hero 影片檔可直接放到 `/static/citizen-power-hero.mp4`，目前沒有影片時會自動顯示海報圖。</div>
   </main>
+
+  <script>
+    (function () {
+      const revealNodes = Array.from(document.querySelectorAll('.reveal'));
+      const activateVisible = function () {
+        revealNodes.forEach(function (node) {
+          const rect = node.getBoundingClientRect();
+          if (rect.top < window.innerHeight * 0.92) {
+            node.classList.add('in-view');
+          }
+        });
+      };
+
+      if (!('IntersectionObserver' in window)) {
+        revealNodes.forEach(function (node) {
+          node.classList.add('in-view');
+        });
+        return;
+      }
+
+      const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.14,
+        rootMargin: '0px 0px -8% 0px'
+      });
+
+      revealNodes.forEach(function (node) {
+        if (!node.classList.contains('in-view')) {
+          observer.observe(node);
+        }
+      });
+
+      activateVisible();
+      window.addEventListener('load', activateVisible, { once: true });
+      window.addEventListener('pageshow', function () {
+        requestAnimationFrame(activateVisible);
+      });
+    }());
+  </script>
+
 </body>
 </html>
 
