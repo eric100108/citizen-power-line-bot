@@ -271,11 +271,15 @@ def webhook():
             continue
 
         if user_message in SUBSIDY_KEYWORDS or inferred_intent == "subsidy":
-            reply_start_build_quick_reply(reply_token, build_subsidy_guidance_message())
+            reply_start_build_quick_reply(reply_token, build_subsidy_guidance_message(user_message))
             continue
 
         if user_message in SITE_KEYWORDS or inferred_intent == "site":
-            reply_start_build_quick_reply(reply_token, build_site_guidance_message(service_steps))
+            site_answer = find_faq_answer(user_message)
+            if site_answer:
+                reply_start_build_quick_reply(reply_token, site_answer)
+            else:
+                reply_start_build_quick_reply(reply_token, build_site_guidance_message(service_steps))
             continue
 
         if user_message in PROGRESS_KEYWORDS or inferred_intent == "progress":
@@ -283,7 +287,8 @@ def webhook():
             continue
 
         if user_message in HUMAN_HELP_KEYWORDS or inferred_intent == "human_help":
-            reply_line_message(reply_token, build_human_help_message())
+            human_answer = find_faq_answer(user_message)
+            reply_line_message(reply_token, human_answer if human_answer else build_human_help_message())
             continue
 
         if user_message in CASE_KEYWORDS or inferred_intent == "case":
@@ -408,6 +413,7 @@ init_db()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
 
 
 
