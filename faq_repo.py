@@ -121,3 +121,4 @@ def list_faqs(keyword=""):
 
     scored_rows.sort(key=lambda item: item[0], reverse=True)
     return [row for _, row in scored_rows]
+
