@@ -27,7 +27,7 @@
       --radius-xl: 34px;
       --radius-lg: 26px;
       --radius-md: 20px;
-      --shell: min(1380px, calc(100% - 40px));
+      --shell: min(1520px, calc(100% - 32px));
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -36,6 +36,7 @@
       min-height: 100vh;
       font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
       color: var(--text);
+      overflow-x: hidden;
       background:
         radial-gradient(circle at top left, rgba(57, 201, 92, .14), transparent 24%),
         radial-gradient(circle at top right, rgba(29, 133, 207, .12), transparent 28%),
@@ -112,12 +113,12 @@
     .hero-band {
       position: relative;
       overflow: hidden;
-      padding: 34px 0 30px;
+      padding: 22px 0 22px;
     }
     .hero {
       position: relative;
       overflow: hidden;
-      min-height: 68vh;
+      min-height: 72vh;
       padding: clamp(34px, 7vw, 74px);
       border-radius: var(--radius-xl);
       background:
@@ -231,7 +232,25 @@
       line-height: 1.15;
     }
     .section-band {
+      position: relative;
       padding: 22px 0;
+    }
+    .section-band.tint-blue::before,
+    .section-band.tint-green::before,
+    .section-band.tint-amber::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .section-band.tint-blue::before {
+      background: linear-gradient(180deg, rgba(228, 242, 255, .74) 0%, rgba(244, 250, 255, 0) 100%);
+    }
+    .section-band.tint-green::before {
+      background: linear-gradient(180deg, rgba(231, 247, 237, .8) 0%, rgba(251, 254, 252, 0) 100%);
+    }
+    .section-band.tint-amber::before {
+      background: linear-gradient(180deg, rgba(255, 245, 222, .68) 0%, rgba(255,255,255,0) 100%);
     }
     .grid {
       display: grid;
@@ -460,6 +479,30 @@
       color: #fff;
       border: 1px solid rgba(255,255,255,.22);
     }
+    .spotlight-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .spotlight-card {
+      border-radius: 22px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      backdrop-filter: blur(10px);
+    }
+    .spotlight-card span {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: rgba(255,255,255,.74);
+    }
+    .spotlight-card strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.25;
+    }
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -485,6 +528,7 @@
     .reveal[data-delay="4"] { transition-delay: .32s; }
     @media (max-width: 1120px) {
       .hero-pills,
+      .spotlight-strip,
       .grid.two,
       .grid.helper,
       .summary-grid,
@@ -494,6 +538,15 @@
       .section-head {
         flex-direction: column;
         align-items: flex-start;
+      }
+    }
+    @media (min-width: 1180px) {
+      .hero-inner {
+        grid-template-columns: 1.12fr .88fr;
+      }
+      .panel.cta-panel {
+        position: sticky;
+        top: 104px;
       }
     }
     @media (max-width: 720px) {
@@ -581,7 +634,7 @@
       </div>
     </section>
 
-    <section class="section-band">
+    <section class="section-band tint-blue">
       <div class="shell grid two">
         <section class="panel input-panel reveal" data-delay="1">
           <div class="section-head">
@@ -650,7 +703,7 @@
       </div>
     </section>
 
-    <section class="section-band">
+    <section class="section-band tint-green">
       <div class="shell grid helper">
         <section class="panel helper-panel reveal" data-delay="1">
           <div class="section-head">
@@ -686,7 +739,7 @@
       </div>
     </section>
 
-    <section class="section-band">
+    <section class="section-band tint-amber">
       <div class="shell">
         <section class="panel reveal">
           <div class="section-head">
@@ -706,6 +759,16 @@
   </main>
 
   <script>
+    const revealNodes = Array.from(document.querySelectorAll(".reveal"));
+    const activateVisible = () => {
+      revealNodes.forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) {
+          node.classList.add("in-view");
+        }
+      });
+    };
+
     const observer = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -713,14 +776,20 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.14 }) : null;
+    }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" }) : null;
 
-    document.querySelectorAll(".reveal").forEach((node) => {
+    revealNodes.forEach((node) => {
       if (!observer) {
         node.classList.add("in-view");
         return;
       }
       observer.observe(node);
+    });
+
+    activateVisible();
+    window.addEventListener("load", activateVisible, { once: true });
+    window.addEventListener("pageshow", () => {
+      requestAnimationFrame(activateVisible);
     });
   </script>
 </body>

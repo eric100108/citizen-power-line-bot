@@ -27,7 +27,7 @@
       --radius-xl: 34px;
       --radius-lg: 26px;
       --radius-md: 20px;
-      --shell: min(1380px, calc(100% - 40px));
+      --shell: min(1520px, calc(100% - 32px));
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -36,6 +36,7 @@
       min-height: 100vh;
       font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
       color: var(--text);
+      overflow-x: hidden;
       background:
         radial-gradient(circle at top left, rgba(32, 134, 222, .15), transparent 24%),
         radial-gradient(circle at top right, rgba(52, 190, 117, .10), transparent 28%),
@@ -112,12 +113,12 @@
     .hero-band {
       position: relative;
       overflow: hidden;
-      padding: 34px 0 30px;
+      padding: 22px 0 22px;
     }
     .hero {
       position: relative;
       overflow: hidden;
-      min-height: 64vh;
+      min-height: 70vh;
       padding: clamp(34px, 7vw, 74px);
       border-radius: var(--radius-xl);
       background:
@@ -204,7 +205,25 @@
       line-height: 1.15;
     }
     .section-band {
+      position: relative;
       padding: 22px 0;
+    }
+    .section-band.tint-blue::before,
+    .section-band.tint-green::before,
+    .section-band.tint-neutral::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .section-band.tint-blue::before {
+      background: linear-gradient(180deg, rgba(233, 244, 255, .78) 0%, rgba(250, 252, 255, 0) 100%);
+    }
+    .section-band.tint-green::before {
+      background: linear-gradient(180deg, rgba(231, 247, 237, .72) 0%, rgba(255,255,255,0) 100%);
+    }
+    .section-band.tint-neutral::before {
+      background: linear-gradient(180deg, rgba(243, 248, 251, .82) 0%, rgba(255,255,255,0) 100%);
     }
     .grid {
       display: grid;
@@ -490,6 +509,30 @@
       background: var(--blue);
       box-shadow: 0 0 0 7px rgba(34, 135, 221, .14);
     }
+    .guide-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .guide-card {
+      border-radius: 22px;
+      padding: 18px 20px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      backdrop-filter: blur(10px);
+    }
+    .guide-card span {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: rgba(255,255,255,.74);
+    }
+    .guide-card strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.28;
+    }
     .empty-state {
       padding: 20px 22px;
       line-height: 1.85;
@@ -521,6 +564,7 @@
     .reveal[data-delay="4"] { transition-delay: .32s; }
     @media (max-width: 1120px) {
       .hero-stats,
+      .guide-strip,
       .grid.two,
       .sop-list,
       .mini-grid {
@@ -529,6 +573,15 @@
       .section-head {
         flex-direction: column;
         align-items: flex-start;
+      }
+    }
+    @media (min-width: 1180px) {
+      .hero-inner {
+        grid-template-columns: 1.08fr .92fr;
+      }
+      .panel.form-panel {
+        position: sticky;
+        top: 104px;
       }
     }
     @media (max-width: 720px) {
@@ -609,7 +662,7 @@
       </div>
     </section>
 
-    <section class="section-band">
+    <section class="section-band tint-blue">
       <div class="shell grid two">
         <section class="panel result-panel reveal" data-delay="1">
           <div class="section-head">
@@ -670,7 +723,7 @@
       </div>
     </section>
 
-    <section class="section-band">
+    <section class="section-band tint-green">
       <div class="shell grid two">
         <section class="panel roadmap-panel reveal" data-delay="1">
           <div class="section-head">
@@ -723,7 +776,7 @@
       </div>
     </section>
 
-    <section class="section-band">
+    <section class="section-band tint-neutral">
       <div class="shell grid two">
         <section class="panel timeline-panel reveal" data-delay="1">
           <div class="section-head">
@@ -819,6 +872,16 @@
 
     renderSopStatus({ sop_status: defaultSopStatus }, "以南寮案最新進度作為預設基準");
 
+    const revealNodes = Array.from(document.querySelectorAll(".reveal"));
+    const activateVisible = () => {
+      revealNodes.forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) {
+          node.classList.add("in-view");
+        }
+      });
+    };
+
     const observer = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -826,14 +889,19 @@
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.14 }) : null;
+    }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" }) : null;
 
-    document.querySelectorAll(".reveal").forEach((node) => {
+    revealNodes.forEach((node) => {
       if (!observer) {
         node.classList.add("in-view");
         return;
       }
       observer.observe(node);
+    });
+    activateVisible();
+    window.addEventListener("load", activateVisible, { once: true });
+    window.addEventListener("pageshow", () => {
+      requestAnimationFrame(activateVisible);
     });
   </script>
 
