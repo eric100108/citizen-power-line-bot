@@ -49,6 +49,8 @@ def infer_user_intent(user_message):
         return "case"
     if any(term in normalized for term in ["怎麼開始", "如何開始", "從開始", "從哪開始", "從哪裡開始", "開始建立", "建立電廠", "啟動電廠", "先做什麼", "先幹嘛", "該不該做", "值不值得做"]):
         return "start_build"
+    if ("??" in normalized and "??" in normalized) or ("??" in normalized and any(term in normalized for term in ["??", "??", "??", "??"])):
+        return "start_build"
     if "補助" in normalized:
         return "subsidy"
     if any(term in normalized for term in ["場址", "屋頂", "盤點", "屋頂出租", "屋頂提供"]):
