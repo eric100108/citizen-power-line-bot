@@ -67,6 +67,19 @@
       gap: 14px;
       min-width: 0;
     }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      color: inherit;
+      text-decoration: none;
+    }
+    .brand {
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
     .brand-mark {
       width: 46px;
       height: 46px;
@@ -94,6 +107,7 @@
     .top-actions {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       gap: 10px;
       flex-wrap: wrap;
     }
@@ -553,12 +567,27 @@
       :root { --shell: calc(100% - 24px); }
       .topbar-inner {
         min-height: 68px;
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px 0;
       }
       .brand-copy strong {
         font-size: 18px;
       }
+      .top-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
       .top-actions a {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
         padding: 10px 14px;
+      }
+      .top-actions a.primary {
+        grid-column: 1 / -1;
       }
       .hero {
         min-height: auto;
@@ -582,13 +611,13 @@
 <body>
   <header class="topbar">
     <div class="shell topbar-inner">
-      <div class="brand">
+      <a class="brand-link" href="/menu" aria-label="????">
         <div class="brand-mark">CP</div>
         <div class="brand-copy">
           <strong>公民電廠</strong>
           <span>CITIZEN POWER PLATFORM</span>
         </div>
-      </div>
+      </a>
       <nav class="top-actions" aria-label="頁面導覽">
         <a href="/project/{{ project_slug }}">看案例</a>
         <a href="/progress">追蹤 SOP</a>
