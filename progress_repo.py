@@ -33,7 +33,7 @@ def get_or_create_user(conn, line_user_id, display_name):
         """,
         (line_user_id, display_name),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
 def get_progress_records():

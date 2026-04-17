@@ -1,7 +1,15 @@
-﻿import os
+import os
+import re
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+except ImportError:  # pragma: no cover - optional until PostgreSQL is installed
+    psycopg = None
+    dict_row = None
 
 BASE_DIR = Path(__file__).resolve().parent
 RUNTIME_DIR = BASE_DIR / "runtime"
@@ -10,16 +18,82 @@ SCHEMA_PATH = BASE_DIR / "schema.sql"
 
 DEFAULT_PROJECT_SLUG = "nanliao-citizen-power"
 DEFAULT_COMMUNITY_SLUG = "penghu-nanliao"
-DEFAULT_PROGRESS_STAGES = ["規劃中", "申請中", "施工中", "併網測試", "正式運轉"]
+DEFAULT_PROGRESS_STAGES = ["???", "???", "???", "????", "????"]
 
 __all__ = [
     "get_db_path",
+    "get_database_engine",
     "ensure_db_directory",
     "get_connection",
     "run_schema",
     "get_database_metadata",
     "init_db",
 ]
+
+
+class CursorProxy:
+    def __init__(self, cursor=None, rows=None):
+        self._cursor = cursor
+        self._rows = rows
+
+    def fetchone(self):
+        if self._rows is not None:
+            return self._rows[0] if self._rows else None
+        return self._cursor.fetchone() if self._cursor else None
+
+    def fetchall(self):
+        if self._rows is not None:
+            return list(self._rows)
+        return self._cursor.fetchall() if self._cursor else []
+
+
+class ConnectionProxy:
+    def __init__(self, inner, engine):
+        self._inner = inner
+        self.engine = engine
+        self._last_insert_id = None
+
+    def execute(self, sql, params=None):
+        params = tuple(params or ())
+        normalized = " ".join(sql.strip().split()).lower()
+        if normalized.startswith("select last_insert_id()"):
+            return CursorProxy(rows=[{"id": self._last_insert_id}])
+        if self.engine == "sqlite":
+            cursor = self._inner.execute(sql, params)
+            if normalized.startswith("insert into"):
+                self._last_insert_id = cursor.lastrowid
+            return CursorProxy(cursor=cursor)
+        return self._execute_postgres(sql, params, normalized)
+
+    def executescript(self, script):
+        if self.engine == "sqlite":
+            self._inner.executescript(script)
+            return None
+        for statement in split_sql_statements(script):
+            if statement.strip():
+                self.execute(statement)
+        return None
+
+    def commit(self):
+        self._inner.commit()
+
+    def rollback(self):
+        self._inner.rollback()
+
+    def close(self):
+        self._inner.close()
+
+    def _execute_postgres(self, sql, params, normalized):
+        pg_sql = convert_sql_for_postgres(sql)
+        cursor = self._inner.cursor(row_factory=dict_row)
+        if normalized.startswith("insert into") and " returning " not in normalized:
+            pg_sql = f"{pg_sql.rstrip().rstrip(';')} RETURNING id"
+            cursor.execute(pg_sql, params)
+            inserted = cursor.fetchone()
+            self._last_insert_id = inserted["id"] if inserted else None
+            return CursorProxy(rows=[inserted] if inserted else [])
+        cursor.execute(pg_sql, params)
+        return CursorProxy(cursor=cursor)
 
 
 def utc_now_iso():
@@ -30,16 +104,32 @@ def utc_today_iso():
     return datetime.utcnow().date().isoformat()
 
 
+def get_database_url():
+    return os.environ.get("DATABASE_URL", "").strip()
+
+
+def get_database_engine():
+    return "postgres" if get_database_url() else "sqlite"
+
+
 def get_db_path():
     raw_path = os.environ.get("DB_NAME", "").strip()
     return Path(raw_path) if raw_path else DEFAULT_DB_PATH
 
 
 def ensure_db_directory():
-    get_db_path().parent.mkdir(parents=True, exist_ok=True)
+    if get_database_engine() == "sqlite":
+        get_db_path().parent.mkdir(parents=True, exist_ok=True)
 
 
 def get_connection():
+    engine = get_database_engine()
+    if engine == "postgres":
+        if psycopg is None:
+            raise RuntimeError("DATABASE_URL is set but psycopg is not installed. Add psycopg[binary] to requirements.")
+        conn = psycopg.connect(get_database_url(), autocommit=False)
+        return ConnectionProxy(conn, "postgres")
+
     ensure_db_directory()
     conn = sqlite3.connect(get_db_path())
     conn.row_factory = sqlite3.Row
@@ -47,19 +137,69 @@ def get_connection():
     conn.execute("PRAGMA temp_store = MEMORY")
     conn.execute("PRAGMA synchronous = NORMAL")
     conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    return ConnectionProxy(conn, "sqlite")
+
+
+def convert_sql_for_postgres(sql):
+    return re.sub(r"\?", "%s", sql)
+
+
+def split_sql_statements(script):
+    statements = []
+    current = []
+    in_single = False
+    in_double = False
+    for char in script:
+        if char == "'" and not in_double:
+            in_single = not in_single
+        elif char == '"' and not in_single:
+            in_double = not in_double
+        if char == ";" and not in_single and not in_double:
+            statement = "".join(current).strip()
+            if statement:
+                statements.append(statement)
+            current = []
+            continue
+        current.append(char)
+    tail = "".join(current).strip()
+    if tail:
+        statements.append(tail)
+    return statements
+
+
+def convert_schema_for_postgres(schema_text):
+    converted = schema_text.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "BIGSERIAL PRIMARY KEY")
+    converted = converted.replace("DEFAULT CURRENT_TIMESTAMP", "DEFAULT CURRENT_TIMESTAMP::text")
+    return converted
 
 
 def run_schema(conn):
-    conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+    schema_text = SCHEMA_PATH.read_text(encoding="utf-8")
+    if conn.engine == "postgres":
+        conn.executescript(convert_schema_for_postgres(schema_text))
+    else:
+        conn.executescript(schema_text)
 
 
 def get_table_columns(conn, table_name):
+    if conn.engine == "postgres":
+        rows = conn.execute(
+            """
+            SELECT column_name AS name
+            FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = %s
+            ORDER BY ordinal_position ASC
+            """,
+            (table_name,),
+        ).fetchall()
+        return {row["name"] for row in rows}
     return {row["name"] for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()}
 
 
 def ensure_progress_columns(conn):
     columns = get_table_columns(conn, "progress_items")
+    if not columns:
+        return
     if "line_user_id" not in columns:
         conn.execute("ALTER TABLE progress_items ADD COLUMN line_user_id TEXT NOT NULL DEFAULT ''")
     if "display_name" not in columns:
@@ -70,10 +210,14 @@ def ensure_progress_columns(conn):
 
 def ensure_faq_columns(conn):
     columns = get_table_columns(conn, "faq_items")
+    if not columns:
+        return
     if "category_id" not in columns:
         conn.execute("ALTER TABLE faq_items ADD COLUMN category_id INTEGER")
     if "is_active" not in columns:
         conn.execute("ALTER TABLE faq_items ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1")
+    if "visibility_level" not in columns:
+        conn.execute("ALTER TABLE faq_items ADD COLUMN visibility_level TEXT NOT NULL DEFAULT 'public'")
     if "created_at" not in columns:
         conn.execute("ALTER TABLE faq_items ADD COLUMN created_at TEXT NOT NULL DEFAULT ''")
     if "updated_at" not in columns:
@@ -82,12 +226,30 @@ def ensure_faq_columns(conn):
 
 def ensure_calculator_rule_columns(conn):
     columns = get_table_columns(conn, "calculator_rules")
+    if not columns:
+        return
     if "version" not in columns:
         conn.execute("ALTER TABLE calculator_rules ADD COLUMN version INTEGER NOT NULL DEFAULT 1")
     if "effective_from" not in columns:
         conn.execute("ALTER TABLE calculator_rules ADD COLUMN effective_from TEXT NOT NULL DEFAULT ''")
     if "created_at" not in columns:
         conn.execute("ALTER TABLE calculator_rules ADD COLUMN created_at TEXT NOT NULL DEFAULT ''")
+
+
+def ensure_visibility_columns(conn):
+    visibility_defaults = {
+        "document_highlights": "public",
+        "project_financial_rules": "restricted",
+        "project_profit_distribution_rules": "restricted",
+        "project_metrics": "restricted",
+        "project_sites": "restricted",
+    }
+    for table_name, default_value in visibility_defaults.items():
+        columns = get_table_columns(conn, table_name)
+        if not columns:
+            continue
+        if "visibility_level" not in columns:
+            conn.execute(f"ALTER TABLE {table_name} ADD COLUMN visibility_level TEXT NOT NULL DEFAULT '{default_value}'")
 
 
 def upsert_metadata(conn, meta_key, meta_value):
@@ -105,9 +267,12 @@ def upsert_metadata(conn, meta_key, meta_value):
 
 def ensure_app_metadata(conn):
     upsert_metadata(conn, "schema_name", "citizen_power_line_bot")
-    upsert_metadata(conn, "schema_version", "2026-04-12-service-seed")
+    upsert_metadata(conn, "schema_version", "2026-04-15-dual-engine")
     upsert_metadata(conn, "project_slug", DEFAULT_PROJECT_SLUG)
-    upsert_metadata(conn, "db_path", str(get_db_path()))
+    if conn.engine == "postgres":
+        upsert_metadata(conn, "db_path", "DATABASE_URL")
+    else:
+        upsert_metadata(conn, "db_path", str(get_db_path()))
 
 
 def get_database_metadata():
@@ -173,7 +338,8 @@ def upsert_source_document(conn, slug, title, file_name, version_label, publishe
     return conn.execute("SELECT id FROM source_documents WHERE slug = ?", (slug,)).fetchone()["id"]
 
 
-def upsert_document_highlight(conn, source_document_id, highlight_type, title, content, reference_page, display_order):
+def upsert_document_highlight(conn, source_document_id, highlight_type, title, content, reference_page, display_order, visibility_level="public"):
+
     row = conn.execute(
         "SELECT id FROM document_highlights WHERE source_document_id = ? AND title = ? LIMIT 1",
         (source_document_id, title),
@@ -182,21 +348,21 @@ def upsert_document_highlight(conn, source_document_id, highlight_type, title, c
         conn.execute(
             """
             UPDATE document_highlights
-            SET highlight_type = ?, content = ?, reference_page = ?, display_order = ?
+            SET highlight_type = ?, content = ?, visibility_level = ?, reference_page = ?, display_order = ?
             WHERE id = ?
             """,
-            (highlight_type, content, reference_page, display_order, row["id"]),
+            (highlight_type, content, visibility_level, reference_page, display_order, row["id"]),
         )
         return row["id"]
 
     conn.execute(
         """
-        INSERT INTO document_highlights (source_document_id, highlight_type, title, content, reference_page, display_order)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO document_highlights (source_document_id, highlight_type, title, content, visibility_level, reference_page, display_order)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (source_document_id, highlight_type, title, content, reference_page, display_order),
+        (source_document_id, highlight_type, title, content, visibility_level, reference_page, display_order),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 def upsert_faq_category(conn, slug, name):
     conn.execute(
@@ -210,7 +376,8 @@ def upsert_faq_category(conn, slug, name):
     return conn.execute("SELECT id FROM faq_categories WHERE slug = ?", (slug,)).fetchone()["id"]
 
 
-def upsert_faq_item(conn, category_id, question, answer):
+def upsert_faq_item(conn, category_id, question, answer, visibility_level="public"):
+
     row = conn.execute(
         "SELECT id FROM faq_items WHERE question = ? LIMIT 1",
         (question,),
@@ -219,21 +386,21 @@ def upsert_faq_item(conn, category_id, question, answer):
         conn.execute(
             """
             UPDATE faq_items
-            SET category_id = ?, answer = ?, is_active = 1, updated_at = CURRENT_TIMESTAMP
+            SET category_id = ?, answer = ?, visibility_level = ?, is_active = 1, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
             """,
-            (category_id, answer, row["id"]),
+            (category_id, answer, visibility_level, row["id"]),
         )
         return row["id"]
 
     conn.execute(
         """
-        INSERT INTO faq_items (category_id, question, answer, is_active, created_at, updated_at)
-        VALUES (?, ?, ?, 1, ?, ?)
+        INSERT INTO faq_items (category_id, question, answer, visibility_level, is_active, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 1, ?, ?)
         """,
-        (category_id, question, answer, utc_now_iso(), utc_now_iso()),
+        (category_id, question, answer, visibility_level, utc_now_iso(), utc_now_iso()),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
 def ensure_calculator_rule(conn, rule_name, value):
@@ -252,10 +419,11 @@ def ensure_calculator_rule(conn, rule_name, value):
         """,
         (rule_name, value, utc_today_iso(), utc_now_iso()),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
-def upsert_project_financial_rule(conn, project_id, source_document_id, rule_name, rule_value, unit="", note="", version=1):
+def upsert_project_financial_rule(conn, project_id, source_document_id, rule_name, rule_value, unit="", note="", version=1, visibility_level="restricted"):
+
     row = conn.execute(
         "SELECT id FROM project_financial_rules WHERE project_id = ? AND rule_name = ? AND version = ? LIMIT 1",
         (project_id, rule_name, version),
@@ -264,26 +432,27 @@ def upsert_project_financial_rule(conn, project_id, source_document_id, rule_nam
         conn.execute(
             """
             UPDATE project_financial_rules
-            SET source_document_id = ?, rule_value = ?, unit = ?, note = ?, effective_from = ?
+            SET source_document_id = ?, rule_value = ?, unit = ?, note = ?, visibility_level = ?, effective_from = ?
             WHERE id = ?
             """,
-            (source_document_id, rule_value, unit, note, utc_today_iso(), row["id"]),
+            (source_document_id, rule_value, unit, note, visibility_level, utc_today_iso(), row["id"]),
         )
         return row["id"]
 
     conn.execute(
         """
         INSERT INTO project_financial_rules (
-            project_id, source_document_id, rule_name, rule_value, unit, note, version, effective_from
+            project_id, source_document_id, rule_name, rule_value, unit, note, visibility_level, version, effective_from
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (project_id, source_document_id, rule_name, rule_value, unit, note, version, utc_today_iso()),
+        (project_id, source_document_id, rule_name, rule_value, unit, note, visibility_level, version, utc_today_iso()),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
-def upsert_profit_distribution_rule(conn, project_id, source_document_id, item_name, ratio, display_order, note=""):
+def upsert_profit_distribution_rule(conn, project_id, source_document_id, item_name, ratio, display_order, note="", visibility_level="restricted"):
+
     row = conn.execute(
         "SELECT id FROM project_profit_distribution_rules WHERE project_id = ? AND item_name = ? LIMIT 1",
         (project_id, item_name),
@@ -292,24 +461,25 @@ def upsert_profit_distribution_rule(conn, project_id, source_document_id, item_n
         conn.execute(
             """
             UPDATE project_profit_distribution_rules
-            SET source_document_id = ?, ratio = ?, display_order = ?, note = ?
+            SET source_document_id = ?, ratio = ?, display_order = ?, note = ?, visibility_level = ?
             WHERE id = ?
             """,
-            (source_document_id, ratio, display_order, note, row["id"]),
+            (source_document_id, ratio, display_order, note, visibility_level, row["id"]),
         )
         return row["id"]
 
     conn.execute(
         """
-        INSERT INTO project_profit_distribution_rules (project_id, source_document_id, item_name, ratio, display_order, note)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO project_profit_distribution_rules (project_id, source_document_id, item_name, ratio, display_order, note, visibility_level)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (project_id, source_document_id, item_name, ratio, display_order, note),
+        (project_id, source_document_id, item_name, ratio, display_order, note, visibility_level),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
-def upsert_project_metric(conn, project_id, source_document_id, metric_name, metric_group, metric_period, metric_value, unit="", note=""):
+def upsert_project_metric(conn, project_id, source_document_id, metric_name, metric_group, metric_period, metric_value, unit="", note="", visibility_level="restricted"):
+
     row = conn.execute(
         """
         SELECT id FROM project_metrics
@@ -322,24 +492,25 @@ def upsert_project_metric(conn, project_id, source_document_id, metric_name, met
         conn.execute(
             """
             UPDATE project_metrics
-            SET source_document_id = ?, metric_value = ?, unit = ?, note = ?, updated_at = CURRENT_TIMESTAMP
+            SET source_document_id = ?, metric_value = ?, unit = ?, note = ?, visibility_level = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
             """,
-            (source_document_id, metric_value, unit, note, row["id"]),
+            (source_document_id, metric_value, unit, note, visibility_level, row["id"]),
         )
         return row["id"]
 
     conn.execute(
         """
-        INSERT INTO project_metrics (project_id, source_document_id, metric_name, metric_group, metric_period, metric_value, unit, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO project_metrics (project_id, source_document_id, metric_name, metric_group, metric_period, metric_value, unit, note, visibility_level)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (project_id, source_document_id, metric_name, metric_group, metric_period, metric_value, unit, note),
+        (project_id, source_document_id, metric_name, metric_group, metric_period, metric_value, unit, note, visibility_level),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
-def upsert_project_site(conn, project_id, source_document_id, site_name, site_type, planned_capacity_kw, actual_capacity_kw, annual_generation_kwh, annual_revenue, status, note=""):
+def upsert_project_site(conn, project_id, source_document_id, site_name, site_type, planned_capacity_kw, actual_capacity_kw, annual_generation_kwh, annual_revenue, status, note="", visibility_level="restricted"):
+
     row = conn.execute(
         "SELECT id FROM project_sites WHERE project_id = ? AND site_name = ? LIMIT 1",
         (project_id, site_name),
@@ -349,10 +520,10 @@ def upsert_project_site(conn, project_id, source_document_id, site_name, site_ty
             """
             UPDATE project_sites
             SET source_document_id = ?, site_type = ?, planned_capacity_kw = ?, actual_capacity_kw = ?,
-                annual_generation_kwh = ?, annual_revenue = ?, status = ?, note = ?, updated_at = CURRENT_TIMESTAMP
+                annual_generation_kwh = ?, annual_revenue = ?, status = ?, note = ?, visibility_level = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
             """,
-            (source_document_id, site_type, planned_capacity_kw, actual_capacity_kw, annual_generation_kwh, annual_revenue, status, note, row["id"]),
+            (source_document_id, site_type, planned_capacity_kw, actual_capacity_kw, annual_generation_kwh, annual_revenue, status, note, visibility_level, row["id"]),
         )
         return row["id"]
 
@@ -360,13 +531,13 @@ def upsert_project_site(conn, project_id, source_document_id, site_name, site_ty
         """
         INSERT INTO project_sites (
             project_id, source_document_id, site_name, site_type, planned_capacity_kw, actual_capacity_kw,
-            annual_generation_kwh, annual_revenue, status, note
+            annual_generation_kwh, annual_revenue, status, note, visibility_level
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (project_id, source_document_id, site_name, site_type, planned_capacity_kw, actual_capacity_kw, annual_generation_kwh, annual_revenue, status, note),
+        (project_id, source_document_id, site_name, site_type, planned_capacity_kw, actual_capacity_kw, annual_generation_kwh, annual_revenue, status, note, visibility_level),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 def upsert_project_milestone(conn, project_id, source_document_id, milestone_code, title, stage_group, planned_period, status, display_order, note=""):
     row = conn.execute(
@@ -391,7 +562,7 @@ def upsert_project_milestone(conn, project_id, source_document_id, milestone_cod
         """,
         (project_id, source_document_id, milestone_code, title, stage_group, planned_period, status, display_order, note),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
 def upsert_service_journey_step(conn, project_id, source_document_id, step_code, title, stage_group, audience, summary, recommended_action, display_order):
@@ -419,7 +590,7 @@ def upsert_service_journey_step(conn, project_id, source_document_id, step_code,
         """,
         (project_id, source_document_id, step_code, title, stage_group, audience, summary, recommended_action, display_order),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
 def upsert_community_benefit_program(conn, project_id, source_document_id, program_name, program_type, description, display_order, is_active=1):
@@ -445,7 +616,7 @@ def upsert_community_benefit_program(conn, project_id, source_document_id, progr
         """,
         (project_id, source_document_id, program_name, program_type, description, display_order, is_active),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
 def upsert_project_progress_seed(conn, project_id, stage, updated_at, note=""):
@@ -464,7 +635,7 @@ def upsert_project_progress_seed(conn, project_id, stage, updated_at, note=""):
         """,
         (project_id, stage, updated_at, note),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
 def upsert_progress_item_seed(conn, stage, updated_at, display_name):
@@ -482,7 +653,7 @@ def upsert_progress_item_seed(conn, stage, updated_at, display_name):
         """,
         (stage, updated_at, display_name, utc_now_iso()),
     )
-    return conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+    return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
 def seed_base_data(conn):
@@ -737,6 +908,7 @@ def init_db():
     ensure_progress_columns(conn)
     ensure_faq_columns(conn)
     ensure_calculator_rule_columns(conn)
+    ensure_visibility_columns(conn)
     seed_base_data(conn)
     conn.commit()
     conn.close()

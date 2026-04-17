@@ -1,11 +1,42 @@
-from db import get_connection
+﻿from db import get_connection
 
 DEFAULT_PROJECT_SLUG = "nanliao-citizen-power"
+PUBLIC_VISIBILITY = ("public",)
+INTERNAL_VISIBILITY = ("public", "restricted", "internal")
 
 
 def _rule_value(rule_map, key, fallback):
     entry = rule_map.get(key)
     return entry["value"] if entry else fallback
+
+
+def _fetch_project_financial_rules(project_slug, visibility_levels):
+    conn = get_connection()
+    placeholders = ",".join("?" for _ in visibility_levels)
+    rows = conn.execute(
+        f"""
+        SELECT pfr.rule_name, pfr.rule_value, pfr.unit, pfr.note, pfr.visibility_level
+        FROM project_financial_rules pfr
+        INNER JOIN projects p ON p.id = pfr.project_id
+        WHERE p.slug = ? AND pfr.visibility_level IN ({placeholders})
+        ORDER BY pfr.rule_name ASC, pfr.version DESC, pfr.id DESC
+        """,
+        (project_slug, *visibility_levels),
+    ).fetchall()
+    conn.close()
+
+    rules = {}
+    for row in rows:
+        rules.setdefault(
+            row["rule_name"],
+            {
+                "value": row["rule_value"],
+                "unit": row["unit"],
+                "note": row["note"],
+                "visibility_level": row["visibility_level"],
+            },
+        )
+    return rules
 
 
 def get_project_summary(project_slug):
@@ -25,67 +56,11 @@ def get_project_summary(project_slug):
 
 
 def get_project_financial_rules(project_slug):
-    conn = get_connection()
-    rows = conn.execute(
-        """
-        SELECT pfr.rule_name, pfr.rule_value, pfr.unit, pfr.note
-        FROM project_financial_rules pfr
-        INNER JOIN projects p ON p.id = pfr.project_id
-        WHERE p.slug = ?
-        ORDER BY pfr.rule_name ASC, pfr.version DESC, pfr.id DESC
-        """,
-        (project_slug,),
-    ).fetchall()
-    conn.close()
-
-    rules = {}
-    for row in rows:
-        rules.setdefault(
-            row["rule_name"],
-            {
-                "value": row["rule_value"],
-                "unit": row["unit"],
-                "note": row["note"],
-            },
-        )
-    return rules
+    return _fetch_project_financial_rules(project_slug, PUBLIC_VISIBILITY)
 
 
-def get_project_profit_distribution(project_slug):
-    conn = get_connection()
-    rows = conn.execute(
-        """
-        SELECT ppdr.item_name, ppdr.ratio, ppdr.note
-        FROM project_profit_distribution_rules ppdr
-        INNER JOIN projects p ON p.id = ppdr.project_id
-        WHERE p.slug = ?
-        ORDER BY ppdr.display_order ASC, ppdr.id ASC
-        """,
-        (project_slug,),
-    ).fetchall()
-    conn.close()
-    return rows
-
-
-def get_project_metrics(project_slug):
-    conn = get_connection()
-    rows = conn.execute(
-        """
-        SELECT pm.metric_name, pm.metric_group, pm.metric_period, pm.metric_value, pm.unit, pm.note
-        FROM project_metrics pm
-        INNER JOIN projects p ON p.id = pm.project_id
-        WHERE p.slug = ?
-        ORDER BY pm.metric_group ASC, pm.metric_period ASC, pm.metric_name ASC
-        """,
-        (project_slug,),
-    ).fetchall()
-    conn.close()
-
-    metrics = {}
-    for row in rows:
-        metrics[(row["metric_name"], row["metric_period"])] = row
-        metrics.setdefault(row["metric_name"], row)
-    return metrics
+def get_project_financial_rules_internal(project_slug):
+    return _fetch_project_financial_rules(project_slug, INTERNAL_VISIBILITY)
 
 
 def get_calculator_settings():
@@ -104,18 +79,35 @@ def get_calculator_settings():
         settings.setdefault(row["rule_name"], row["value"])
 
     return {
-        "reference_irr": settings.get("reference_irr", 0.0878),
-        "sell_price_per_kwh": settings.get("sell_price_per_kwh", 5.5),
-        "annual_generation_kwh": settings.get("annual_generation_kwh", 112635),
-        "annual_net_income": settings.get("annual_net_income", 304754),
-        "shareholder_dividend_rate": settings.get("shareholder_dividend_rate", 0.50),
-        "operation_cost_rate": settings.get("operation_cost_rate", 0.35),
-        "site_rent_rate": settings.get("site_rent_rate", 0.10),
-        "community_return_rate": settings.get("community_return_rate", 0.05),
-        "project_years": int(settings.get("project_years", 20)),
-        "degradation_rate": settings.get("degradation_rate", 0.01),
         "reference_project_budget": settings.get("reference_project_budget", 5265000),
         "reference_resident_investment": settings.get("reference_resident_investment", 2632500),
+    }
+
+
+def _build_participation_profile(amount, reference_resident_investment):
+    ratio = (amount / reference_resident_investment) if reference_resident_investment > 0 else 0
+    if amount <= 0:
+        return {
+            "participation_band": "尚未輸入",
+            "participation_summary": "先輸入想投入的金額，系統才會幫你判讀目前比較接近哪一種參與位置。",
+            "next_step": "先輸入金額，再看是否要進一步對位 SOP。",
+        }
+    if ratio < 0.01:
+        return {
+            "participation_band": "初步了解",
+            "participation_summary": "這筆金額比較適合用來理解公民電廠參與方式、流程與風險，而不是直接對照個別案場的內部財務數字。",
+            "next_step": "先查看案例與 SOP，判斷自己目前更接近哪一步。",
+        }
+    if ratio < 0.03:
+        return {
+            "participation_band": "評估參與",
+            "participation_summary": "這個區間適合進一步確認你想扮演的角色，是場址提供、社區參與、還是投入更多討論與準備。",
+            "next_step": "回到 SOP 對位頁，確認接下來要補哪一種資料。",
+        }
+    return {
+        "participation_band": "準備決策",
+        "participation_summary": "這個區間表示你可能已進入較具體的參與評估，但系統對外仍不會顯示南寮內部補助、分配與報酬資料。",
+        "next_step": "建議直接進入 SOP 對位，並安排真人協助確認下一步。",
     }
 
 
@@ -123,82 +115,28 @@ def build_calculator_result(amount, project_slug=DEFAULT_PROJECT_SLUG):
     amount = max(amount, 0)
     fallback_settings = get_calculator_settings()
     project = get_project_summary(project_slug)
-    rule_map = get_project_financial_rules(project_slug)
-    metrics = get_project_metrics(project_slug)
-    distribution_rows = get_project_profit_distribution(project_slug)
+    rule_map = get_project_financial_rules_internal(project_slug)
 
-    reference_project_budget = _rule_value(
-        rule_map,
-        "project_budget",
-        fallback_settings["reference_project_budget"],
-    )
+    reference_project_budget = _rule_value(rule_map, "project_budget", fallback_settings["reference_project_budget"])
     resident_investment_ratio = _rule_value(rule_map, "resident_investment_ratio", 0.50)
     reference_resident_investment = max(reference_project_budget * resident_investment_ratio, 0)
-    shareholder_dividend_rate = _rule_value(
-        rule_map,
-        "shareholder_dividend_rate",
-        fallback_settings["shareholder_dividend_rate"],
-    )
-
-    for row in distribution_rows:
-        if row["item_name"] == "股東紅利":
-            shareholder_dividend_rate = row["ratio"]
-            break
-
-    settings = {
-        "reference_irr": _rule_value(rule_map, "reference_irr", fallback_settings["reference_irr"]),
-        "sell_price_per_kwh": _rule_value(rule_map, "sell_price_per_kwh", fallback_settings["sell_price_per_kwh"]),
-        "sell_price_min_per_kwh": _rule_value(rule_map, "sell_price_min_per_kwh", 5.0),
-        "sell_price_max_per_kwh": _rule_value(rule_map, "sell_price_max_per_kwh", 7.0),
-        "annual_generation_kwh": _rule_value(rule_map, "annual_generation_kwh", fallback_settings["annual_generation_kwh"]),
-        "annual_net_income": _rule_value(rule_map, "annual_net_income", fallback_settings["annual_net_income"]),
-        "shareholder_dividend_rate": shareholder_dividend_rate,
-        "operation_cost_rate": _rule_value(rule_map, "operation_cost_rate", fallback_settings["operation_cost_rate"]),
-        "site_rent_rate": _rule_value(rule_map, "site_rent_rate", fallback_settings["site_rent_rate"]),
-        "community_return_rate": _rule_value(rule_map, "community_return_rate", fallback_settings["community_return_rate"]),
-        "project_years": int(_rule_value(rule_map, "project_years", fallback_settings["project_years"])),
-        "degradation_rate": _rule_value(rule_map, "degradation_rate", fallback_settings["degradation_rate"]),
-        "reference_project_budget": reference_project_budget,
-        "reference_resident_investment": reference_resident_investment,
-        "installed_capacity_kw": _rule_value(rule_map, "installed_capacity_kw", 0),
-        "target_capacity_kw": _rule_value(rule_map, "target_capacity_kw", 0),
-        "target_site_count": int(_rule_value(rule_map, "target_site_count", 0)),
-        "average_annual_income": _rule_value(rule_map, "average_annual_income", 0),
-        "total_20y_income": _rule_value(rule_map, "total_20y_income", 0),
-        "total_20y_net_income": _rule_value(rule_map, "total_20y_net_income", 0),
-        "government_subsidy": _rule_value(rule_map, "government_subsidy", 0),
-        "government_subsidy_ratio": _rule_value(rule_map, "government_subsidy_ratio", 0),
-        "resident_investment_ratio": resident_investment_ratio,
-    }
-
-    annual_reference_return = amount * settings["reference_irr"]
-    estimated_20y_reference_return = annual_reference_return * settings["project_years"]
-    annual_dividend_pool = settings["annual_net_income"] * settings["shareholder_dividend_rate"]
-    ownership_ratio = (amount / reference_resident_investment) if reference_resident_investment > 0 else 0
-    annual_dividend_share = annual_dividend_pool * ownership_ratio
-    payback_years = (amount / annual_dividend_share) if annual_dividend_share > 0 else None
-
-    actual_capacity_row = metrics.get("actual_built_capacity_kw")
-    actual_generation_row = metrics.get("actual_annual_generation_kwh")
-    actual_revenue_row = metrics.get("actual_annual_revenue_twd")
+    profile = _build_participation_profile(amount, reference_resident_investment)
 
     return {
         "amount": amount,
         "project_slug": project_slug,
-        "project_name": project["name"] if project else "公民電廠案場",
-        "community_name": project["community_name"] if project else "社區",
-        "project_stage": project["current_stage"] if project else "",
+        "project_name": project["name"] if project else "公民電廠案例",
+        "community_name": project["community_name"] if project else "社區案例",
+        "project_stage": project["current_stage"] if project else "規劃中",
         "project_status": project["status"] if project else "planning",
-        "project_description": project["description"] if project else "",
-        "distribution_rows": distribution_rows,
-        "actual_built_capacity_kw": actual_capacity_row["metric_value"] if actual_capacity_row else 0,
-        "actual_annual_generation_kwh": actual_generation_row["metric_value"] if actual_generation_row else 0,
-        "actual_annual_revenue_twd": actual_revenue_row["metric_value"] if actual_revenue_row else 0,
-        "annual_reference_return": annual_reference_return,
-        "estimated_20y_reference_return": estimated_20y_reference_return,
-        "annual_dividend_pool": annual_dividend_pool,
-        "ownership_ratio": ownership_ratio,
-        "annual_dividend_share": annual_dividend_share,
-        "payback_years": payback_years,
-        **settings,
+        "project_description": project["description"] if project else "這個頁面提供的是公開版參與判讀，不會直接揭露個別案場的敏感財務資訊。",
+        "participation_band": profile["participation_band"],
+        "participation_summary": profile["participation_summary"],
+        "next_step": profile["next_step"],
+        "public_notice": "頁面只提供公開版參與判讀。南寮的補助、分配、IRR 與內部財務模型仍保留在資料庫供系統比對，不直接對外顯示。",
+        "public_guidance": [
+            "先確認你想扮演的是理解、評估，還是準備決策的角色。",
+            "再回到 SOP 對位頁，確認目前缺的是場址、補助、社區溝通，還是文件整理。",
+            "若要進一步判斷，安排真人協助會比只看公開頁面更有效。",
+        ],
     }
