@@ -18,6 +18,10 @@ def get_line_login_channel_id():
     return os.environ.get("LINE_LOGIN_CHANNEL_ID", "").strip()
 
 
+def get_admin_line_user_id():
+    return os.environ.get("ADMIN_LINE_USER_ID", "").strip()
+
+
 def get_public_base_url():
     return os.environ.get("PUBLIC_BASE_URL", "https://citizen-power-line-bot.onrender.com").strip().rstrip("/")
 
@@ -74,6 +78,44 @@ def reply_line_quick_reply(reply_token, text, items):
         timeout=10,
     )
     print("LINE quick reply status:", response.status_code)
+
+
+def push_line_message(to_user_id, text):
+    channel_access_token = get_channel_access_token()
+    if not channel_access_token:
+        print("ERROR: CHANNEL_ACCESS_TOKEN is missing")
+        return
+    if not to_user_id:
+        print("INFO: ADMIN_LINE_USER_ID is missing")
+        return
+
+    response = requests.post(
+        "https://api.line.me/v2/bot/message/push",
+        headers={
+            "Authorization": f"Bearer {channel_access_token}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "to": to_user_id,
+            "messages": [{"type": "text", "text": text}],
+        },
+        timeout=10,
+    )
+    print("LINE admin push status:", response.status_code)
+
+
+def notify_admin_human_help(line_user_id, user_message):
+    admin_line_user_id = get_admin_line_user_id()
+    if not admin_line_user_id:
+        return
+
+    message = (
+        "真人協助需求\n\n"
+        f"使用者訊息：{user_message or '真人協助'}\n"
+        f"LINE userId：{line_user_id or '未取得'}\n\n"
+        "請到 LINE 官方帳號後台接續回覆。"
+    )
+    push_line_message(admin_line_user_id, message)
 
 
 def _quick_reply_item(label, text):

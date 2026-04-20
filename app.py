@@ -8,6 +8,7 @@ from faq_repo import find_faq_answer, find_faq_matches, get_faq_answer_by_questi
 from line_service import (
     get_liff_id,
     get_line_profile_from_access_token,
+    notify_admin_human_help,
     reply_faq_quick_reply,
     reply_human_help_card,
     reply_line_message,
@@ -345,6 +346,7 @@ def webhook():
             continue
 
         if user_message in HUMAN_HELP_KEYWORDS or inferred_intent == "human_help":
+            notify_admin_human_help(line_user_id, user_message)
             reply_human_help_card(reply_token, build_human_help_message())
             continue
 
