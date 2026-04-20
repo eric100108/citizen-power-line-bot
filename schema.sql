@@ -240,6 +240,62 @@ CREATE TABLE IF NOT EXISTS calculator_rules (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS site_parameter_presets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    preset_code TEXT NOT NULL UNIQUE,
+    label TEXT NOT NULL,
+    source_label TEXT NOT NULL DEFAULT '',
+    area_m2_per_kwp REAL NOT NULL DEFAULT 5.0,
+    annual_generation_per_kwp REAL NOT NULL DEFAULT 1249,
+    daily_generation_per_kwp REAL NOT NULL DEFAULT 3.42,
+    module_watt REAL NOT NULL DEFAULT 410,
+    module_area_m2 REAL NOT NULL DEFAULT 1.95,
+    sell_price_per_kwh REAL NOT NULL DEFAULT 5.5,
+    construction_unit_cost_per_kwp REAL NOT NULL DEFAULT 60000,
+    carbon_factor_kg_per_kwh REAL NOT NULL DEFAULT 0.474,
+    display_order INTEGER NOT NULL DEFAULT 0,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    source_document_id INTEGER,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (source_document_id) REFERENCES source_documents(id)
+);
+
+CREATE TABLE IF NOT EXISTS fit_rooftop_rates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tariff_year INTEGER NOT NULL,
+    period_label TEXT NOT NULL DEFAULT '',
+    capacity_min_kw REAL NOT NULL,
+    capacity_max_kw REAL,
+    rate_per_kwh REAL NOT NULL,
+    source_document_id INTEGER,
+    note TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (source_document_id) REFERENCES source_documents(id),
+    UNIQUE(tariff_year, period_label, capacity_min_kw)
+);
+
+CREATE TABLE IF NOT EXISTS nanliao_roof_inventory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL,
+    source_document_id INTEGER,
+    roof_no INTEGER NOT NULL,
+    area_m2 REAL NOT NULL,
+    capacity_kw_5_m2 REAL NOT NULL,
+    capacity_kw_4_91_m2 REAL NOT NULL,
+    module_count INTEGER NOT NULL,
+    module_area_total_m2 REAL NOT NULL,
+    annual_generation_1249_kwh REAL NOT NULL,
+    annual_generation_1263_kwh REAL NOT NULL,
+    revenue_5_twd REAL NOT NULL,
+    revenue_5_5_twd REAL NOT NULL,
+    revenue_6_twd REAL NOT NULL,
+    construction_cost_60000_twd REAL NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects(id),
+    FOREIGN KEY (source_document_id) REFERENCES source_documents(id),
+    UNIQUE(project_id, roof_no)
+);
+
 CREATE TABLE IF NOT EXISTS calculator_runs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,

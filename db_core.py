@@ -422,6 +422,142 @@ def ensure_calculator_rule(conn, rule_name, value):
     return conn.execute("SELECT last_insert_id() AS id").fetchone()["id"]
 
 
+def upsert_site_parameter_preset(
+    conn,
+    preset_code,
+    label,
+    source_label,
+    area_m2_per_kwp,
+    annual_generation_per_kwp,
+    daily_generation_per_kwp,
+    module_watt,
+    module_area_m2,
+    sell_price_per_kwh,
+    construction_unit_cost_per_kwp,
+    carbon_factor_kg_per_kwh,
+    display_order,
+    source_document_id=None,
+):
+    conn.execute(
+        """
+        INSERT INTO site_parameter_presets (
+            preset_code, label, source_label, area_m2_per_kwp, annual_generation_per_kwp,
+            daily_generation_per_kwp, module_watt, module_area_m2, sell_price_per_kwh,
+            construction_unit_cost_per_kwp, carbon_factor_kg_per_kwh, display_order,
+            is_active, source_document_id, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(preset_code) DO UPDATE SET
+            label = excluded.label,
+            source_label = excluded.source_label,
+            area_m2_per_kwp = excluded.area_m2_per_kwp,
+            annual_generation_per_kwp = excluded.annual_generation_per_kwp,
+            daily_generation_per_kwp = excluded.daily_generation_per_kwp,
+            module_watt = excluded.module_watt,
+            module_area_m2 = excluded.module_area_m2,
+            sell_price_per_kwh = excluded.sell_price_per_kwh,
+            construction_unit_cost_per_kwp = excluded.construction_unit_cost_per_kwp,
+            carbon_factor_kg_per_kwh = excluded.carbon_factor_kg_per_kwh,
+            display_order = excluded.display_order,
+            is_active = 1,
+            source_document_id = excluded.source_document_id,
+            updated_at = CURRENT_TIMESTAMP
+        """,
+        (
+            preset_code,
+            label,
+            source_label,
+            area_m2_per_kwp,
+            annual_generation_per_kwp,
+            daily_generation_per_kwp,
+            module_watt,
+            module_area_m2,
+            sell_price_per_kwh,
+            construction_unit_cost_per_kwp,
+            carbon_factor_kg_per_kwh,
+            display_order,
+            source_document_id,
+        ),
+    )
+
+
+def upsert_fit_rooftop_rate(conn, tariff_year, period_label, capacity_min_kw, capacity_max_kw, rate_per_kwh, source_document_id=None, note=""):
+    conn.execute(
+        """
+        INSERT INTO fit_rooftop_rates (
+            tariff_year, period_label, capacity_min_kw, capacity_max_kw,
+            rate_per_kwh, source_document_id, note
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(tariff_year, period_label, capacity_min_kw) DO UPDATE SET
+            capacity_max_kw = excluded.capacity_max_kw,
+            rate_per_kwh = excluded.rate_per_kwh,
+            source_document_id = excluded.source_document_id,
+            note = excluded.note
+        """,
+        (tariff_year, period_label, capacity_min_kw, capacity_max_kw, rate_per_kwh, source_document_id, note),
+    )
+
+
+def upsert_nanliao_roof_inventory(
+    conn,
+    project_id,
+    source_document_id,
+    roof_no,
+    area_m2,
+    capacity_kw_5_m2,
+    capacity_kw_4_91_m2,
+    module_count,
+    module_area_total_m2,
+    annual_generation_1249_kwh,
+    annual_generation_1263_kwh,
+    revenue_5_twd,
+    revenue_5_5_twd,
+    revenue_6_twd,
+    construction_cost_60000_twd,
+):
+    conn.execute(
+        """
+        INSERT INTO nanliao_roof_inventory (
+            project_id, source_document_id, roof_no, area_m2, capacity_kw_5_m2,
+            capacity_kw_4_91_m2, module_count, module_area_total_m2,
+            annual_generation_1249_kwh, annual_generation_1263_kwh,
+            revenue_5_twd, revenue_5_5_twd, revenue_6_twd, construction_cost_60000_twd
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(project_id, roof_no) DO UPDATE SET
+            source_document_id = excluded.source_document_id,
+            area_m2 = excluded.area_m2,
+            capacity_kw_5_m2 = excluded.capacity_kw_5_m2,
+            capacity_kw_4_91_m2 = excluded.capacity_kw_4_91_m2,
+            module_count = excluded.module_count,
+            module_area_total_m2 = excluded.module_area_total_m2,
+            annual_generation_1249_kwh = excluded.annual_generation_1249_kwh,
+            annual_generation_1263_kwh = excluded.annual_generation_1263_kwh,
+            revenue_5_twd = excluded.revenue_5_twd,
+            revenue_5_5_twd = excluded.revenue_5_5_twd,
+            revenue_6_twd = excluded.revenue_6_twd,
+            construction_cost_60000_twd = excluded.construction_cost_60000_twd
+        """,
+        (
+            project_id,
+            source_document_id,
+            roof_no,
+            area_m2,
+            capacity_kw_5_m2,
+            capacity_kw_4_91_m2,
+            module_count,
+            module_area_total_m2,
+            annual_generation_1249_kwh,
+            annual_generation_1263_kwh,
+            revenue_5_twd,
+            revenue_5_5_twd,
+            revenue_6_twd,
+            construction_cost_60000_twd,
+        ),
+    )
+
+
 def upsert_project_financial_rule(conn, project_id, source_document_id, rule_name, rule_value, unit="", note="", version=1, visibility_level="restricted"):
 
     row = conn.execute(
@@ -817,6 +953,62 @@ def seed_base_data(conn):
     ]
     for rule_name, value in calculator_rules:
         ensure_calculator_rule(conn, rule_name, value)
+
+    site_parameter_presets = [
+        ("official_penghu_114", "官方參考", "114 澎湖容量因數 + 115 屋頂型 FIT", 5.0, 1249, 3.42, 410, 1.95, 5.6279, 60000, 0.474, 10, doc_final_report),
+        ("nanliao_case", "南寮案例", "南寮二階段案例反推", 4.91, 1263, 3.46, 410, 1.95, 5.5, 60000, 0.474, 20, doc_final_report),
+        ("custom", "自訂參數", "使用者自行調整", 5.0, 1249, 3.42, 410, 1.95, 5.5, 60000, 0.474, 30, doc_final_report),
+    ]
+    for row in site_parameter_presets:
+        upsert_site_parameter_preset(conn, *row)
+
+    fit_rate_rows = [
+        (114, "first", 1, 10, 5.7055, doc_final_report, "114 年第一期屋頂型太陽光電 FIT"),
+        (114, "first", 10, 20, 5.4561, doc_final_report, "114 年第一期屋頂型太陽光電 FIT"),
+        (114, "first", 20, 50, 4.2906, doc_final_report, "114 年第一期屋頂型太陽光電 FIT"),
+        (114, "first", 50, 100, 4.0853, doc_final_report, "114 年第一期屋頂型太陽光電 FIT"),
+        (114, "first", 100, 500, 3.7547, doc_final_report, "114 年第一期屋頂型太陽光電 FIT"),
+        (114, "first", 500, None, 3.6616, doc_final_report, "114 年第一期屋頂型太陽光電 FIT"),
+        (114, "second", 1, 10, 5.6279, doc_final_report, "114 年第二期屋頂型太陽光電 FIT"),
+        (114, "second", 10, 20, 5.3819, doc_final_report, "114 年第二期屋頂型太陽光電 FIT"),
+        (114, "second", 20, 50, 4.2505, doc_final_report, "114 年第二期屋頂型太陽光電 FIT"),
+        (114, "second", 50, 100, 4.0459, doc_final_report, "114 年第二期屋頂型太陽光電 FIT"),
+        (114, "second", 100, 500, 3.7152, doc_final_report, "114 年第二期屋頂型太陽光電 FIT"),
+        (114, "second", 500, None, 3.6236, doc_final_report, "114 年第二期屋頂型太陽光電 FIT"),
+        (115, "full", 1, 10, 5.6279, doc_final_report, "115 年屋頂型太陽光電 FIT"),
+        (115, "full", 10, 20, 5.3819, doc_final_report, "115 年屋頂型太陽光電 FIT"),
+        (115, "full", 20, 50, 4.2505, doc_final_report, "115 年屋頂型太陽光電 FIT"),
+        (115, "full", 50, 100, 4.0459, doc_final_report, "115 年屋頂型太陽光電 FIT"),
+        (115, "full", 100, 500, 3.7152, doc_final_report, "115 年屋頂型太陽光電 FIT"),
+        (115, "full", 500, None, 3.6236, doc_final_report, "115 年屋頂型太陽光電 FIT"),
+    ]
+    for row in fit_rate_rows:
+        upsert_fit_rooftop_rate(conn, *row)
+
+    nanliao_roof_rows = [
+        (1, 185.80, 37.16, 37.84, 91, 177.45, 46413, 46933, 232064, 255271, 278477, 2229600),
+        (2, 36.84, 7.37, 7.50, 18, 35.10, 9203, 9306, 46013, 50614, 55216, 442080),
+        (3, 48.55, 9.71, 9.89, 24, 46.80, 12128, 12264, 60639, 66703, 72767, 582600),
+        (4, 112.10, 22.42, 22.83, 55, 107.25, 28003, 28316, 140013, 154014, 168015, 1345200),
+        (5, 45.30, 9.06, 9.23, 22, 42.90, 11316, 11443, 56580, 62238, 67896, 543600),
+        (6, 86.58, 17.32, 17.63, 42, 81.90, 21628, 21870, 108138, 118952, 129766, 1038960),
+        (7, 83.72, 16.74, 17.05, 41, 79.95, 20913, 21148, 104566, 115023, 125480, 1004640),
+        (8, 35.43, 7.09, 7.22, 17, 33.15, 8850, 8950, 44252, 48677, 53102, 425160),
+        (9, 51.21, 10.24, 10.43, 25, 48.75, 12792, 12936, 63961, 70357, 76754, 614520),
+        (10, 62.62, 12.52, 12.75, 31, 60.45, 15642, 15818, 78212, 86034, 93855, 751440),
+        (11, 82.23, 16.45, 16.75, 40, 78.00, 20541, 20771, 102705, 112976, 123246, 986760),
+        (12, 72.35, 14.47, 14.74, 35, 68.25, 18073, 18276, 90365, 99402, 108438, 868200),
+        (13, 119.31, 23.86, 24.30, 58, 113.10, 29804, 30138, 149018, 163920, 178822, 1431720),
+        (14, 74.31, 14.86, 15.13, 36, 70.20, 18563, 18771, 92813, 102095, 111376, 891720),
+        (15, 91.41, 18.28, 18.62, 45, 87.75, 22834, 23090, 114171, 125588, 137005, 1096920),
+        (16, 122.88, 24.58, 25.03, 60, 117.00, 30695, 31039, 153477, 168825, 184173, 1474560),
+        (17, 171.62, 34.32, 34.95, 84, 163.80, 42871, 43351, 214353, 235789, 257224, 2059440),
+        (18, 115.10, 23.02, 23.44, 56, 109.20, 28752, 29074, 143760, 158136, 172512, 1381200),
+        (19, 74.01, 14.80, 15.07, 36, 70.20, 18488, 18695, 92438, 101682, 110926, 888120),
+        (20, 50.03, 10.01, 10.19, 24, 46.80, 12497, 12638, 62487, 68736, 74985, 600360),
+    ]
+    for row in nanliao_roof_rows:
+        upsert_nanliao_roof_inventory(conn, project_id, doc_final_report, *row)
 
     financial_rules = [
         ("installed_capacity_kw", 87.75, "kW", "第一階段規劃容量", doc_exec_plan),

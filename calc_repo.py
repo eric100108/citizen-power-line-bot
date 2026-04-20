@@ -63,6 +63,66 @@ OFFICIAL_SITE_ESTIMATE_NOTES = [
 ]
 
 
+def _fetch_site_parameter_presets():
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            """
+            SELECT
+                preset_code, label, source_label, area_m2_per_kwp,
+                annual_generation_per_kwp, daily_generation_per_kwp, module_watt,
+                module_area_m2, sell_price_per_kwh, construction_unit_cost_per_kwp,
+                carbon_factor_kg_per_kwh
+            FROM site_parameter_presets
+            WHERE is_active = 1
+            ORDER BY display_order ASC, id ASC
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
+    return {
+        row["preset_code"]: {
+            "label": row["label"],
+            "source_label": row["source_label"],
+            "area_m2_per_kwp": row["area_m2_per_kwp"],
+            "annual_generation_per_kwp": row["annual_generation_per_kwp"],
+            "daily_generation_per_kwp": row["daily_generation_per_kwp"],
+            "module_watt": row["module_watt"],
+            "module_area_m2": row["module_area_m2"],
+            "sell_price_per_kwh": row["sell_price_per_kwh"],
+            "construction_unit_cost_per_kwp": row["construction_unit_cost_per_kwp"],
+            "carbon_factor_kg_per_kwh": row["carbon_factor_kg_per_kwh"],
+        }
+        for row in rows
+    }
+
+
+def _fetch_fit_rooftop_rates(tariff_year=115, period_label="full"):
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            """
+            SELECT capacity_min_kw, capacity_max_kw, rate_per_kwh
+            FROM fit_rooftop_rates
+            WHERE tariff_year = ? AND period_label = ?
+            ORDER BY capacity_min_kw ASC
+            """,
+            (tariff_year, period_label),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    return [
+        {
+            "capacity_min_kw": row["capacity_min_kw"],
+            "capacity_max_kw": row["capacity_max_kw"],
+            "rate_per_kwh": row["rate_per_kwh"],
+        }
+        for row in rows
+    ]
+
+
 def _rule_value(rule_map, key, fallback):
     entry = rule_map.get(key)
     return entry["value"] if entry else fallback
@@ -220,6 +280,12 @@ def _build_site_scale(capacity_kwp):
 
 
 def _get_fit_rate(capacity_kwp, rate_key="rate_115"):
+    db_rates = _fetch_fit_rooftop_rates(115, "full")
+    for row in db_rates:
+        max_kw = row["capacity_max_kw"]
+        if capacity_kwp >= row["capacity_min_kw"] and (max_kw is None or capacity_kwp < max_kw):
+            return row["rate_per_kwh"], row
+
     for row in FIT_ROOFTOP_RATES:
         max_kw = row["capacity_max_kw"]
         if capacity_kwp >= row["capacity_min_kw"] and (max_kw is None or capacity_kwp < max_kw):
@@ -245,8 +311,9 @@ def _build_site_parameters(
     custom_construction_unit_cost_per_kwp=None,
     custom_carbon_factor_kg_per_kwh=None,
 ):
-    mode = parameter_mode if parameter_mode in SITE_PARAMETER_PRESETS else "official_penghu_114"
-    params = dict(SITE_PARAMETER_PRESETS[mode])
+    presets = _fetch_site_parameter_presets() or SITE_PARAMETER_PRESETS
+    mode = parameter_mode if parameter_mode in presets else "official_penghu_114"
+    params = dict(presets[mode])
     overrides = {
         "area_m2_per_kwp": custom_area_m2_per_kwp,
         "annual_generation_per_kwp": custom_annual_generation_per_kwp,
