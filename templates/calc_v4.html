@@ -102,8 +102,8 @@
       <div class="shell hero-grid">
         <div>
           <div class="badge">Nanliao 2026 Calculator</div>
-          <h1>用南寮公式，先完成容量與參與判斷</h1>
-          <p>輸入屋頂坪數與投入金額，快速取得容量、發電、成本與參與判讀。</p>
+          <h1>參與金額判讀</h1>
+          <p>輸入投入金額，判斷目前參與位置、參考收益與下一步。</p>
           <div class="hero-pills">
             <div class="hero-pill"><span>目前專案階段</span><strong>{{ project_stage }}</strong></div>
             <div class="hero-pill"><span>容量換算係數</span><strong>{{ "{:,.1f}".format(area_m2_per_kwp) }} m2/kWp</strong></div>
@@ -116,7 +116,7 @@
     <section class="section">
       <div class="shell grid two">
         <section class="panel roof">
-          <div class="section-head"><h2>屋頂容量估算</h2><span>理解場址能做多大</span></div>
+          <div class="section-head"><h2>輔助容量參考</h2><span>先估屋頂可支持的規模</span></div>
           <form method="get" action="/calc">
             <input type="hidden" name="project" value="{{ project_slug }}">
             <input type="hidden" name="amount" value="{{ amount|int }}">

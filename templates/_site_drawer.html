@@ -1,16 +1,37 @@
 <style>
   .cp-menu-trigger {
-    width: 44px;
-    height: 44px;
+    position: relative;
+    width: 46px;
+    height: 46px;
     flex: 0 0 auto;
-    border: 0;
-    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 18px;
     display: inline-grid;
     place-items: center;
-    background: #075c62;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,0)),
+      linear-gradient(135deg, #075f66 0%, #0b7a73 100%);
     color: #ffffff;
     cursor: pointer;
-    box-shadow: 0 10px 22px rgba(4, 38, 45, .16);
+    box-shadow: 0 14px 28px rgba(4, 38, 45, .22);
+    overflow: hidden;
+  }
+  .cp-menu-trigger::before {
+    position: absolute;
+    top: 13px;
+    left: 13px;
+  }
+  .cp-menu-trigger::after {
+    position: absolute;
+    left: 13px;
+    bottom: 13px;
+    width: 14px;
+  }
+  .cp-menu-trigger span {
+    position: absolute;
+    left: 13px;
+    top: 22px;
+    width: 20px;
   }
   .cp-menu-trigger span,
   .cp-menu-trigger::before,
@@ -22,8 +43,9 @@
     background: currentColor;
     display: block;
   }
-  .cp-menu-trigger {
-    gap: 4px;
+  .cp-menu-trigger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 34px rgba(4, 38, 45, .28);
   }
   .topbar .topbar-inner {
     max-width: none !important;
@@ -168,11 +190,10 @@
     font-size: 13px;
   }
   @media (max-width: 720px) {
-    .cp-menu-trigger {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-    }
+    .cp-menu-trigger { width: 44px; height: 44px; border-radius: 17px; }
+    .cp-menu-trigger::before { top: 12px; left: 12px; }
+    .cp-menu-trigger span { top: 21px; left: 12px; }
+    .cp-menu-trigger::after { left: 12px; bottom: 12px; }
     .topbar .topbar-inner {
       padding-left: 16px !important;
       padding-right: 16px !important;
@@ -197,6 +218,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .cp-drawer-scrim,
+    .cp-menu-trigger,
     .cp-drawer,
     .cp-drawer-link {
       transition: none;
@@ -219,12 +241,12 @@
       <span>平台入口與主要功能切換。</span>
     </a>
     <a class="cp-drawer-link" href="/site-estimate">
-      <strong>官方案場估算</strong>
-      <span>容量、板數、FIT 收益、補助與減碳。</span>
+      <strong>場址容量評估</strong>
+      <span>輸入面積，估容量、板數、發電與補助門檻。</span>
     </a>
     <a class="cp-drawer-link" href="/calc?amount=10000">
-      <strong>投資試算</strong>
-      <span>投入金額、參與位置與參考收益。</span>
+      <strong>參與金額判讀</strong>
+      <span>輸入投入金額，判斷參與位置與下一步。</span>
     </a>
     <a class="cp-drawer-link" href="/project">
       <strong>南寮案例</strong>

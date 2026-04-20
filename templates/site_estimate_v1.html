@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>官方參考案場估算 | 公民電廠平台</title>
+  <title>場址容量評估 | 公民電廠平台</title>
   <style>
     :root {
       --bg:#f4f8f3; --text:#13261f; --sub:#5b6d64; --muted:#7b8e84;
@@ -104,7 +104,7 @@
     <section class="hero">
       <div class="shell hero-inner">
         <div class="badge">{{ parameter_label }}｜{{ parameter_source_label }}</div>
-        <h1>用官方參考資料估算案場容量與收益</h1>
+        <h1>場址容量評估</h1>
         <p>輸入面積，取得容量、板數、發電量、FIT 收益、補助上限與減碳估算。</p>
         <div class="hero-pills">
           <div class="hero-pill"><span>案場規模</span><strong>{{ scale_label }}</strong></div>
@@ -200,7 +200,7 @@
                 <input id="carbon_factor" name="carbon_factor" type="number" min="0" step="0.001" value="{{ carbon_factor_kg_per_kwh }}">
               </div>
             </div>
-            <button class="button" type="submit">更新案場估算</button>
+            <button class="button" type="submit">更新容量評估</button>
           </form>
         </section>
 
