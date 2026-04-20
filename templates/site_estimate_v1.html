@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案場容量估算 | 公民電廠平台</title>
+  <style>
+    :root {
+      --bg:#f4f8f3; --text:#13261f; --sub:#5b6d64; --muted:#7b8e84;
+      --line:#d5e3db; --surface:rgba(255,255,255,.92); --white:#fff;
+      --nav:#103845; --nav2:#1b5664; --green:#35c65a; --green-dark:#158040;
+      --blue:#1d84cc; --amber:#b77b12; --red:#b94b38; --shadow:0 28px 72px rgba(17,50,37,.12);
+      --radius-xl:34px;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; min-height:100vh; font-family:"Microsoft JhengHei","PingFang TC",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(53,198,90,.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(29,132,204,.14), transparent 30%),
+        linear-gradient(180deg,#fbfdfb 0%,var(--bg) 100%);
+    }
+    .shell { width:min(1480px, calc(100% - 36px)); margin:0 auto; }
+    .topbar { position:sticky; top:0; z-index:30; background:linear-gradient(90deg,var(--nav),var(--nav2)); color:#fff; box-shadow:0 10px 26px rgba(11,32,40,.18); }
+    .topbar-inner { min-height:76px; display:flex; align-items:center; justify-content:space-between; gap:18px; }
+    .brand { display:flex; align-items:center; gap:14px; color:inherit; text-decoration:none; }
+    .brand-mark { width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg,#43d14a,#1f8bf4); font-weight:800; }
+    .brand-copy strong { display:block; font-size:21px; line-height:1.1; }
+    .brand-copy span { display:block; margin-top:4px; font-size:12px; color:rgba(255,255,255,.76); letter-spacing:.08em; }
+    .nav-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .nav-actions a { color:#fff; text-decoration:none; font-weight:700; padding:11px 16px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.16); }
+    .nav-actions a.primary { background:var(--green); border-color:transparent; }
+    .hero {
+      color:#fff; padding:clamp(44px,8vw,92px) 0; position:relative; overflow:hidden;
+      background:
+        linear-gradient(120deg,rgba(8,28,35,.78),rgba(10,50,43,.46)),
+        linear-gradient(135deg,#1d5461 0%,#217b7a 46%,#35c65a 100%);
+    }
+    .hero::after { content:""; position:absolute; right:-90px; top:-80px; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.24),rgba(255,255,255,0)); }
+    .hero-inner { position:relative; z-index:1; }
+    .badge { display:inline-flex; padding:8px 14px; border-radius:999px; background:rgba(255,255,255,.14); font-size:13px; font-weight:700; }
+    h1 { margin:16px 0 12px; font-size:clamp(42px,6vw,76px); line-height:1.02; letter-spacing:-.035em; max-width:980px; }
+    .hero p { margin:0; max-width:840px; color:rgba(255,255,255,.92); line-height:1.85; font-size:17px; }
+    .hero-pills { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-top:28px; }
+    .hero-pill { padding:16px 18px; border-radius:22px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(10px); }
+    .hero-pill span { display:block; font-size:13px; color:rgba(255,255,255,.76); margin-bottom:6px; }
+    .hero-pill strong { font-size:24px; line-height:1.2; }
+    .section { padding:24px 0; }
+    .grid { display:grid; gap:18px; }
+    .two { grid-template-columns:.88fr 1.12fr; align-items:start; }
+    .panel { background:var(--surface); border:1px solid rgba(255,255,255,.86); border-radius:var(--radius-xl); padding:28px; box-shadow:var(--shadow); backdrop-filter:blur(10px); }
+    .panel.form { background:linear-gradient(180deg,rgba(236,249,240,.94),rgba(255,255,255,.98)); }
+    .panel.result { background:linear-gradient(180deg,rgba(234,245,255,.94),rgba(255,255,255,.98)); }
+    .section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:18px; }
+    .section-head h2 { margin:0; font-size:clamp(28px,3.2vw,40px); line-height:1.08; letter-spacing:-.03em; }
+    .section-head span { color:var(--muted); font-size:13px; white-space:nowrap; }
+    .lead { margin:0 0 18px; color:var(--sub); line-height:1.85; max-width:820px; }
+    form { display:grid; gap:14px; }
+    label { display:block; margin-bottom:8px; font-size:14px; color:var(--sub); font-weight:700; }
+    input, select { width:100%; border:1px solid #cfe0d5; border-radius:18px; padding:14px 16px; font-size:16px; font-family:inherit; color:var(--text); background:#fff; }
+    .button { min-height:54px; border:none; border-radius:18px; padding:14px 20px; background:linear-gradient(135deg,var(--green),#1fb16f); color:#fff; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 14px 28px rgba(53,198,90,.22); }
+    .mode-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .metric-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .metric, .detail, .note, .param-card { border-radius:22px; border:1px solid var(--line); background:var(--white); box-shadow:0 16px 34px rgba(19,58,42,.06); }
+    .metric { padding:20px; min-height:146px; }
+    .metric.blue { background:linear-gradient(180deg,#ebf7ff,#fff); border-color:#c7def3; }
+    .metric.green { background:linear-gradient(180deg,#eefcf1,#fff); border-color:#cce9d2; }
+    .metric.amber { background:linear-gradient(180deg,#fff7e7,#fff); border-color:#ecd8aa; }
+    .metric.red { background:linear-gradient(180deg,#fff0ec,#fff); border-color:#efc6bb; }
+    .metric span, .param-card span { display:block; margin-bottom:8px; color:var(--sub); font-size:13px; }
+    .metric strong { display:block; font-size:clamp(26px,3vw,38px); line-height:1.08; }
+    .metric small { display:block; margin-top:10px; color:var(--sub); line-height:1.65; }
+    .param-card { padding:16px; }
+    .param-card strong { display:block; font-size:18px; }
+    .detail-list { display:grid; gap:12px; margin-top:18px; }
+    .detail { padding:17px 19px; display:flex; align-items:center; justify-content:space-between; gap:18px; }
+    .detail span { color:var(--sub); line-height:1.7; }
+    .detail strong { text-align:right; font-size:18px; }
+    .note-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .note { padding:24px; }
+    .note.dark { background:linear-gradient(135deg,#163f4d,#236578); color:#fff; border-color:transparent; }
+    .note h3 { margin:0 0 12px; font-size:24px; }
+    .note p, .note li { color:inherit; opacity:.9; line-height:1.8; }
+    .note ul { margin:14px 0 0; padding-left:18px; }
+    .back-link { display:inline-flex; margin-top:18px; color:var(--green-dark); text-decoration:none; font-weight:800; }
+    @media (max-width:1080px) { .two, .metric-grid, .hero-pills, .note-grid, .mode-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
+    @media (max-width:720px) { .shell { width:calc(100% - 24px); } .topbar-inner { min-height:68px; align-items:flex-start; flex-direction:column; padding:12px 0; } .nav-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; } .nav-actions a { text-align:center; } .nav-actions a.primary { grid-column:1/-1; } .panel { padding:22px; } .detail { align-items:flex-start; flex-direction:column; } .detail strong { text-align:left; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="/menu" aria-label="返回首頁">
+        <div class="brand-mark">CP</div>
+        <div class="brand-copy"><strong>公民電廠</strong><span>CITIZEN POWER PLATFORM</span></div>
+      </a>
+      <nav class="nav-actions" aria-label="頁面導覽">
+        <a href="/project">南寮案例</a>
+        <a href="/calc?amount=10000">投資試算</a>
+        <a href="/progress">SOP 對位</a>
+        <a class="primary" href="/menu">返回首頁</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell hero-inner">
+        <div class="badge">{{ parameter_label }}｜{{ parameter_source_label }}</div>
+        <h1>輸入案場大小，先估容量、發電與減碳</h1>
+        <p>輸入面積，立即取得容量、板數、發電量、成本、收入與減碳估算。</p>
+        <div class="hero-pills">
+          <div class="hero-pill"><span>案場規模</span><strong>{{ scale_label }}</strong></div>
+          <div class="hero-pill"><span>估算容量</span><strong>{{ "{:,.2f}".format(capacity_kwp) }} kW</strong></div>
+          <div class="hero-pill"><span>太陽能板</span><strong>{{ panel_count }} 片</strong></div>
+          <div class="hero-pill"><span>首年減碳</span><strong>{{ "{:,.2f}".format(annual_carbon_reduction_kg / 1000) }} 噸</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell grid two">
+        <section class="panel form">
+          <div class="section-head"><h2>輸入案場條件</h2><span>可切換參數口徑</span></div>
+          <form method="get" action="/site-estimate">
+            <input type="hidden" name="project" value="{{ project_slug }}">
+            <div>
+              <label for="parameter_mode">參數模式</label>
+              <select id="parameter_mode" name="parameter_mode">
+                <option value="official_penghu_114" {% if parameter_mode == "official_penghu_114" %}selected{% endif %}>官方預設：澎湖 114 平均</option>
+                <option value="nanliao_case" {% if parameter_mode == "nanliao_case" %}selected{% endif %}>南寮案例：第二階段反推</option>
+                <option value="custom" {% if parameter_mode == "custom" %}selected{% endif %}>自訂參數</option>
+              </select>
+            </div>
+            <div class="mode-grid">
+              <div>
+                <label for="area_input_type">面積口徑</label>
+                <select id="area_input_type" name="area_input_type">
+                  <option value="gross_area" {% if area_input_type == "gross_area" %}selected{% endif %}>總屋頂面積</option>
+                  <option value="usable_area" {% if area_input_type == "usable_area" %}selected{% endif %}>可用面積</option>
+                </select>
+              </div>
+              <div>
+                <label for="sales_mode">收入模式</label>
+                <select id="sales_mode" name="sales_mode">
+                  <option value="wheeling_transfer" {% if sales_mode == "wheeling_transfer" %}selected{% endif %}>綠電轉供情境價</option>
+                  <option value="fit" {% if sales_mode == "fit" %}selected{% endif %}>屋頂型 FIT 躉購</option>
+                  <option value="self_use" {% if sales_mode == "self_use" %}selected{% endif %}>自發自用節費估算</option>
+                </select>
+              </div>
+            </div>
+            <div class="mode-grid">
+              <div>
+                <label for="site_ping">案場面積（坪）</label>
+                <input id="site_ping" name="site_ping" type="number" min="0" step="1" value="{{ site_ping|int }}">
+              </div>
+              <div>
+                <label for="usable_ratio">可使用比例（%）</label>
+                <input id="usable_ratio" name="usable_ratio" type="number" min="0" max="100" step="1" value="{{ usable_ratio_percent|round(0)|int }}">
+              </div>
+            </div>
+            <div class="mode-grid">
+              <div>
+                <label for="degradation_method">衰退算法</label>
+                <select id="degradation_method" name="degradation_method">
+                  <option value="compound" {% if degradation_method == "compound" %}selected{% endif %}>複利衰退</option>
+                  <option value="linear" {% if degradation_method == "linear" %}selected{% endif %}>線性衰退</option>
+                  <option value="none" {% if degradation_method == "none" %}selected{% endif %}>不計衰退</option>
+                </select>
+              </div>
+              <div>
+                <label for="years">估算年期</label>
+                <input id="years" name="years" type="number" min="1" step="1" value="{{ years }}">
+              </div>
+            </div>
+            <div class="mode-grid">
+              <div>
+                <label for="area_m2_per_kwp">自訂 m2/kW</label>
+                <input id="area_m2_per_kwp" name="area_m2_per_kwp" type="number" min="0" step="0.01" value="{{ area_m2_per_kwp }}">
+              </div>
+              <div>
+                <label for="annual_generation_per_kwp">自訂年發電係數</label>
+                <input id="annual_generation_per_kwp" name="annual_generation_per_kwp" type="number" min="0" step="1" value="{{ annual_generation_per_kwp }}">
+              </div>
+            </div>
+            <div class="mode-grid">
+              <div>
+                <label for="module_watt">模組瓦數 W/片</label>
+                <input id="module_watt" name="module_watt" type="number" min="0" step="1" value="{{ module_watt|round(0)|int }}">
+              </div>
+              <div>
+                <label for="module_area_m2">模組面積 m2/片</label>
+                <input id="module_area_m2" name="module_area_m2" type="number" min="0" step="0.01" value="{{ module_area_m2 }}">
+              </div>
+            </div>
+            <div class="mode-grid">
+              <div>
+                <label for="sell_price_per_kwh">情境電價 元/度</label>
+                <input id="sell_price_per_kwh" name="sell_price_per_kwh" type="number" min="0" step="0.1" value="{{ sell_price_per_kwh }}">
+              </div>
+              <div>
+                <label for="carbon_factor">減碳係數 kgCO2e/度</label>
+                <input id="carbon_factor" name="carbon_factor" type="number" min="0" step="0.001" value="{{ carbon_factor_kg_per_kwh }}">
+              </div>
+            </div>
+            <button class="button" type="submit">更新案場估算</button>
+          </form>
+        </section>
+
+        <section class="panel result">
+          <div class="section-head"><h2>估算結果</h2><span>{{ scale_summary }}</span></div>
+          <div class="metric-grid">
+            <div class="metric blue"><span>系統容量</span><strong>{{ "{:,.2f}".format(capacity_kwp) }} kW</strong><small>可用面積 / {{ "{:,.2f}".format(area_m2_per_kwp) }} m2/kW</small></div>
+            <div class="metric green"><span>太陽能板數量</span><strong>{{ panel_count }} 片</strong><small>單片 {{ "{:,.0f}".format(module_watt) }}W，模組面積 {{ "{:,.2f}".format(module_total_area_m2) }} m2</small></div>
+            <div class="metric amber"><span>首年發電量</span><strong>{{ "{:,.0f}".format(first_year_generation_kwh) }} 度</strong><small>日均約 {{ "{:,.1f}".format(daily_generation_kwh) }} 度</small></div>
+            <div class="metric green"><span>{{ years }} 年累積發電</span><strong>{{ "{:,.0f}".format(lifetime_generation_kwh) }} 度</strong><small>{{ "複利" if degradation_method == "compound" else "線性" if degradation_method == "linear" else "不計" }}衰退</small></div>
+            <div class="metric blue"><span>粗估建置成本</span><strong>NT$ {{ "{:,.0f}".format(construction_cost) }}</strong><small>NT$ {{ "{:,.0f}".format(construction_unit_cost_per_kwp) }} / kW</small></div>
+            <div class="metric red"><span>補助上限粗估</span><strong>NT$ {{ "{:,.0f}".format(reward_max) }}</strong><small>min(1,000 萬, 總設置經費 × 50%)</small></div>
+          </div>
+          <div class="detail-list">
+            <div class="detail"><span>收入採用單價</span><strong>{{ "{:,.4f}".format(sell_price_per_kwh) }} 元/度</strong></div>
+            <div class="detail"><span>首年售電/節費估算</span><strong>NT$ {{ "{:,.0f}".format(first_year_revenue) }}</strong></div>
+            <div class="detail"><span>{{ years }} 年售電/節費估算</span><strong>NT$ {{ "{:,.0f}".format(lifetime_revenue) }}</strong></div>
+            <div class="detail"><span>社區最低投資額門檻</span><strong>NT$ {{ "{:,.0f}".format(minimum_community_investment) }}</strong></div>
+            <div class="detail"><span>容量是否達 10 kW 門檻</span><strong>{{ "符合" if eligible_capacity else "未達" }}</strong></div>
+            <div class="detail"><span>參與門檻</span><strong>至少 {{ required_participant_count }} 位（個）</strong></div>
+            <div class="detail"><span>首年減碳量</span><strong>{{ "{:,.2f}".format(annual_carbon_reduction_kg / 1000) }} 噸 CO2e</strong></div>
+            <div class="detail"><span>{{ years }} 年減碳量</span><strong>{{ "{:,.2f}".format(lifetime_carbon_reduction_kg / 1000) }} 噸 CO2e</strong></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <section class="note">
+          <h3>使用參數</h3>
+          <div class="mode-grid">
+            <div class="param-card"><span>面積係數</span><strong>{{ "{:,.2f}".format(area_m2_per_kwp) }} m2/kW</strong></div>
+            <div class="param-card"><span>年發電係數</span><strong>{{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kW/年</strong></div>
+            <div class="param-card"><span>減碳係數</span><strong>{{ "{:,.3f}".format(carbon_factor_kg_per_kwh) }} kgCO2e/度</strong></div>
+            <div class="param-card"><span>FIT 參考費率</span><strong>{{ "{:,.4f}".format(fit_rate) }} 元/度</strong></div>
+          </div>
+          <a class="back-link" href="/progress">前往 SOP 對位</a>
+        </section>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

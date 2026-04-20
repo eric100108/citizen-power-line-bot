@@ -2,7 +2,7 @@
 import re
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
-from calc_repo import build_calculator_result
+from calc_repo import build_calculator_result, build_site_estimate_result
 from db import init_db
 from faq_repo import find_faq_answer, find_faq_matches, get_faq_answer_by_question, list_faqs
 from line_service import (
@@ -325,6 +325,7 @@ def home():
             "faq_all": "/faq",
             "faq_search": "/faq?keyword=補助",
             "calc": "/calc?amount=10000",
+            "site_estimate": "/site-estimate?site_ping=30",
             "progress": "/progress",
             "progress_sop_api": "/api/progress-sop?line_user_id=YOUR_LINE_USER_ID",
             "webhook": "/webhook",
@@ -356,9 +357,42 @@ def hello():
 @app.route("/calc")
 def calc():
     amount = request.args.get("amount", default=10000, type=float)
+    roof_ping = request.args.get("roof_ping", default=30, type=float)
     project_slug = request.args.get("project", default="nanliao-citizen-power", type=str).strip() or "nanliao-citizen-power"
-    calc_result = build_calculator_result(amount, project_slug)
+    calc_result = build_calculator_result(amount, project_slug, roof_ping)
     return render_template("calc_v4.html", **calc_result)
+
+
+@app.route("/site-estimate")
+def site_estimate():
+    site_ping = request.args.get("site_ping", default=30, type=float)
+    usable_ratio_percent = request.args.get("usable_ratio", default=85, type=float)
+    years = request.args.get("years", default=20, type=int)
+    carbon_factor = request.args.get("carbon_factor", default=None, type=float)
+    parameter_mode = request.args.get("parameter_mode", default="official_penghu_114", type=str).strip()
+    area_input_type = request.args.get("area_input_type", default="gross_area", type=str).strip()
+    degradation_method = request.args.get("degradation_method", default="compound", type=str).strip()
+    sales_mode = request.args.get("sales_mode", default="wheeling_transfer", type=str).strip()
+    project_slug = request.args.get("project", default="nanliao-citizen-power", type=str).strip() or "nanliao-citizen-power"
+    estimate = build_site_estimate_result(
+        site_ping=site_ping,
+        usable_ratio=usable_ratio_percent / 100,
+        project_slug=project_slug,
+        years=years,
+        carbon_factor_kg_per_kwh=carbon_factor,
+        parameter_mode=parameter_mode,
+        area_input_type=area_input_type,
+        degradation_method=degradation_method,
+        sales_mode=sales_mode,
+        custom_area_m2_per_kwp=request.args.get("area_m2_per_kwp", default=None, type=float),
+        custom_annual_generation_per_kwp=request.args.get("annual_generation_per_kwp", default=None, type=float),
+        custom_module_watt=request.args.get("module_watt", default=None, type=float),
+        custom_module_area_m2=request.args.get("module_area_m2", default=None, type=float),
+        custom_sell_price_per_kwh=request.args.get("sell_price_per_kwh", default=None, type=float),
+        custom_construction_unit_cost_per_kwp=request.args.get("construction_unit_cost_per_kwp", default=None, type=float),
+    )
+    estimate["usable_ratio_percent"] = usable_ratio_percent
+    return render_template("site_estimate_v1.html", **estimate)
 
 
 @app.route("/project")

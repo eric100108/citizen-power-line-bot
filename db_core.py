@@ -18,7 +18,7 @@ SCHEMA_PATH = BASE_DIR / "schema.sql"
 
 DEFAULT_PROJECT_SLUG = "nanliao-citizen-power"
 DEFAULT_COMMUNITY_SLUG = "penghu-nanliao"
-DEFAULT_PROGRESS_STAGES = ["???", "???", "???", "????", "????"]
+DEFAULT_PROGRESS_STAGES = ["規劃中", "申請中", "施工中", "併網測試", "正式運轉"]
 
 __all__ = [
     "get_db_path",
@@ -710,7 +710,22 @@ def seed_base_data(conn):
         "作為已建置容量、分場景資料與營運成果的參考來源。",
     )
 
+    doc_final_report = upsert_source_document(
+        conn,
+        "report-nanliao-solar-final-2026",
+        "澎湖南寮公民電廠 2026 年最終統整版",
+        "report_nanliao_solar_final_2026.pdf",
+        "NP-FINAL-2026",
+        "2026-04-18",
+        "整合南寮案容量換算、模組片數、發電量、衰減、財務分配與環境效益參數，作為試算與 FAQ 的最新版依據。",
+    )
+
     highlight_rows = [
+        (doc_final_report, "calculator", "官方預設試算口徑", "網站預設以可用面積為輸入口徑，採 5.0 m2/kW、410W/片、1.95 m2/片、1,249 度/kW/年與 0.474 kgCO2e/度作為官方預設粗估。", "handbook", 90),
+        (doc_final_report, "calculator", "南寮案例試算口徑", "南寮案例模式採 4.91 m2/kW、3.46 度/kW/日、1,263 度/kW/年、5.5 元/度與 60,000 元/kW；這是案例情境值，不是全台通用標準。", "handbook", 100),
+        (doc_final_report, "environment", "南寮日照環境參數", "NASA 氣象資料顯示南寮區域全天空表面短波下行輻射度為 4.6872 kWh/m2/day。", "p.1", 110),
+        (doc_final_report, "finance", "2026 財務模型參數", "建置單價 60,000 元/kWp、綠電轉供電價 5.5 元/度，收益分配以股東紅利 50%、維運行政 35%、租金 10%、社區回饋 5% 為基準。", "p.2", 120),
+        (doc_final_report, "ecosystem", "環境效益", "屋頂型太陽能板建置後可降低房舍內部溫度約 2 至 3 度，並對應 SDGs 潔淨能源、永續城鄉與氣候行動。", "p.2", 130),
         (doc_history, "knowledge", "公民電廠核心概念", "公民電廠強調由在地居民、社區組織與公共部門共同參與，讓能源收益、決策與學習留在地方。", "p.1-p.2", 10),
         (doc_history, "knowledge", "制度工具", "整理 FIT、PPA、REC 等制度工具，可作為募集、售電與營運溝通時的基礎知識。", "p.1-p.3", 20),
         (doc_grant, "grant", "補助核定目標", "補助文件可辨識出本案以 300kW 及 15 個場址為目標，並核列 2,632,500 元補助。", "p.4", 30),
@@ -761,6 +776,14 @@ def seed_base_data(conn):
         ("project-progress", "目前已經做出哪些成果？", "營運摘要可辨識已建置 27.3kW、11.83kW、23.205kW 三處屋頂場景，合計年發電量約 78,723 度、年營收約 393,615 元。"),
         ("service-model", "為什麼系統要把文件整理進資料庫？", "因為陪伴式服務需要把規劃書、補助核定、營運摘要與制度背景整合成可查詢的專案知識，讓 FAQ、試算、案場總覽與陪伴流程說法一致。"),
     ]
+    faq_rows.extend([
+        ("site-planning", "屋頂坪數要怎麼換算成太陽光電容量？", "預設請使用可用面積估算：容量 kW = 可用面積 m2 / 5.0。若使用者輸入的是總屋頂面積，系統會先乘上可用率；南寮案例模式則可切換為 4.91 m2/kW。"),
+        ("site-planning", "系統怎麼估算需要幾片太陽能板？", "網站預設以 410W/片、1.95 m2/片估算，片數 = round(容量 × 1000 / 410)。這是網站假設值，正式設計仍要依實際模組規格與現場排布調整。"),
+        ("finance", "南寮的發電量試算用什麼基準？", "官方預設採 114 年澎湖平均 1,249 度/kW/年；南寮案例模式採 1,263 度/kW/年。長期試算可切換複利衰退或線性衰退，避免把不同 1% 衰退算法混在一起。"),
+        ("finance", "南寮 2026 版收益分配怎麼看？", "2026 統整版採用股東紅利 50%、維運行政 35%、場址租金 10%、社區回饋 5% 作為財務模型基準。前台只用來說明模型邏輯，實際案場仍需依合約與治理規則確認。"),
+        ("service-model", "南寮報告中的環境效益可以怎麼轉成服務說法？", "可以轉成陪伴式服務裡的非財務價值：屋頂太陽能板可能降低房舍內部溫度約 2 至 3 度，並對應潔淨能源、永續城鄉與氣候行動等永續目標。"),
+    ])
+
     for category_slug, question, answer in faq_rows:
         upsert_faq_item(conn, category_ids[category_slug], question, answer)
 
@@ -778,6 +801,19 @@ def seed_base_data(conn):
         ("community_return_rate", 0.05),
         ("reference_project_budget", 5265000),
         ("reference_resident_investment", 2632500),
+        ("area_m2_per_kwp", 5.0),
+        ("nanliao_case_area_m2_per_kwp", 4.91),
+        ("module_watt", 410),
+        ("module_area_m2", 1.95),
+        ("annual_generation_per_kwp", 1249),
+        ("nanliao_case_annual_generation_per_kwp", 1263),
+        ("daily_generation_per_kwp", 3.42),
+        ("nanliao_case_daily_generation_per_kwp", 3.46),
+        ("construction_unit_cost_per_kwp", 60000),
+        ("carbon_factor_kg_per_kwh", 0.474),
+        ("nanliao_solar_irradiation_kwh_m2_day", 4.6872),
+        ("roof_temperature_reduction_min_c", 2),
+        ("roof_temperature_reduction_max_c", 3),
     ]
     for rule_name, value in calculator_rules:
         ensure_calculator_rule(conn, rule_name, value)
@@ -801,6 +837,19 @@ def seed_base_data(conn):
         ("government_subsidy_ratio", 0.50, "ratio", "政府補助占比", doc_grant),
         ("resident_investment_ratio", 0.50, "ratio", "居民投資占比", doc_exec_plan),
         ("reference_resident_investment", 2632500, "TWD", "居民募集總額", doc_exec_plan),
+        ("area_m2_per_kwp", 5.0, "m2/kW", "南寮第一階段初估係數，作為網站官方預設口徑", doc_final_report),
+        ("nanliao_case_area_m2_per_kwp", 4.91, "m2/kW", "南寮第二階段 5 戶案場反推係數，僅作案例模式", doc_final_report),
+        ("module_watt", 410, "W", "網站預設單片模組瓦數，可由管理端調整", doc_final_report),
+        ("module_area_m2", 1.95, "m2/panel", "網站預設單片模組面積，可由管理端調整", doc_final_report),
+        ("annual_generation_per_kwp", 1249, "kWh/kW/year", "114 年澎湖官方平均年發電係數", doc_final_report),
+        ("nanliao_case_annual_generation_per_kwp", 1263, "kWh/kW/year", "南寮案例年發電係數，僅作案例模式", doc_final_report),
+        ("daily_generation_per_kwp", 3.42, "kWh/kW/day", "114 年澎湖官方平均日發電係數", doc_final_report),
+        ("nanliao_case_daily_generation_per_kwp", 3.46, "kWh/kW/day", "南寮案例日發電係數", doc_final_report),
+        ("construction_unit_cost_per_kwp", 60000, "TWD/kWp", "2026 統整版建置單價基準", doc_final_report),
+        ("carbon_factor_kg_per_kwh", 0.474, "kgCO2e/kWh", "113 年度官方電力排碳係數，作為 location-based 粗估預設", doc_final_report),
+        ("nanliao_solar_irradiation_kwh_m2_day", 4.6872, "kWh/m2/day", "2026 統整版 NASA 南寮日照環境參數", doc_final_report),
+        ("roof_temperature_reduction_min_c", 2, "C", "屋頂太陽能板可能降低室內溫度下限", doc_final_report),
+        ("roof_temperature_reduction_max_c", 3, "C", "屋頂太陽能板可能降低室內溫度上限", doc_final_report),
         ("average_annual_income", 619494, "TWD", "規劃平均年收入", doc_exec_plan),
         ("total_20y_income", 12389873, "TWD", "規劃 20 年總收入", doc_exec_plan),
         ("total_20y_net_income", 5516039, "TWD", "規劃 20 年淨收益", doc_exec_plan),
@@ -816,10 +865,33 @@ def seed_base_data(conn):
         ("場址租金", 0.10, 3, "回饋提供屋頂或場址的合作方", doc_exec_plan),
         ("社區回饋", 0.05, 4, "支持地方活動與公共需求", doc_exec_plan),
     ]
+    distribution_rules.extend([
+        ("股東紅利", 0.50, 11, "2026 統整版年度收益分配核心，用於吸引公民參與。", doc_final_report),
+        ("維運行政", 0.35, 12, "2026 統整版維持電廠長期穩定運作的必要開銷。", doc_final_report),
+        ("場址租金", 0.10, 13, "2026 統整版場址使用與合作回饋基準。", doc_final_report),
+        ("社區回饋金", 0.05, 14, "2026 統整版社區回饋金，可用於長者供餐、有機耕種與教育宣導。", doc_final_report),
+    ])
+
     for item_name, ratio, display_order, note, source_document_id in distribution_rules:
         upsert_profit_distribution_rule(conn, project_id, source_document_id, item_name, ratio, display_order, note)
 
     metrics = [
+        ("capacity_area_factor_m2_per_kwp", "technical", "official-penghu-114", 5.0, "m2/kW", "南寮第一階段初估係數，作為網站官方預設", doc_final_report),
+        ("nanliao_case_area_factor_m2_per_kwp", "technical", "nanliao-case", 4.91, "m2/kW", "南寮第二階段案例反推係數", doc_final_report),
+        ("module_watt", "technical", "site-default", 410, "W", "網站預設單片模組瓦數", doc_final_report),
+        ("module_area_m2", "technical", "site-default", 1.95, "m2/panel", "網站預設單片模組面積", doc_final_report),
+        ("annual_generation_per_kwp", "technical", "official-penghu-114", 1249, "kWh/kW/year", "114 年澎湖官方平均年發電係數", doc_final_report),
+        ("nanliao_case_annual_generation_per_kwp", "technical", "nanliao-case", 1263, "kWh/kW/year", "南寮案例年發電係數", doc_final_report),
+        ("daily_generation_per_kwp", "technical", "official-penghu-114", 3.42, "kWh/kW/day", "114 年澎湖官方平均日發電係數", doc_final_report),
+        ("nanliao_case_daily_generation_per_kwp", "technical", "nanliao-case", 3.46, "kWh/kW/day", "南寮案例日發電係數", doc_final_report),
+        ("construction_unit_cost_per_kwp", "finance", "2026-final", 60000, "TWD/kWp", "2026 統整版建置單價", doc_final_report),
+        ("carbon_factor_kg_per_kwh", "environment", "official-113", 0.474, "kgCO2e/kWh", "113 年度官方電力排碳係數", doc_final_report),
+        ("nanliao_solar_irradiation", "environment", "2026-final", 4.6872, "kWh/m2/day", "NASA 南寮全天空表面短波下行輻射度", doc_final_report),
+        ("penghu_pv_capacity_mw", "regional-context", "2024-11", 68.47, "MW", "澎湖光電容量", doc_final_report),
+        ("penghu_wind_capacity_mw", "regional-context", "2024-11", 19.2, "MW", "澎湖風電容量", doc_final_report),
+        ("penghu_pv_generation_share", "regional-context", "2025-Q1", 0.3225, "ratio", "澎湖光電發電占比", doc_final_report),
+        ("roof_temperature_reduction_min_c", "environment", "2026-final", 2, "C", "屋頂光電降溫效益下限", doc_final_report),
+        ("roof_temperature_reduction_max_c", "environment", "2026-final", 3, "C", "屋頂光電降溫效益上限", doc_final_report),
         ("planned_capacity_kw", "planning", "2023-plan", 87.75, "kW", "執行規劃容量", doc_exec_plan),
         ("project_budget_twd", "planning", "2023-plan", 5265000, "TWD", "專案總預算", doc_exec_plan),
         ("reference_irr", "planning", "2023-plan", 0.0878, "ratio", "規劃 IRR", doc_exec_plan),
@@ -875,6 +947,11 @@ def seed_base_data(conn):
         ("場址合作回饋", "site-partnership", "透過場址租金或合作回饋，讓提供屋頂與場域的合作夥伴能持續參與。", 30, doc_exec_plan),
         ("在地示範複製", "development", "把三處場景與營運成果整理成可複製模型，支持更多社區推進公民電廠。", 40, doc_company),
     ]
+    programs.extend([
+        ("屋頂降溫效益", "environment", "2026 統整版指出屋頂太陽能板建置後可降低房舍內部溫度約 2 至 3 度，可作為居民溝通時的非財務效益。", 50, doc_final_report),
+        ("永續教育素材", "education", "把南寮案連結到 SDGs 潔淨能源、永續城鄉與氣候行動，作為社區教育與對外說明素材。", 60, doc_final_report),
+    ])
+
     for program_name, program_type, description, display_order, source_document_id in programs:
         upsert_community_benefit_program(conn, project_id, source_document_id, program_name, program_type, description, display_order)
 

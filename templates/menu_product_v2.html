@@ -68,11 +68,6 @@
       color: inherit;
       text-decoration: none;
     }
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 0;
-    }
     .brand-mark {
       width: 46px;
       height: 46px;
@@ -421,7 +416,7 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand-link" href="/menu" aria-label="????">
+      <a class="brand-link" href="/menu" aria-label="返回首頁">
         <div class="brand-mark">CP</div>
         <div class="brand-copy">
           <strong>公民電廠</strong>
@@ -431,6 +426,7 @@
       <nav class="nav-links" aria-label="主導覽">
         <a href="/menu">平台首頁</a>
         <a href="/project">南寮案例</a>
+        <a href="/site-estimate">案場估算</a>
         <a href="/calc?amount=10000">投資試算</a>
         <a href="/progress">SOP 追蹤</a>
       </nav>
@@ -451,10 +447,10 @@
         <div class="hero-copy">
           <div class="hero-kicker">Citizen Power Companion Platform</div>
           <h1><span class="accent">看懂公民電廠</span>與推進下一步</h1>
-          <p>這是一個把案例、試算、SOP 對位與 LINE 互動整合在一起的陪伴式平台。你可以先看南寮案例，再做投資試算，最後確認自己現在對應到南寮 SOP 的哪一步。</p>
+          <p>看案例、估案場、做試算、追進度。</p>
           <div class="hero-actions">
-            <a class="primary" href="/project">了解南寮案例</a>
-            <a class="secondary" href="/calc?amount=10000">立即試算</a>
+            <a class="primary" href="/project">看南寮案例</a>
+            <a class="secondary" href="/site-estimate">估案場</a>
           </div>
         </div>
       </div>
@@ -470,19 +466,25 @@
           <a class="feature-card reveal" data-delay="1" href="/project">
             <div class="tag">Case</div>
             <strong>先看一個真實案例怎麼做出來</strong>
-            <p>把南寮公民電廠整理成可閱讀的案例頁，直接看到案場背景、里程碑與成果。</p>
+            <p>查看案場背景、里程碑與成果。</p>
             <div class="feature-arrow">前往南寮案例</div>
           </a>
-          <a class="feature-card reveal" data-delay="2" href="/calc?amount=10000">
+          <a class="feature-card reveal" data-delay="2" href="/site-estimate">
+            <div class="tag">Estimate</div>
+            <strong>先估案場大小能做出多少電</strong>
+            <p>輸入坪數，取得容量、板數、發電與減碳估算。</p>
+            <div class="feature-arrow">前往案場估算</div>
+          </a>
+          <a class="feature-card reveal" data-delay="3" href="/calc?amount=10000">
             <div class="tag">Calculator</div>
             <strong>把投入與回報關係先看清楚</strong>
-            <p>用同一套案場資料試算投入金額、參與比例與參考收益，幫助判斷是否適合參與。</p>
+            <p>輸入金額，取得參與位置與參考收益。</p>
             <div class="feature-arrow">前往投資試算</div>
           </a>
-          <a class="feature-card reveal" data-delay="3" href="/progress">
+          <a class="feature-card reveal" data-delay="4" href="/progress">
             <div class="tag">SOP</div>
             <strong>把目前位置直接對回 SOP</strong>
-            <p>不是只有紀錄進度，而是直接告訴你現在對應南寮的哪一步，以及接下來要做什麼。</p>
+            <p>查看目前對應的 SOP 步驟與下一步。</p>
             <div class="feature-arrow">前往 SOP 追蹤</div>
           </a>
         </div>
@@ -523,28 +525,28 @@
           <div class="utility-card reveal" data-delay="2">
             <div>
               <strong>LINE FAQ 入口</strong>
-              <p>可從 LINE 直接進入常見問題、建立流程、補助、場址與 SOP 對位。</p>
+              <p>常見問題、建立流程、補助、場址與 SOP 對位。</p>
             </div>
             <a href="/menu">查看</a>
           </div>
           <div class="utility-card reveal" data-delay="3">
             <div>
               <strong>南寮案例頁</strong>
-              <p>南寮案例已經整合到平台，可作為公民電廠陪伴流程的示範版本。</p>
+              <p>查看南寮公民電廠案例。</p>
             </div>
             <a href="/project">前往</a>
           </div>
           <div class="utility-card reveal" data-delay="4">
             <div>
               <strong>投資試算工具</strong>
-              <p>先理解投入與參考回報，再判斷自己是否適合參與或推進專案。</p>
+              <p>試算投入金額與參考回報。</p>
             </div>
             <a href="/calc?amount=10000">前往</a>
           </div>
           <div class="utility-card reveal" data-delay="1">
             <div>
               <strong>SOP 對位</strong>
-              <p>把目前進度映射到南寮 SOP，清楚看到當前步驟與下一步建議。</p>
+              <p>查看目前步驟與下一步建議。</p>
             </div>
             <a href="/progress">前往</a>
           </div>
@@ -552,7 +554,7 @@
       </aside>
     </section>
 
-    <div class="footer">Hero 影片檔可直接放到 `/static/citizen-power-hero.mp4`，目前沒有影片時會自動顯示海報圖。</div>
+    <div class="footer">公民電廠陪伴式平台</div>
   </main>
 
   <script>
