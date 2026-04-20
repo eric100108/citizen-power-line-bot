@@ -9,6 +9,7 @@ from line_service import (
     get_liff_id,
     get_line_profile_from_access_token,
     reply_faq_quick_reply,
+    reply_human_help_card,
     reply_line_message,
     reply_related_faq_quick_reply,
     reply_start_build_quick_reply,
@@ -344,7 +345,7 @@ def webhook():
             continue
 
         if user_message in HUMAN_HELP_KEYWORDS or inferred_intent == "human_help":
-            reply_line_message(reply_token, build_human_help_message())
+            reply_human_help_card(reply_token, build_human_help_message())
             continue
 
         if user_message in CASE_KEYWORDS or inferred_intent == "case":

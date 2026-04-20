@@ -128,11 +128,22 @@ def _card_title(text, default_title="公民電廠助手"):
     return default_title
 
 
-def _hero_image_url():
+def _line_card_image_url(title):
     base_url = get_public_base_url()
     if not base_url.startswith("https://"):
         return ""
-    return f"{base_url}/static/hero-photo.jpg"
+
+    image_map = {
+        "常見問題": "line-faq.jpg",
+        "相關問題": "line-faq.jpg",
+        "開始建立電廠": "line-start-build.jpg",
+        "補助資訊": "line-subsidy.jpg",
+        "場址盤點": "line-site.jpg",
+        "SOP 進度": "line-sop.jpg",
+        "真人協助": "line-human-help.jpg",
+    }
+    filename = image_map.get(title, "line-start-build.jpg")
+    return f"{base_url}/static/{filename}"
 
 
 def _build_flex_quick_reply_message(title, subtitle, text, items):
@@ -203,7 +214,7 @@ def _build_flex_quick_reply_message(title, subtitle, text, items):
         },
     }
 
-    image_url = _hero_image_url()
+    image_url = _line_card_image_url(title)
     if image_url:
         bubble["hero"] = {
             "type": "image",
@@ -289,6 +300,21 @@ def reply_related_faq_quick_reply(reply_token, text, questions):
         return
 
     reply_line_message(reply_token, text)
+
+
+def reply_human_help_card(reply_token, text):
+    items = [
+        _quick_reply_item("FAQ", "FAQ"),
+        _quick_reply_item("開始建立電廠", "開始建立電廠"),
+        _quick_reply_item("場址", "場址"),
+    ]
+    reply_line_flex_quick_reply(
+        reply_token,
+        "真人協助",
+        "已收到需求，請稍等。",
+        text,
+        items,
+    )
 
 
 def get_liff_id():
