@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ | 公民電廠平台</title>
+  <style>
+    :root {
+      --bg:#f4f8f3;
+      --text:#14261f;
+      --sub:#5d6f66;
+      --muted:#7b8d84;
+      --line:#d5e3db;
+      --surface:rgba(255,255,255,.94);
+      --nav:#103845;
+      --nav2:#1b5664;
+      --green:#35c65a;
+      --blue:#1d84cc;
+      --shadow:0 28px 72px rgba(17,50,37,.12);
+      --radius-xl:34px;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      min-height:100vh;
+      font-family:"Microsoft JhengHei","PingFang TC",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(53,198,90,.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(29,132,204,.14), transparent 30%),
+        linear-gradient(180deg,#fbfdfb 0%,var(--bg) 100%);
+    }
+    .shell { width:min(1480px, calc(100% - 36px)); margin:0 auto; }
+    .topbar {
+      position:sticky;
+      top:0;
+      z-index:30;
+      background:linear-gradient(90deg,var(--nav),var(--nav2));
+      color:#fff;
+      box-shadow:0 10px 26px rgba(11,32,40,.18);
+    }
+    .topbar-inner {
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+    }
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:14px;
+      color:inherit;
+      text-decoration:none;
+    }
+    .brand-mark {
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,#43d14a,#1f8bf4);
+      font-weight:800;
+    }
+    .brand-copy strong { display:block; font-size:21px; line-height:1.1; }
+    .brand-copy span { display:block; margin-top:4px; font-size:12px; color:rgba(255,255,255,.76); letter-spacing:.08em; }
+    .hero {
+      padding:clamp(44px,8vw,92px) 0;
+      color:#fff;
+      background:
+        linear-gradient(120deg,rgba(8,28,35,.78),rgba(10,50,43,.46)),
+        linear-gradient(135deg,#1d5461 0%,#217b7a 46%,#35c65a 100%);
+    }
+    .badge { display:inline-flex; padding:8px 14px; border-radius:999px; background:rgba(255,255,255,.14); font-size:13px; font-weight:700; }
+    h1 { margin:16px 0 12px; font-size:clamp(42px,6vw,76px); line-height:1.02; letter-spacing:-.035em; }
+    .hero p { margin:0; max-width:760px; color:rgba(255,255,255,.9); line-height:1.85; font-size:17px; }
+    .section { padding:24px 0 44px; }
+    .panel {
+      background:var(--surface);
+      border:1px solid rgba(255,255,255,.88);
+      border-radius:var(--radius-xl);
+      padding:28px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(10px);
+    }
+    form {
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      margin-bottom:20px;
+    }
+    input {
+      width:100%;
+      border:1px solid #cfe0d5;
+      border-radius:18px;
+      padding:15px 18px;
+      font-size:16px;
+      font-family:inherit;
+      color:var(--text);
+      background:#fff;
+    }
+    .button {
+      border:0;
+      border-radius:18px;
+      padding:14px 20px;
+      background:linear-gradient(135deg,var(--green),#1fb16f);
+      color:#fff;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .faq-list { display:grid; gap:14px; }
+    .faq-card {
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:20px 22px;
+      background:#fff;
+      box-shadow:0 16px 34px rgba(19,58,42,.06);
+    }
+    .faq-card span {
+      display:inline-flex;
+      margin-bottom:10px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#eaf4ff;
+      color:#145d8d;
+      font-size:12px;
+      font-weight:800;
+    }
+    .faq-card h2 {
+      margin:0 0 10px;
+      font-size:22px;
+      line-height:1.35;
+    }
+    .faq-card p {
+      margin:0;
+      color:var(--sub);
+      line-height:1.85;
+      white-space:pre-line;
+    }
+    .empty {
+      padding:22px;
+      border-radius:24px;
+      background:#fff7e7;
+      color:#8a5c08;
+      border:1px solid #ecd8aa;
+      line-height:1.8;
+    }
+    @media (max-width:720px) {
+      .shell { width:calc(100% - 24px); }
+      .topbar-inner { min-height:68px; }
+      .panel { padding:22px; }
+      form { grid-template-columns:1fr; }
+      .button { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  {% include "_site_drawer.html" %}
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <button class="cp-menu-trigger" type="button" onclick="cpOpenDrawer()" aria-label="開啟頁面切換"><span></span></button>
+      <a class="brand" href="/menu" aria-label="返回首頁">
+        <div class="brand-mark">CP</div>
+        <div class="brand-copy"><strong>公民電廠</strong><span>CITIZEN POWER PLATFORM</span></div>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell">
+        <div class="badge">FAQ</div>
+        <h1>常見問題</h1>
+        <p>查詢公民電廠建立流程、補助、場址、試算與 SOP 對位。</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell panel">
+        <form method="get" action="/faq">
+          <input name="keyword" type="search" value="{{ keyword }}" placeholder="輸入關鍵字，例如：補助、場址、開始建立電廠">
+          <button class="button" type="submit">搜尋</button>
+        </form>
+
+        {% if faq_rows %}
+        <div class="faq-list">
+          {% for item in faq_rows %}
+          <article class="faq-card">
+            {% if item.category_name %}<span>{{ item.category_name }}</span>{% endif %}
+            <h2>{{ item.question }}</h2>
+            <p>{{ item.answer }}</p>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty">查無符合條件的 FAQ。可以改搜「補助」、「場址」或「開始建立電廠」。</div>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

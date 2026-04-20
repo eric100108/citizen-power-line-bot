@@ -1,38 +1,61 @@
 <style>
   .cp-menu-trigger {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     flex: 0 0 auto;
     border: 0;
-    border-radius: 16px;
+    border-radius: 14px;
     display: inline-grid;
     place-items: center;
     background: #075c62;
     color: #ffffff;
     cursor: pointer;
-    box-shadow: 0 14px 30px rgba(4, 38, 45, .18);
+    box-shadow: 0 10px 22px rgba(4, 38, 45, .16);
   }
   .cp-menu-trigger span,
   .cp-menu-trigger::before,
   .cp-menu-trigger::after {
     content: "";
-    width: 22px;
+    width: 20px;
     height: 2px;
     border-radius: 999px;
     background: currentColor;
     display: block;
   }
   .cp-menu-trigger {
-    gap: 5px;
+    gap: 4px;
   }
   .topbar .topbar-inner {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
+    gap: 14px !important;
   }
   .topbar .brand,
   .topbar .brand-link {
     min-width: 0;
+    gap: 12px !important;
+  }
+  .topbar .brand-mark {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 14px !important;
+    font-size: 15px !important;
+  }
+  .topbar .brand-copy strong {
+    font-size: 20px !important;
+    line-height: 1.05 !important;
+    letter-spacing: .01em !important;
+  }
+  .topbar .brand-copy span {
+    margin-top: 4px !important;
+    font-size: 11px !important;
+    letter-spacing: .12em !important;
   }
   .cp-drawer-scrim {
     position: fixed;
@@ -146,9 +169,26 @@
   }
   @media (max-width: 720px) {
     .cp-menu-trigger {
-      width: 46px;
-      height: 46px;
-      border-radius: 15px;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+    }
+    .topbar .topbar-inner {
+      padding-left: 16px !important;
+      padding-right: 16px !important;
+      gap: 12px !important;
+    }
+    .topbar .brand-mark {
+      width: 38px !important;
+      height: 38px !important;
+      font-size: 14px !important;
+    }
+    .topbar .brand-copy strong {
+      font-size: 18px !important;
+    }
+    .topbar .brand-copy span {
+      font-size: 10px !important;
+      letter-spacing: .10em !important;
     }
     .cp-drawer {
       width: min(360px, 92vw);
@@ -194,7 +234,7 @@
       <strong>SOP 進度對位</strong>
       <span>查看目前步驟與下一步建議。</span>
     </a>
-    <a class="cp-drawer-link" href="/faq?keyword=補助">
+    <a class="cp-drawer-link" href="/faq">
       <strong>FAQ</strong>
       <span>補助、場址、建立流程與常見問題。</span>
     </a>

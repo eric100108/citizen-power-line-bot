@@ -41,9 +41,9 @@
         <h1>{{ project.name }}</h1>
         <p>{{ project.description }}</p>
         <div class="grid guide-grid reveal" style="margin-top:20px;">
-          <div class="card hero-pill"><span>公開版重點</span><strong>只呈現流程與可複製經驗</strong></div>
-          <div class="card hero-pill"><span>資料處理原則</span><strong>敏感財務與分配資料不在網頁公開</strong></div>
-          <div class="card hero-pill"><span>使用方式</span><strong>先看案例，再回 SOP 找自己的位置</strong></div>
+          <div class="card hero-pill"><span>案例重點</span><strong>社區如何啟動與推進</strong></div>
+          <div class="card hero-pill"><span>可複製經驗</span><strong>場址、補助、協作與營運</strong></div>
+          <div class="card hero-pill"><span>下一步</span><strong>估算案場或對位 SOP</strong></div>
         </div>
       </div>
     </section>
@@ -53,7 +53,6 @@
         <div class="panel reveal">
           <div class="section-head"><h2>法規對照</h2><span>依公開募集型公民電廠辦法整理</span></div>
           <p class="lead">南寮案例頁現在按辦法要求的公開資訊整理，只說明適用規則、參與原則、社區回饋與流程節奏。南寮實際補助金額、總設置經費、投資比例、收益分配與個別場址細節不在網頁揭露。</p>
-          <div class="notice">本頁僅提供公開版案例與法規對照。敏感資料保留在資料庫供系統比對，不直接對外顯示。</div>
           {% if regulation_summary %}
           <div class="grid rule-grid" style="margin-top:18px;">
             {% for item in regulation_summary %}
@@ -69,9 +68,7 @@
       </div>
     </section>
 
-    <section class="section"><div class="shell"><div class="panel reveal"><div class="section-head"><h2>這頁現在看什麼</h2><span>公開版案例摘要</span></div><p class="lead">這個案例頁現在只保留適合公開展示的資訊，讓使用者理解公民電廠如何從社區啟動、場址盤點、申請準備一路走到營運與回饋。南寮的敏感財務、分配、補助與其他較私密內容只留在資料庫供系統內部比對。</p><div class="grid hero-pills"><div class="card"><span>案例用途</span><strong>理解流程</strong></div><div class="card"><span>主要價值</span><strong>可複製經驗</strong></div><div class="card"><span>公開程度</span><strong>摘要版</strong></div></div></div></div></section>
-
-    <section class="section"><div class="shell grid two"><section class="panel reveal"><div class="section-head"><h2>南寮是怎麼一路推進的</h2><span>里程碑與服務步驟</span></div><p class="lead">把案例節奏拆開來看，重點不是個別數字，而是知道社區型公民電廠會經過哪些判斷、準備與協調。</p>{% if milestones %}<div class="timeline">{% for item in milestones %}<div class="timeline-item"><strong>{{ item.title }}</strong><div class="meta"><span>{{ item.stage_group }}</span><span>{{ item.planned_period }}</span><span>{{ item.status }}</span></div>{% if item.note %}<div style="margin-top:12px;color:var(--sub);line-height:1.8;">{{ item.note }}</div>{% endif %}</div>{% endfor %}</div>{% else %}<div class="card">目前還沒有可顯示的里程碑資料。</div>{% endif %}</section><aside class="panel reveal"><div class="section-head"><h2>公開說明原則</h2><span>只提供流程，不公開細部財務</span></div><p class="lead">網站端只保留流程理解與陪伴脈絡。像是補助金額、投資安排、分配比例、報酬指標、個別場域細節等資料，都不在前台顯示。</p><div class="grid benefit-grid" style="grid-template-columns:1fr;"><div class="card"><strong>資料留在資料庫</strong><p>細部資料仍保留在資料庫供系統比對與流程判斷，不會直接出現在案例頁。</p></div><div class="card"><strong>對外只講公開版</strong><p>網站與對話僅使用公開版摘要，避免把南寮較隱私或敏感內容對外揭露。</p></div><div class="card"><strong>下一步導向 SOP</strong><p>看完案例後，建議回到 SOP 對位頁，確認自己現在更接近哪一步。</p></div></div></aside></div></section>
+    <section class="section"><div class="shell grid two"><section class="panel reveal"><div class="section-head"><h2>南寮是怎麼一路推進的</h2><span>里程碑與服務步驟</span></div><p class="lead">從社區啟動、場址盤點、申請準備到營運回饋，整理成可對照的推進節奏。</p>{% if milestones %}<div class="timeline">{% for item in milestones %}<div class="timeline-item"><strong>{{ item.title }}</strong><div class="meta"><span>{{ item.stage_group }}</span><span>{{ item.planned_period }}</span><span>{{ item.status }}</span></div>{% if item.note %}<div style="margin-top:12px;color:var(--sub);line-height:1.8;">{{ item.note }}</div>{% endif %}</div>{% endfor %}</div>{% else %}<div class="card">目前還沒有可顯示的里程碑資料。</div>{% endif %}</section><aside class="panel reveal"><div class="section-head"><h2>接下來可以做什麼</h2><span>從案例進入行動</span></div><div class="grid benefit-grid" style="grid-template-columns:1fr;"><a class="card" href="/site-estimate" style="text-decoration:none;color:inherit;"><strong>估算自己的案場</strong><p>輸入屋頂或基地面積，先看容量、發電、FIT 收益、補助上限與減碳量。</p></a><a class="card" href="/progress" style="text-decoration:none;color:inherit;"><strong>對位目前進度</strong><p>把自己的狀態對回 SOP，確認現在在哪一步、下一步該補什麼。</p></a><a class="card" href="/faq?keyword=開始建立電廠" style="text-decoration:none;color:inherit;"><strong>查看建立流程</strong><p>從起案、場址、補助到協作，把問題拆成可執行的步驟。</p></a></div></aside></div></section>
 
     <section class="section"><div class="shell grid two"><section class="panel reveal"><div class="section-head"><h2>公開版場域摘要</h2><span>匿名化呈現</span></div>{% if sites %}<div class="grid site-grid">{% for item in sites %}<div class="card"><span>{{ item.site_type }} / {{ item.status }}</span><strong>{{ item.site_name }}</strong><p>{{ item.note }}</p></div>{% endfor %}</div>{% else %}<div class="card">目前沒有可公開顯示的場域摘要。</div>{% endif %}<div class="section-head" style="margin-top:24px;"><h2>社區回饋方向</h2><span>公開版回饋輪廓</span></div>{% if benefit_programs %}<div class="grid benefit-grid">{% for item in benefit_programs %}<div class="card"><strong>{{ item.program_name }}</strong><p>{{ item.description }}</p></div>{% endfor %}</div>{% else %}<div class="card">目前沒有可公開顯示的社區回饋方向。</div>{% endif %}</section><section class="panel reveal"><div class="section-head"><h2>陪伴式 SOP 摘要</h2><span>公開版流程節奏</span></div>{% if service_steps %}<div class="grid sop-grid">{% for item in service_steps[:6] %}<div class="card"><span>{{ item.stage_group }} / {{ item.audience }}</span><strong>{{ item.title }}</strong><p>{{ item.summary }}</p></div>{% endfor %}</div>{% else %}<div class="card">目前沒有可顯示的 SOP 摘要。</div>{% endif %}<div class="section-head" style="margin-top:24px;"><h2>文件重點摘錄</h2><span>公開版知識摘要</span></div>{% if document_highlights %}<div class="grid highlight-grid">{% for item in document_highlights[:6] %}<div class="card"><span>{{ item.highlight_type }} / {{ item.source_title }}</span><strong>{{ item.title }}</strong><p>{{ item.content }}</p></div>{% endfor %}</div>{% else %}<div class="card">目前沒有可公開顯示的文件摘要。</div>{% endif %}</section></div></section>
   </main>

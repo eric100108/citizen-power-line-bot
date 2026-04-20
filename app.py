@@ -19,6 +19,7 @@ from progress_repo import create_progress, get_latest_user_progress, get_progres
 from progress_service import PROGRESS_STAGES, build_predicted_progress, build_sop_status, parse_progress_date
 
 app = Flask(__name__)
+app.json.ensure_ascii = False
 
 START_BUILD_KEYWORDS = {"開始建立電廠", "開始建電廠", "我要開始建立電廠", "開始建立電廠要做什麼？", "我要怎麼開始建立電廠"}
 FULL_SOP_KEYWORDS = {"完整 SOP", "完整SOP", "我要看完整 SOP", "我要看完整SOP"}
@@ -324,6 +325,7 @@ def home():
         "features": {
             "faq_all": "/faq",
             "faq_search": "/faq?keyword=補助",
+            "faq_api": "/api/faq?keyword=補助",
             "calc": "/calc?amount=10000",
             "site_estimate": "/site-estimate?site_ping=30&sales_mode=fit",
             "progress": "/progress",
@@ -339,7 +341,13 @@ def home():
 def faq():
     keyword = request.args.get("keyword", default="", type=str)
     rows = list_faqs(keyword)
+    return render_template("faq_v1.html", keyword=keyword, faq_rows=rows)
 
+
+@app.route("/api/faq")
+def faq_api():
+    keyword = request.args.get("keyword", default="", type=str)
+    rows = list_faqs(keyword)
     if not rows:
         return jsonify({"message": "查無符合條件的 FAQ"}), 404
 
