@@ -76,12 +76,12 @@ def build_start_build_message(service_steps, user_message=""):
             return answer
 
     if any(term in normalized for term in ["先做什麼", "先幹嘛", "還沒資料"]):
-        answer = get_faq_answer_by_question("系統會先幫社區做哪些前期工作？")
+        answer = get_faq_answer_by_question("開始前要先準備哪些資料？")
         if answer:
             return answer
 
     if not service_steps:
-        return "目前還沒有建立電廠 SOP 資料，建議先整理社區需求、可用場址與推動窗口。"
+        return "目前還沒有建立電廠 SOP 資料，建議先確認社區需求、可用場址與推動窗口。"
 
     step_lines = []
     for index, step in enumerate(service_steps[:4], start=1):
@@ -89,7 +89,7 @@ def build_start_build_message(service_steps, user_message=""):
 
     first_step = service_steps[0]
     return (
-        "開始建立公民電廠，建議先照著南寮的可複製 SOP 往前走：\n"
+        "開始建立公民電廠，建議先照著南寮 SOP 往前走：\n"
         + "\n".join(step_lines)
         + f"\n\n你現在最適合先做的是：{first_step['title']}"
         + f"\n建議動作：{first_step['recommended_action']}"
@@ -114,7 +114,7 @@ def build_site_guidance_message(service_steps):
             f"場址盤點對應南寮 SOP 的「{survey_step['title']}」。"
             f"\n你現在要先做的是：{survey_step['summary']}"
             f"\n建議動作：{survey_step['recommended_action']}"
-            "\n\n最少先整理 3 件事：可用屋頂、建物現況照片、基本用電情境。"
+            "\n\n最少先準備 3 件事：可用屋頂、建物現況照片、基本用電情境。"
         )
     return "場址盤點建議先確認可用屋頂、建物資料與用電情境，再進入容量與法規評估。"
 
@@ -184,7 +184,7 @@ def build_progress_position_message(line_user_id, service_steps, project_rows):
     if not current_step:
         return "目前還沒有足夠的進度資料可對位。"
 
-    prefix = "你目前對應到" if user_latest else "目前系統先以南寮案最新進度對位到"
+    prefix = "你目前對應到" if user_latest else "目前以南寮案最新進度對位到"
     return (
         f"{prefix}南寮 SOP 第 {sop_status['current_order']} / {sop_status['step_count']} 步。"
         f"\n目前階段：{sop_status['current_stage']}"

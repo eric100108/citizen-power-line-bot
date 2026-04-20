@@ -62,18 +62,42 @@ FAQ_ALIAS_GROUPS = {
 }
 
 PUBLIC_SAFE_ANSWERS = {
-    "南寮案的規劃規模大概是多少？": "這個案例可作為社區型公民電廠的參考樣態，但網站與對外回覆不公開南寮的細部容量、預算與投資結構。若系統要做流程對位，仍會使用資料庫中的內部資料進行比對。",
-    "這個案子有補助嗎？": "這類案例通常會先評估是否有政府計畫或地方型資源可申請，但網站與對外回覆不公開南寮的補助金額、比例與內部申請細節。建議先確認申請窗口、資格與附件需求。",
-    "居民要怎麼參與投資？": "居民是否參與、如何參與，通常會依社區共識、法規條件與推進方式另行設計。網站與對外回覆不公開南寮的投資安排、金額門檻或內部分配資料。",
-    "投資收益會怎麼分配？": "收益與回饋的細部設計屬於案場內部規劃資料。對外只會說明公民電廠通常會兼顧營運、維護、合作方與社區回饋，但不公開南寮的具體分配比例。",
-    "公民電廠有機會賺錢嗎？": "是否值得投入，應該看案場條件、法規、維運能力與社區目標，而不是單看單一財務數字。網站與對外回覆不公開南寮的內部收益模型或報酬指標。",
-    "社區回饋通常會怎麼安排？": "社區回饋通常會回到地方公共需求、教育推廣、公共空間或社區活動，但個別案場的回饋比例與方式屬於內部規劃資料，不會在網站與對外回覆中公開。",
-    "南寮案現在進行到哪裡？": "目前系統會把這個案例當成正式運轉後的示範流程參考，但網站與對外回覆不公開南寮的細部營運數據或內部節點資料。",
-    "目前已經做出哪些成果？": "目前可對外說明的是：這個案例已累積可供複製的社區推進經驗，涵蓋社區啟動、場址盤點、補助評估、施工協調到營運回饋；但不公開南寮的細部營運數字。",
+    "南寮案的規劃規模大概是多少？": "南寮可作為社區型公民電廠案例參考，重點在推動流程、場址盤點、補助評估與營運回饋。",
+    "這個案子有補助嗎？": "公民電廠通常會先評估中央、地方或專案型資源。建議先確認申請窗口、資格條件、容量門檻、社區參與要求與附件清單。",
+    "如何參與投資？": "先看募集規則、最低投入金額、權利義務、收益方式與退出規則，再決定是否參與。",
+    "居民要怎麼參與投資？": "居民參與方式會依社區共識、募集規則與案場條件設計。一般會先辦說明，再確認投入金額、權利義務、回饋方式與退出規則。",
+    "投資收益會怎麼分配？": "收益分配通常會同時考量維運、場址租金、參與者回饋與社區公共用途。實際比例需要依合約、治理規則與案場財務條件確認。",
+    "公民電廠有機會賺錢嗎？": "有機會，但不能只看單一報酬數字。需要一起看案場條件、補助、售電模式、維運成本、合約年期與社區目標。",
+    "社區回饋通常會怎麼安排？": "社區回饋可以用在能源教育、公共空間、社區活動、弱勢支持或地方共同需求。重點是先把用途、管理方式與揭露節奏說清楚。",
+    "南寮案現在進行到哪裡？": "南寮案例已可作為營運後的流程參考，重點在於它如何從社區啟動、場址盤點、補助申請、施工協調走到營運回饋。",
+    "案場現在進行到哪裡？": "目前進度可到進度頁查看，重點是確認現在階段、已完成項目與下一步待辦。",
+    "目前已經做出哪些成果？": "目前可參考的是南寮累積的社區推進經驗，包含社區啟動、場址盤點、補助評估、施工協調與營運回饋。",
+    "開始前要先整理哪些資料？": "開始前先確認社區需求、可用屋頂、用電情境、補助資格與推動窗口，再進入場址評估。",
+    "申請補助前要先準備什麼？": "先準備組織資料、場址現況、初步容量、預算、期程與地方效益說明。",
+    "屋頂適不適合做公民電廠，要先看什麼？": "先看屋頂使用權、遮蔭、結構安全、可用面積、併網條件與後續維運。",
+    "補助沒有申請到，案子還能做嗎？": "可以，但要重算案場規模、募集金額、售電模式、維運成本與回收期。",
+    "公民電廠最大的風險通常是什麼？": "常見風險包含場址條件、行政時程、居民共識、施工驗收、維運成本與售電合約。",
+    "系統會先幫社區做哪些前期工作？": "開始前先確認社區需求、可用屋頂、用電情境、補助資格與推動窗口，再進入場址評估。",
+    "為什麼系統要把文件整理進資料庫？": "會用到的資料包含計畫書、補助規則、案場資料與營運摘要。",
+    "系統怎麼估算需要幾片太陽能板？": "先用可用面積估容量，再用容量換算模組片數。預設以 410W/片估算，正式設計仍需依實際模組與現場排布確認。",
+}
+
+PUBLIC_QUESTION_LABELS = {
+    "系統會先幫社區做哪些前期工作？": "開始前要先準備哪些資料？",
+    "開始前要先整理哪些資料？": "開始前要先準備哪些資料？",
+    "我不知道該不該做公民電廠，先怎麼判斷？": "還不確定要不要做，先看哪些條件？",
+    "為什麼系統要把文件整理進資料庫？": "平台會用到哪些專案資料？",
+    "系統怎麼估算需要幾片太陽能板？": "太陽能板片數怎麼估？",
+}
+
+HIDDEN_PUBLIC_QUESTIONS = {
+    "為什麼系統要把文件整理進資料庫？",
+    "平台會整理哪些專案資料？",
+    "平台會用到哪些專案資料？",
 }
 
 SENSITIVE_PATTERNS = [
-    "2,632,500", "5,265,000", "8.78%", "62.335", "393,615", "78,723", "50%", "IRR", "分配", "股利", "預算", "補助金額", "比例", "營收", "容量",
+    "2,632,500", "5,265,000", "8.78%", "62.335", "393,615", "78,723", "IRR", "股利", "補助金額",
 ]
 
 
@@ -151,8 +175,12 @@ def sanitize_faq_answer(question, answer):
     if question in PUBLIC_SAFE_ANSWERS:
         return PUBLIC_SAFE_ANSWERS[question]
     if _looks_sensitive(answer):
-        return "這題涉及個別案場的敏感或較私密資料，網站與對外回覆不公開南寮的細部數字與分配內容。若系統需要判斷流程位置，仍會使用資料庫中的內部資料進行比對。"
+        return "請先確認場址、合約、補助、維運與社區共識，再進一步試算。"
     return answer
+
+
+def display_faq_question(question):
+    return PUBLIC_QUESTION_LABELS.get(question, question)
 
 
 def _fetch_faq_rows(visibility_levels):
@@ -174,8 +202,12 @@ def _fetch_faq_rows(visibility_levels):
 
 def _find_question_row(question, visibility_levels):
     rows = _fetch_faq_rows(visibility_levels)
+    candidates = {question, display_faq_question(question)}
+    for stored_question, display_question in PUBLIC_QUESTION_LABELS.items():
+        if question == display_question:
+            candidates.add(stored_question)
     for row in rows:
-        if row["question"] == question:
+        if row["question"] in candidates:
             return row
     return None
 
@@ -184,7 +216,7 @@ def get_faq_answer_by_question(question):
     row = _find_question_row(question, PUBLIC_VISIBILITY)
     if not row:
         return None
-    return sanitize_faq_answer(question, row["answer"])
+    return sanitize_faq_answer(row["question"], row["answer"])
 
 
 def get_faq_answer_by_question_internal(question):
@@ -199,16 +231,18 @@ def _find_faq_matches(query, limit=3, min_score=18, visibility_levels=PUBLIC_VIS
     if alias_question:
         alias_answer = get_faq_answer_by_question(alias_question) if sanitize_output else get_faq_answer_by_question_internal(alias_question)
         if alias_answer:
-            return [{"question": alias_question, "answer": alias_answer, "category_name": "", "score": 999, "visibility_level": "public"}]
+            return [{"question": display_faq_question(alias_question), "answer": alias_answer, "category_name": "", "score": 999, "visibility_level": "public"}]
 
     rows = _fetch_faq_rows(visibility_levels)
     scored_rows = []
     for row in rows:
+        if sanitize_output and (row["question"] in HIDDEN_PUBLIC_QUESTIONS or display_faq_question(row["question"]) in HIDDEN_PUBLIC_QUESTIONS):
+            continue
         score = _score_faq_match(query, row["question"], row["answer"], row["category_name"])
         if score >= min_score:
             scored_rows.append(
                 {
-                    "question": row["question"],
+                    "question": display_faq_question(row["question"]) if sanitize_output else row["question"],
                     "answer": sanitize_faq_answer(row["question"], row["answer"]) if sanitize_output else row["answer"],
                     "category_name": row["category_name"],
                     "score": score,
@@ -216,7 +250,16 @@ def _find_faq_matches(query, limit=3, min_score=18, visibility_levels=PUBLIC_VIS
                 }
             )
     scored_rows.sort(key=lambda item: item["score"], reverse=True)
-    return scored_rows[:limit]
+    deduped_rows = []
+    seen_questions = set()
+    for row in scored_rows:
+        if row["question"] in seen_questions:
+            continue
+        seen_questions.add(row["question"])
+        deduped_rows.append(row)
+        if len(deduped_rows) >= limit:
+            break
+    return deduped_rows
 
 
 def find_faq_matches(query, limit=3, min_score=18):
@@ -255,10 +298,19 @@ def find_faq_answer_internal(query):
 
 def list_faqs(keyword=""):
     rows = _fetch_faq_rows(PUBLIC_VISIBILITY)
-    sanitized_rows = [
-        {"question": row["question"], "answer": sanitize_faq_answer(row["question"], row["answer"]), "category_name": row["category_name"]}
-        for row in rows
-    ]
+    deduped_rows = {}
+    for row in rows:
+        question = display_faq_question(row["question"])
+        if row["question"] in HIDDEN_PUBLIC_QUESTIONS or question in HIDDEN_PUBLIC_QUESTIONS:
+            continue
+        if question in deduped_rows:
+            continue
+        deduped_rows[question] = {
+            "question": question,
+            "answer": sanitize_faq_answer(row["question"], row["answer"]),
+            "category_name": row["category_name"],
+        }
+    sanitized_rows = list(deduped_rows.values())
     if not keyword:
         return sanitized_rows
     scored_rows = []

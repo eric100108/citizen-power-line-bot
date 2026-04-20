@@ -663,12 +663,11 @@
         <div class="hero-inner">
           <div class="hero-copy reveal">
             <div class="badge">Nanliao Playbook</div>
-            <h1>把使用者的現在位置，<br>直接對位到南寮 SOP</h1>
-            <p>這一頁不是只有記錄進度，而是幫使用者看懂自己在陪伴流程中的相對位置，清楚知道現在走到哪裡、接下來要往哪裡推進。</p>
+            <h1>專案進度與待辦事項</h1>
           </div>
           <div class="hero-stats reveal" data-delay="1">
             <div class="hero-stat">
-              <span>目前對位步驟</span>
+              <span>目前步驟</span>
               <strong id="hero-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</strong>
             </div>
             <div class="hero-stat">
@@ -688,16 +687,15 @@
       <div class="shell grid two">
         <section class="panel result-panel reveal" data-delay="1">
           <div class="section-head">
-            <h2>目前對位結果</h2>
-            <span>與南寮經驗同步比對</span>
+            <h2>目前進度</h2>
+            <span>階段與待辦</span>
           </div>
-          <p class="lead">先看你現在對應到南寮的哪一步，這樣後面的提醒、文件與行動建議才會有意義。</p>
-          <div id="sop-source" class="status-pill">以南寮案最新進度作為預設基準</div>
+          <div id="sop-source" class="status-pill">目前專案進度</div>
           <div class="step-card">
             <div class="step-meta" id="current-stage-label">目前專案階段：{{ default_sop_status.current_stage }}</div>
             <strong id="current-step-title">{{ default_sop_status.current_step.title if default_sop_status.current_step else "尚未建立 SOP 步驟" }}</strong>
-            <p id="current-step-summary">{{ default_sop_status.current_step.summary if default_sop_status.current_step else "目前沒有可顯示的 SOP 資料。" }}</p>
-            <p class="sop-hint" id="current-step-action">下一個建議動作：{{ default_sop_status.current_step.recommended_action if default_sop_status.current_step else "請先建立服務步驟資料。" }}</p>
+            <p id="current-step-summary"></p>
+            <p class="sop-hint" id="current-step-action">待辦事項：{{ default_sop_status.current_step.recommended_action if default_sop_status.current_step else "請先建立服務步驟資料。" }}</p>
             <div class="ratio">
               <div class="ratio-row">
                 <div id="progress-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</div>
@@ -711,7 +709,7 @@
           {% else %}
             <p class="sop-hint" id="latest-record-text">目前尚未收到使用者進度，先以南寮專案預設進度呈現。</p>
           {% endif %}
-          {% if saved == "1" %}<div class="message success">進度已更新，系統會依新階段重新對位南寮 SOP。</div>{% elif saved == "0" %}<div class="message warning">更新失敗，請確認日期、階段與 LINE 身分資訊是否完整。</div>{% endif %}
+          {% if saved == "1" %}<div class="message success">進度已更新。</div>{% elif saved == "0" %}<div class="message warning">更新失敗，請確認日期、階段與 LINE 身分資訊是否完整。</div>{% endif %}
         </section>
 
         <section class="panel form-panel reveal" data-delay="2">
@@ -719,10 +717,9 @@
             <h2>填報你的目前進度</h2>
             <span>LINE 使用者專屬</span>
           </div>
-          <p class="lead">登入 LINE 後，系統就能把你的填報和南寮電廠的陪伴路徑對位起來，讓進度判讀更準確。</p>
           <div id="line-user-box" class="user-box">
             <strong>等待 LINE 身分驗證</strong>
-            <div>登入後系統會知道你是誰，並把你的填報進度對應到南寮 SOP 的相對位置。</div>
+            <div>登入後即可儲存你的專案階段與更新日期。</div>
           </div>
           <form method="post" action="/progress" class="form-grid" id="progress-form">
             <input type="hidden" name="line_user_id" id="line_user_id">
@@ -749,17 +746,15 @@
       <div class="shell grid two">
         <section class="panel roadmap-panel reveal" data-delay="1">
           <div class="section-head">
-            <h2>南寮 SOP 全流程</h2>
-            <span>可複製的陪伴路徑</span>
+            <h2>SOP 全流程</h2>
+            <span>從起案到營運</span>
           </div>
-          <p class="lead">把南寮案例拆成一條清楚的公民電廠陪伴流程，讓使用者知道自己在哪一格，而不是只看一串資料。</p>
           {% if service_steps %}
           <div class="sop-list" id="sop-list">
             {% for step in service_steps %}
             <div class="sop-step reveal{% if default_sop_status.current_step and step.step_code == default_sop_status.current_step.step_code %} current{% elif default_sop_status.completed_steps | selectattr('step_code', 'equalto', step.step_code) | list %} completed{% else %} upcoming{% endif %}" data-delay="{{ (loop.index0 % 4) + 1 }}" data-step-code="{{ step.step_code }}">
               <div class="sop-kicker">{{ loop.index }}. {{ step.stage_group }} / 對象：{{ step.audience }}</div>
               <strong>{{ step.title }}</strong>
-              <div>{{ step.summary }}</div>
               <div class="sop-hint">建議動作：{{ step.recommended_action }}</div>
             </div>
             {% endfor %}
@@ -785,14 +780,6 @@
                 <div id="upcoming-steps-text">{{ default_sop_status.upcoming_steps[0].title if default_sop_status.upcoming_steps else "目前已到最後一步，重點轉為營運與回饋。" }}</div>
               </div>
             </div>
-          </section>
-
-          <section class="panel reveal" data-delay="3">
-            <div class="section-head">
-              <h2>使用方式</h2>
-              <span>陪伴頁不是紀錄頁</span>
-            </div>
-            <div class="empty-state">先透過 LINE 驗證身分並填報目前階段，系統就會把你的進度映射到南寮案例的相對步驟。這樣你不只知道目前在哪裡，也會知道下一步該往哪裡推進。</div>
           </section>
         </section>
       </div>
@@ -837,7 +824,7 @@
             {% endfor %}
           </div>
           {% else %}
-          <div class="empty-state">目前已進入最後階段，預測重點改為營運揭露、回饋追蹤與複製經驗整理。</div>
+          <div class="empty-state">目前已進入最後階段，後續重點是營運紀錄、回饋追蹤與擴點準備。</div>
           {% endif %}
           <a class="back-link" href="/menu">返回功能選單</a>
         </section>
@@ -859,8 +846,8 @@
       document.getElementById("sop-source").textContent = sourceLabel;
       document.getElementById("current-stage-label").textContent = `目前專案階段：${status?.current_stage || "尚未填報"}`;
       document.getElementById("current-step-title").textContent = currentStep?.title || "尚未建立 SOP 步驟";
-      document.getElementById("current-step-summary").textContent = currentStep?.summary || "目前沒有可顯示的 SOP 資料。";
-      document.getElementById("current-step-action").textContent = `下一個建議動作：${currentStep?.recommended_action || "請先建立服務步驟資料。"}`;
+      document.getElementById("current-step-summary").textContent = "";
+      document.getElementById("current-step-action").textContent = `待辦事項：${currentStep?.recommended_action || "請先建立服務步驟資料。"}`;
       document.getElementById("progress-order").textContent = `第 ${status?.current_order || 0} / ${status?.step_count || 0} 步`;
       document.getElementById("progress-percent").textContent = `${completionRatio}%`;
       document.getElementById("ratio-fill").style.width = `${completionRatio}%`;
@@ -947,8 +934,8 @@
         return;
       }
       const sourceLabel = result.has_user_progress
-        ? `${displayName} 目前對應到的南寮 SOP`
-        : `${displayName} 尚未填報，先以南寮案最新進度作為參考`;
+        ? `${displayName} 的目前進度`
+        : `${displayName} 尚未填報，先顯示專案目前進度`;
       renderSopStatus(result, sourceLabel);
     }
 
@@ -956,7 +943,7 @@
       try {
         await liff.init({ liffId });
         if (!liff.isLoggedIn()) {
-          userBox.innerHTML = "<strong>請先登入 LINE</strong><div>登入後系統才能辨識你的身分，並把你的填報進度對應到南寮 SOP。</div>";
+          userBox.innerHTML = "<strong>請先登入 LINE</strong><div>登入後可儲存你的專案階段與更新日期。</div>";
           liff.login();
           return;
         }
@@ -978,7 +965,7 @@
         displayNameInput.value = profile.display_name;
         submitButton.disabled = false;
         submitButton.textContent = "更新我的目前進度";
-        userBox.innerHTML = `<strong>${profile.display_name} 已登入</strong><div>你現在填報的階段，會直接對應到南寮電廠的 SOP 步驟，方便判斷你目前走到哪裡。</div>`;
+        userBox.innerHTML = `<strong>${profile.display_name} 已登入</strong><div>可以更新目前階段，並查看接下來的待辦事項。</div>`;
         await fetchSopProgress(profile.line_user_id, profile.display_name);
       } catch (error) {
         userBox.innerHTML = "<strong>LIFF 初始化失敗</strong><div>請重新開啟 LINE 頁面，讓系統重新取得你的身分資訊。</div>";
@@ -989,7 +976,7 @@
   </script>
   {% else %}
   <script>
-    document.getElementById("line-user-box").innerHTML = "<strong>尚未設定 LINE LIFF</strong><div>目前仍可查看南寮 SOP，但若要看到個人對位結果，需要先完成 LIFF 設定。</div>";
+    document.getElementById("line-user-box").innerHTML = "<strong>尚未設定 LINE LIFF</strong><div>目前可查看專案 SOP；若要儲存個人進度，需要先完成 LIFF 設定。</div>";
     const updatedAtInput = document.getElementById("updated_at");
     if (!updatedAtInput.value) {
       updatedAtInput.value = new Date().toISOString().slice(0, 10);
