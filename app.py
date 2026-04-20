@@ -352,7 +352,7 @@ def webhook():
             continue
         answer = find_faq_answer(user_message)
         if answer:
-            reply_line_message(reply_token, answer)
+            reply_start_build_quick_reply(reply_token, answer)
             continue
 
         related_matches = find_faq_matches(user_message, limit=3, min_score=10)
