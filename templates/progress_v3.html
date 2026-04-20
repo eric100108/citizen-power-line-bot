@@ -643,20 +643,17 @@
   </style>
 </head>
 <body>
+  {% include "_site_drawer.html" %}
   <header class="topbar">
     <div class="shell topbar-inner">
-      <a class="brand-link" href="/menu" aria-label="????">
+      <button class="cp-menu-trigger" type="button" onclick="cpOpenDrawer()" aria-label="開啟頁面切換"><span></span></button>
+      <a class="brand-link" href="/menu" aria-label="返回首頁">
         <div class="brand-mark">CP</div>
         <div class="brand-copy">
           <strong>公民電廠</strong>
           <span>CITIZEN POWER PLATFORM</span>
         </div>
       </a>
-      <nav class="top-actions" aria-label="頁面導覽">
-        <a href="/project">看案例</a>
-        <a href="/calc?amount=10000">投資試算</a>
-        <a class="primary" href="/menu">返回首頁</a>
-      </nav>
     </div>
   </header>
 

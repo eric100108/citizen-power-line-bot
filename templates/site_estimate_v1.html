@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>案場容量估算 | 公民電廠平台</title>
+  <title>官方參考案場估算 | 公民電廠平台</title>
   <style>
     :root {
       --bg:#f4f8f3; --text:#13261f; --sub:#5b6d64; --muted:#7b8e84;
@@ -89,18 +89,14 @@
   </style>
 </head>
 <body>
+  {% include "_site_drawer.html" %}
   <header class="topbar">
     <div class="shell topbar-inner">
+      <button class="cp-menu-trigger" type="button" onclick="cpOpenDrawer()" aria-label="開啟頁面切換"><span></span></button>
       <a class="brand" href="/menu" aria-label="返回首頁">
         <div class="brand-mark">CP</div>
         <div class="brand-copy"><strong>公民電廠</strong><span>CITIZEN POWER PLATFORM</span></div>
       </a>
-      <nav class="nav-actions" aria-label="頁面導覽">
-        <a href="/project">南寮案例</a>
-        <a href="/calc?amount=10000">投資試算</a>
-        <a href="/progress">SOP 對位</a>
-        <a class="primary" href="/menu">返回首頁</a>
-      </nav>
     </div>
   </header>
 
@@ -108,8 +104,8 @@
     <section class="hero">
       <div class="shell hero-inner">
         <div class="badge">{{ parameter_label }}｜{{ parameter_source_label }}</div>
-        <h1>輸入案場大小，先估容量、發電與減碳</h1>
-        <p>輸入面積，立即取得容量、板數、發電量、成本、收入與減碳估算。</p>
+        <h1>用官方參考資料估算案場容量與收益</h1>
+        <p>輸入面積，取得容量、板數、發電量、FIT 收益、補助上限與減碳估算。</p>
         <div class="hero-pills">
           <div class="hero-pill"><span>案場規模</span><strong>{{ scale_label }}</strong></div>
           <div class="hero-pill"><span>估算容量</span><strong>{{ "{:,.2f}".format(capacity_kwp) }} kW</strong></div>
@@ -122,14 +118,14 @@
     <section class="section">
       <div class="shell grid two">
         <section class="panel form">
-          <div class="section-head"><h2>輸入案場條件</h2><span>可切換參數口徑</span></div>
+          <div class="section-head"><h2>輸入案場條件</h2><span>官方參考 / 案例比較 / 自訂</span></div>
           <form method="get" action="/site-estimate">
             <input type="hidden" name="project" value="{{ project_slug }}">
             <div>
               <label for="parameter_mode">參數模式</label>
               <select id="parameter_mode" name="parameter_mode">
-                <option value="official_penghu_114" {% if parameter_mode == "official_penghu_114" %}selected{% endif %}>官方預設：澎湖 114 平均</option>
-                <option value="nanliao_case" {% if parameter_mode == "nanliao_case" %}selected{% endif %}>南寮案例：第二階段反推</option>
+                <option value="official_penghu_114" {% if parameter_mode == "official_penghu_114" %}selected{% endif %}>官方參考：澎湖容量因數 + 屋頂型 FIT</option>
+                <option value="nanliao_case" {% if parameter_mode == "nanliao_case" %}selected{% endif %}>案例比較：南寮第二階段反推</option>
                 <option value="custom" {% if parameter_mode == "custom" %}selected{% endif %}>自訂參數</option>
               </select>
             </div>
@@ -144,8 +140,8 @@
               <div>
                 <label for="sales_mode">收入模式</label>
                 <select id="sales_mode" name="sales_mode">
-                  <option value="wheeling_transfer" {% if sales_mode == "wheeling_transfer" %}selected{% endif %}>綠電轉供情境價</option>
                   <option value="fit" {% if sales_mode == "fit" %}selected{% endif %}>屋頂型 FIT 躉購</option>
+                  <option value="wheeling_transfer" {% if sales_mode == "wheeling_transfer" %}selected{% endif %}>綠電轉供情境價</option>
                   <option value="self_use" {% if sales_mode == "self_use" %}selected{% endif %}>自發自用節費估算</option>
                 </select>
               </div>
@@ -215,11 +211,12 @@
             <div class="metric green"><span>太陽能板數量</span><strong>{{ panel_count }} 片</strong><small>單片 {{ "{:,.0f}".format(module_watt) }}W，模組面積 {{ "{:,.2f}".format(module_total_area_m2) }} m2</small></div>
             <div class="metric amber"><span>首年發電量</span><strong>{{ "{:,.0f}".format(first_year_generation_kwh) }} 度</strong><small>日均約 {{ "{:,.1f}".format(daily_generation_kwh) }} 度</small></div>
             <div class="metric green"><span>{{ years }} 年累積發電</span><strong>{{ "{:,.0f}".format(lifetime_generation_kwh) }} 度</strong><small>{{ "複利" if degradation_method == "compound" else "線性" if degradation_method == "linear" else "不計" }}衰退</small></div>
-            <div class="metric blue"><span>粗估建置成本</span><strong>NT$ {{ "{:,.0f}".format(construction_cost) }}</strong><small>NT$ {{ "{:,.0f}".format(construction_unit_cost_per_kwp) }} / kW</small></div>
-            <div class="metric red"><span>補助上限粗估</span><strong>NT$ {{ "{:,.0f}".format(reward_max) }}</strong><small>min(1,000 萬, 總設置經費 × 50%)</small></div>
+            <div class="metric blue"><span>參考建置成本</span><strong>NT$ {{ "{:,.0f}".format(construction_cost) }}</strong><small>NT$ {{ "{:,.0f}".format(construction_unit_cost_per_kwp) }} / kW</small></div>
+            <div class="metric red"><span>補助上限參考</span><strong>NT$ {{ "{:,.0f}".format(reward_max) }}</strong><small>min(1,000 萬, 總設置經費 × 50%)</small></div>
           </div>
           <div class="detail-list">
             <div class="detail"><span>收入採用單價</span><strong>{{ "{:,.4f}".format(sell_price_per_kwh) }} 元/度</strong></div>
+            <div class="detail"><span>FIT 容量級距</span><strong>{{ fit_tier_label }}</strong></div>
             <div class="detail"><span>首年售電/節費估算</span><strong>NT$ {{ "{:,.0f}".format(first_year_revenue) }}</strong></div>
             <div class="detail"><span>{{ years }} 年售電/節費估算</span><strong>NT$ {{ "{:,.0f}".format(lifetime_revenue) }}</strong></div>
             <div class="detail"><span>社區最低投資額門檻</span><strong>NT$ {{ "{:,.0f}".format(minimum_community_investment) }}</strong></div>
@@ -235,13 +232,18 @@
     <section class="section">
       <div class="shell">
         <section class="note">
-          <h3>使用參數</h3>
+          <h3>官方參考與估算邊界</h3>
           <div class="mode-grid">
             <div class="param-card"><span>面積係數</span><strong>{{ "{:,.2f}".format(area_m2_per_kwp) }} m2/kW</strong></div>
             <div class="param-card"><span>年發電係數</span><strong>{{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kW/年</strong></div>
             <div class="param-card"><span>減碳係數</span><strong>{{ "{:,.3f}".format(carbon_factor_kg_per_kwh) }} kgCO2e/度</strong></div>
             <div class="param-card"><span>FIT 參考費率</span><strong>{{ "{:,.4f}".format(fit_rate) }} 元/度</strong></div>
           </div>
+          <ul>
+            {% for note in official_notes %}
+            <li>{{ note }}</li>
+            {% endfor %}
+          </ul>
           <a class="back-link" href="/progress">前往 SOP 對位</a>
         </section>
       </div>

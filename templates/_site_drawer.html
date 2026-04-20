@@ -1,0 +1,225 @@
+<style>
+  .cp-menu-trigger {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    border: 0;
+    border-radius: 16px;
+    display: inline-grid;
+    place-items: center;
+    background: #075c62;
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 14px 30px rgba(4, 38, 45, .18);
+  }
+  .cp-menu-trigger span,
+  .cp-menu-trigger::before,
+  .cp-menu-trigger::after {
+    content: "";
+    width: 22px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    display: block;
+  }
+  .cp-menu-trigger {
+    gap: 5px;
+  }
+  .topbar .topbar-inner {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+  .topbar .brand,
+  .topbar .brand-link {
+    min-width: 0;
+  }
+  .cp-drawer-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    background: rgba(8, 18, 24, .48);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .24s ease;
+  }
+  .cp-drawer {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 901;
+    width: min(380px, 88vw);
+    padding: 28px 26px;
+    background:
+      radial-gradient(circle at 80% 10%, rgba(54, 202, 122, .18), transparent 28%),
+      linear-gradient(180deg, rgba(8, 61, 76, .98) 0%, rgba(11, 91, 109, .98) 100%);
+    color: #ffffff;
+    transform: translateX(-104%);
+    transition: transform .28s ease;
+    box-shadow: 24px 0 60px rgba(6, 23, 30, .24);
+    overflow-y: auto;
+  }
+  body.cp-drawer-open {
+    overflow: hidden;
+  }
+  body.cp-drawer-open .cp-drawer-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  body.cp-drawer-open .cp-drawer {
+    transform: translateX(0);
+  }
+  .cp-drawer-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+  .cp-drawer-kicker {
+    display: block;
+    margin-bottom: 8px;
+    color: rgba(255,255,255,.66);
+    font-size: 12px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .cp-drawer-title {
+    margin: 0;
+    font-size: 30px;
+    line-height: 1.16;
+    letter-spacing: -.03em;
+  }
+  .cp-drawer-close {
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 16px;
+    background: rgba(255,255,255,.08);
+    color: #ffffff;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .cp-drawer-nav {
+    display: grid;
+    gap: 12px;
+  }
+  .cp-drawer-link {
+    display: block;
+    padding: 18px 20px;
+    border-radius: 20px;
+    color: #ffffff;
+    text-decoration: none;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .cp-drawer-link:hover {
+    transform: translateX(2px);
+    background: rgba(255,255,255,.14);
+    border-color: rgba(255,255,255,.24);
+  }
+  .cp-drawer-link.primary {
+    background: linear-gradient(135deg, rgba(59, 201, 92, .34), rgba(29, 132, 204, .22));
+    border-color: rgba(121, 226, 150, .46);
+  }
+  .cp-drawer-link strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 18px;
+    line-height: 1.35;
+  }
+  .cp-drawer-link span {
+    display: block;
+    color: rgba(255,255,255,.76);
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .cp-drawer-foot {
+    margin-top: 26px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.72);
+    line-height: 1.75;
+    font-size: 13px;
+  }
+  @media (max-width: 720px) {
+    .cp-menu-trigger {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+    }
+    .cp-drawer {
+      width: min(360px, 92vw);
+      padding: 24px 22px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cp-drawer-scrim,
+    .cp-drawer,
+    .cp-drawer-link {
+      transition: none;
+    }
+  }
+</style>
+
+<div class="cp-drawer-scrim" onclick="cpCloseDrawer()" aria-hidden="true"></div>
+<aside class="cp-drawer" id="cp-site-drawer" aria-label="頁面切換" aria-hidden="true">
+  <div class="cp-drawer-head">
+    <div>
+      <span class="cp-drawer-kicker">導覽</span>
+      <h2 class="cp-drawer-title">頁面切換</h2>
+    </div>
+    <button class="cp-drawer-close" type="button" onclick="cpCloseDrawer()" aria-label="關閉導覽">×</button>
+  </div>
+  <nav class="cp-drawer-nav">
+    <a class="cp-drawer-link primary" href="/menu">
+      <strong>首頁</strong>
+      <span>平台入口與主要功能切換。</span>
+    </a>
+    <a class="cp-drawer-link" href="/site-estimate">
+      <strong>官方案場估算</strong>
+      <span>容量、板數、FIT 收益、補助與減碳。</span>
+    </a>
+    <a class="cp-drawer-link" href="/calc?amount=10000">
+      <strong>投資試算</strong>
+      <span>投入金額、參與位置與參考收益。</span>
+    </a>
+    <a class="cp-drawer-link" href="/project">
+      <strong>南寮案例</strong>
+      <span>案例背景、里程碑與可複製經驗。</span>
+    </a>
+    <a class="cp-drawer-link" href="/progress">
+      <strong>SOP 進度對位</strong>
+      <span>查看目前步驟與下一步建議。</span>
+    </a>
+    <a class="cp-drawer-link" href="/faq?keyword=補助">
+      <strong>FAQ</strong>
+      <span>補助、場址、建立流程與常見問題。</span>
+    </a>
+  </nav>
+  <div class="cp-drawer-foot">公民電廠陪伴式平台，把官方試算、案例經驗與 SOP 推進集中在同一個入口。</div>
+</aside>
+
+<script>
+  function cpOpenDrawer() {
+    document.body.classList.add("cp-drawer-open");
+    const drawer = document.getElementById("cp-site-drawer");
+    if (drawer) {
+      drawer.setAttribute("aria-hidden", "false");
+    }
+  }
+  function cpCloseDrawer() {
+    document.body.classList.remove("cp-drawer-open");
+    const drawer = document.getElementById("cp-site-drawer");
+    if (drawer) {
+      drawer.setAttribute("aria-hidden", "true");
+    }
+  }
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      cpCloseDrawer();
+    }
+  });
+</script>

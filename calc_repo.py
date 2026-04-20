@@ -8,14 +8,14 @@ INTERNAL_VISIBILITY = ("public", "restricted", "internal")
 
 SITE_PARAMETER_PRESETS = {
     "official_penghu_114": {
-        "label": "官方預設",
-        "source_label": "114 年澎湖縣官方平均",
+        "label": "官方參考",
+        "source_label": "114 澎湖容量因數 + 115 屋頂型 FIT",
         "area_m2_per_kwp": 5.0,
         "annual_generation_per_kwp": 1249,
         "daily_generation_per_kwp": 3.42,
         "module_watt": 410,
         "module_area_m2": 1.95,
-        "sell_price_per_kwh": 5.5,
+        "sell_price_per_kwh": 5.6279,
         "construction_unit_cost_per_kwp": 60000,
         "carbon_factor_kg_per_kwh": 0.474,
     },
@@ -52,6 +52,14 @@ FIT_ROOFTOP_RATES = [
     {"capacity_min_kw": 50, "capacity_max_kw": 100, "rate_114_1": 4.0853, "rate_114_2": 4.0459, "rate_115": 4.0459},
     {"capacity_min_kw": 100, "capacity_max_kw": 500, "rate_114_1": 3.7547, "rate_114_2": 3.7152, "rate_115": 3.7152},
     {"capacity_min_kw": 500, "capacity_max_kw": None, "rate_114_1": 3.6616, "rate_114_2": 3.6236, "rate_115": 3.6236},
+]
+
+OFFICIAL_SITE_ESTIMATE_NOTES = [
+    "發電量預設採 114 年澎湖縣太陽光電容量因數：1,249 度/kW/年。",
+    "收入預設採屋頂型太陽光電 FIT 級距費率；不再以南寮轉供情境價作為主模式。",
+    "補助上限依公民電廠獎勵公式粗估：min(1,000 萬, 總設置經費 × 50%)。",
+    "建置成本、模組瓦數與模組面積仍屬網站估算參數，正式申請需以當年度官方成本參數與設計資料確認。",
+    "附表四至附表六的額外費率目前列為進階資料，尚未自動加計到 FIT 收入。",
 ]
 
 
@@ -219,6 +227,14 @@ def _get_fit_rate(capacity_kwp, rate_key="rate_115"):
     return FIT_ROOFTOP_RATES[0][rate_key], FIT_ROOFTOP_RATES[0]
 
 
+def _format_capacity_tier(tier):
+    min_kw = tier["capacity_min_kw"]
+    max_kw = tier["capacity_max_kw"]
+    if max_kw is None:
+        return f"{min_kw:g} kW 以上"
+    return f"{min_kw:g} kW 以上不及 {max_kw:g} kW"
+
+
 def _build_site_parameters(
     parameter_mode,
     custom_area_m2_per_kwp=None,
@@ -258,7 +274,7 @@ def build_site_estimate_result(
     parameter_mode="official_penghu_114",
     area_input_type="gross_area",
     degradation_method="compound",
-    sales_mode="wheeling_transfer",
+    sales_mode="fit",
     custom_area_m2_per_kwp=None,
     custom_annual_generation_per_kwp=None,
     custom_module_watt=None,
@@ -272,7 +288,7 @@ def build_site_estimate_result(
     tree_absorption_kg_per_year = max(tree_absorption_kg_per_year, 1)
     area_input_type = area_input_type if area_input_type in {"gross_area", "usable_area"} else "gross_area"
     degradation_method = degradation_method if degradation_method in {"compound", "linear", "none"} else "compound"
-    sales_mode = sales_mode if sales_mode in {"fit", "wheeling_transfer", "self_use"} else "wheeling_transfer"
+    sales_mode = sales_mode if sales_mode in {"fit", "wheeling_transfer", "self_use"} else "fit"
 
     fallback_settings = get_calculator_settings()
     rule_map = get_project_financial_rules_internal(project_slug)
@@ -361,6 +377,8 @@ def build_site_estimate_result(
         "sell_price_per_kwh": sell_price_per_kwh,
         "fit_rate": fit_rate,
         "fit_tier": fit_tier,
+        "fit_tier_label": _format_capacity_tier(fit_tier),
+        "official_notes": OFFICIAL_SITE_ESTIMATE_NOTES,
         "daily_generation_kwh": daily_generation_kwh,
         "first_year_generation_kwh": first_year_generation_kwh,
         "year_20_generation_kwh": year_20_generation_kwh,

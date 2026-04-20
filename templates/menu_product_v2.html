@@ -414,8 +414,10 @@
   </style>
 </head>
 <body>
+  {% include "_site_drawer.html" %}
   <header class="topbar">
     <div class="topbar-inner">
+      <button class="cp-menu-trigger" type="button" onclick="cpOpenDrawer()" aria-label="開啟頁面切換"><span></span></button>
       <a class="brand-link" href="/menu" aria-label="返回首頁">
         <div class="brand-mark">CP</div>
         <div class="brand-copy">
@@ -423,14 +425,6 @@
           <span>CITIZEN POWER PLATFORM</span>
         </div>
       </a>
-      <nav class="nav-links" aria-label="主導覽">
-        <a href="/menu">平台首頁</a>
-        <a href="/project">南寮案例</a>
-        <a href="/site-estimate">案場估算</a>
-        <a href="/calc?amount=10000">投資試算</a>
-        <a href="/progress">SOP 追蹤</a>
-      </nav>
-      <a class="nav-cta" href="/progress">立即開始</a>
     </div>
   </header>
 

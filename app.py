@@ -325,7 +325,7 @@ def home():
             "faq_all": "/faq",
             "faq_search": "/faq?keyword=補助",
             "calc": "/calc?amount=10000",
-            "site_estimate": "/site-estimate?site_ping=30",
+            "site_estimate": "/site-estimate?site_ping=30&sales_mode=fit",
             "progress": "/progress",
             "progress_sop_api": "/api/progress-sop?line_user_id=YOUR_LINE_USER_ID",
             "webhook": "/webhook",
@@ -372,7 +372,7 @@ def site_estimate():
     parameter_mode = request.args.get("parameter_mode", default="official_penghu_114", type=str).strip()
     area_input_type = request.args.get("area_input_type", default="gross_area", type=str).strip()
     degradation_method = request.args.get("degradation_method", default="compound", type=str).strip()
-    sales_mode = request.args.get("sales_mode", default="wheeling_transfer", type=str).strip()
+    sales_mode = request.args.get("sales_mode", default="fit", type=str).strip()
     project_slug = request.args.get("project", default="nanliao-citizen-power", type=str).strip() or "nanliao-citizen-power"
     estimate = build_site_estimate_result(
         site_ping=site_ping,
