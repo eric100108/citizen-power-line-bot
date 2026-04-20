@@ -42,6 +42,15 @@ def infer_user_intent(user_message):
     if not normalized:
         return None
 
+    if normalized in {"你是誰", "你誰", "你是甚麼", "你是什麼", "這是誰", "你可以做什麼", "你能做什麼", "你會做什麼"}:
+        return "identity"
+    if normalized in {"你好", "哈囉", "嗨", "hi", "hello", "早安", "午安", "晚安"}:
+        return "greeting"
+    if normalized in {"謝謝", "感謝", "謝啦", "ok", "好", "好的", "了解", "知道了"}:
+        return "ack"
+    if normalized in {"看不懂", "我看不懂", "不懂", "聽不懂", "再說一次", "可以說簡單一點嗎", "講簡單一點"}:
+        return "clarify"
+
     if any(term in normalized for term in ["真人協助", "找人協助", "聯絡真人", "真人", "人工協助", "找人談", "談談", "聊聊", "聊一下"]):
         return "human_help"
     if "完整sop" in normalized or ("sop" in normalized and "完整" in normalized):
@@ -121,9 +130,38 @@ def build_site_guidance_message(service_steps):
 
 def build_human_help_message():
     return (
-        "如果你想直接進入陪伴式推進，下一步建議安排真人協助。"
-        "\n你可以先準備：社區名稱、目前卡住的步驟、可用場址概況、是否要申請補助。"
-        "\n這樣後續就能更快判斷你現在對應南寮 SOP 的哪一步。"
+        "收到，請稍等。"
+        "\n真人服務時間：週一至週五 09:00-18:00。"
+        "\n我會協助轉交給真人服務窗口。"
+    )
+
+
+def build_identity_message():
+    return (
+        "我是公民電廠陪伴式平台的 LINE 助手。"
+        "\n我可以協助你查公民電廠流程、補助、場址條件、案場容量試算、南寮案例與 SOP 進度。"
+        "\n\n你可以直接輸入：開始建立電廠、補助、場址、FAQ、真人協助。"
+    )
+
+
+def build_greeting_message():
+    return (
+        "你好，我可以協助你了解公民電廠怎麼開始。"
+        "\n你可以輸入：開始建立電廠、補助、場址、FAQ、真人協助。"
+    )
+
+
+def build_ack_message():
+    return "收到。你如果要繼續，可以輸入：開始建立電廠、補助、場址、FAQ、真人協助。"
+
+
+def build_clarify_message():
+    return (
+        "我用簡單一點的方式說："
+        "\n1. 先確認有沒有可用屋頂或場址。"
+        "\n2. 再估容量、發電量、補助和收益。"
+        "\n3. 最後依 SOP 推進文件、施工、併網和營運。"
+        "\n\n你可以先輸入「開始建立電廠」。"
     )
 
 
@@ -265,6 +303,22 @@ def webhook():
 
         inferred_intent = infer_user_intent(user_message)
 
+        if inferred_intent == "identity":
+            reply_start_build_quick_reply(reply_token, build_identity_message())
+            continue
+
+        if inferred_intent == "greeting":
+            reply_start_build_quick_reply(reply_token, build_greeting_message())
+            continue
+
+        if inferred_intent == "ack":
+            reply_start_build_quick_reply(reply_token, build_ack_message())
+            continue
+
+        if inferred_intent == "clarify":
+            reply_start_build_quick_reply(reply_token, build_clarify_message())
+            continue
+
         if user_message in START_BUILD_KEYWORDS or inferred_intent == "start_build":
             reply_start_build_quick_reply(reply_token, build_start_build_message(service_steps, user_message))
             continue
@@ -290,8 +344,7 @@ def webhook():
             continue
 
         if user_message in HUMAN_HELP_KEYWORDS or inferred_intent == "human_help":
-            human_answer = find_faq_answer(user_message)
-            reply_line_message(reply_token, human_answer if human_answer else build_human_help_message())
+            reply_line_message(reply_token, build_human_help_message())
             continue
 
         if user_message in CASE_KEYWORDS or inferred_intent == "case":
