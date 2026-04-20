@@ -104,13 +104,32 @@ def push_line_message(to_user_id, text):
     print("LINE admin push status:", response.status_code)
 
 
+def get_line_profile_by_user_id(line_user_id):
+    channel_access_token = get_channel_access_token()
+    if not channel_access_token or not line_user_id:
+        return {}
+
+    response = requests.get(
+        f"https://api.line.me/v2/bot/profile/{line_user_id}",
+        headers={"Authorization": f"Bearer {channel_access_token}"},
+        timeout=10,
+    )
+    if response.status_code != 200:
+        print("LINE profile status:", response.status_code)
+        return {}
+    return response.json()
+
+
 def notify_admin_human_help(line_user_id, user_message):
     admin_line_user_id = get_admin_line_user_id()
     if not admin_line_user_id:
         return
 
+    profile = get_line_profile_by_user_id(line_user_id)
+    display_name = profile.get("displayName") or "未取得名稱"
     message = (
         "真人協助需求\n\n"
+        f"使用者名稱：{display_name}\n"
         f"使用者訊息：{user_message or '真人協助'}\n"
         f"LINE userId：{line_user_id or '未取得'}\n\n"
         "請到 LINE 官方帳號後台接續回覆。"
