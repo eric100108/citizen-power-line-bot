@@ -87,7 +87,7 @@ def _quick_reply_item(label, text):
     }
 
 
-def _compact_lines(text, limit=5):
+def _compact_lines(text, limit=3):
     lines = []
     for raw_line in (text or "").splitlines():
         line = raw_line.strip()
@@ -97,7 +97,7 @@ def _compact_lines(text, limit=5):
         current = ""
         for char in line:
             current += char
-            if char in "。；;，," or len(current) >= 38:
+            if char in "。；;，," or len(current) >= 32:
                 parts.append(current.strip("，,；;。 "))
                 current = ""
         if current.strip():
@@ -111,6 +111,57 @@ def _compact_lines(text, limit=5):
         if len(lines) >= limit:
             break
     return lines or ["請直接選擇下方功能。"]
+
+
+def _card_summary_lines(title, text):
+    normalized = (text or "").replace(" ", "")
+    if title == "常見問題":
+        return [
+            "選一個主題，我會直接帶你看重點。",
+            "建立流程、補助、場址和進度都可以查。",
+        ]
+    if title == "相關問題":
+        return [
+            "我找到幾個接近的問題。",
+            "直接點下面其中一題就可以。",
+        ]
+    if title == "真人協助":
+        return [
+            "收到，請稍等。",
+            "真人服務時間：週一至週五 09:00-18:00。",
+            "我會協助轉交給服務窗口。",
+        ]
+    if title == "補助資訊":
+        return [
+            "先確認補助資格、截止日和附件清單。",
+            "容量、社區投資比例和參與人數都會影響判斷。",
+            "需要細看時，可以再點真人協助。",
+        ]
+    if title == "場址盤點":
+        return [
+            "先看屋頂是否可用、是否遮蔭、結構是否安全。",
+            "準備現場照片、屋頂面積和基本用電情境。",
+            "確認後再進入容量與收益試算。",
+        ]
+    if title == "SOP 進度":
+        return [
+            "先確認目前卡在哪一個階段。",
+            "系統會對照南寮經驗，提示下一步。",
+            "需要完整流程時，點完整 SOP。",
+        ]
+    if title == "開始建立電廠":
+        return [
+            "先確認社區意願與可用場址。",
+            "接著盤點屋頂、估容量、看補助。",
+            "不確定下一步時，可以直接找真人協助。",
+        ]
+    if "我是公民電廠" in normalized or "可以協助" in normalized:
+        return [
+            "我可以協助查流程、補助、場址和進度。",
+            "也可以帶你做案場容量與收益試算。",
+            "先點下方功能開始。",
+        ]
+    return _compact_lines(text)
 
 
 def _card_title(text, default_title="公民電廠助手"):
@@ -148,7 +199,7 @@ def _line_card_image_url(title):
 
 def _build_flex_quick_reply_message(title, subtitle, text, items):
     body_contents = []
-    for line in _compact_lines(text):
+    for line in _card_summary_lines(title, text):
         body_contents.append(
             {
                 "type": "box",
