@@ -197,6 +197,36 @@ def _line_card_image_url(title):
     return f"{base_url}/static/{filename}"
 
 
+def _line_card_footer(title):
+    base_url = get_public_base_url()
+    if not base_url.startswith("https://"):
+        return None
+
+    if title != "開始建立電廠":
+        return None
+
+    return {
+        "type": "box",
+        "layout": "vertical",
+        "spacing": "sm",
+        "paddingAll": "16px",
+        "backgroundColor": "#F7FBF6",
+        "contents": [
+            {
+                "type": "button",
+                "style": "primary",
+                "height": "sm",
+                "color": "#0F766E",
+                "action": {
+                    "type": "uri",
+                    "label": "打開服務首頁",
+                    "uri": f"{base_url}/menu",
+                },
+            }
+        ],
+    }
+
+
 def _build_flex_quick_reply_message(title, subtitle, text, items):
     body_contents = []
     for line in _card_summary_lines(title, text):
@@ -274,6 +304,10 @@ def _build_flex_quick_reply_message(title, subtitle, text, items):
             "aspectRatio": "20:9",
             "aspectMode": "cover",
         }
+
+    footer = _line_card_footer(title)
+    if footer:
+        bubble["footer"] = footer
 
     message = {
         "type": "flex",
