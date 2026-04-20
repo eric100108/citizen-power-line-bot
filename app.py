@@ -303,6 +303,13 @@ def webhook():
         project_rows = get_progress_records()
         line_user_id = event.get("source", {}).get("userId", "").strip()
 
+        if normalize_user_message(user_message) in {"查我的lineid", "查我的userid", "我的lineid", "我的userid"}:
+            reply_line_message(
+                reply_token,
+                f"你的 LINE userId：\n{line_user_id or '未取得'}\n\n請把這個 U 開頭的值填到 Render 的 ADMIN_LINE_USER_ID。",
+            )
+            continue
+
         inferred_intent = infer_user_intent(user_message)
 
         if inferred_intent == "identity":
