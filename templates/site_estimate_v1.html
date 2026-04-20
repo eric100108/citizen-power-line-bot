@@ -59,6 +59,7 @@
     form { display:grid; gap:14px; }
     label { display:block; margin-bottom:8px; font-size:14px; color:var(--sub); font-weight:700; }
     input, select { width:100%; border:1px solid #cfe0d5; border-radius:18px; padding:14px 16px; font-size:16px; font-family:inherit; color:var(--text); background:#fff; }
+    .field-hint { margin:8px 2px 0; color:var(--muted); font-size:12px; line-height:1.55; }
     .button { min-height:54px; border:none; border-radius:18px; padding:14px 20px; background:linear-gradient(135deg,var(--green),#1fb16f); color:#fff; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 14px 28px rgba(53,198,90,.22); }
     .mode-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
     .metric-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
@@ -176,8 +177,9 @@
                 <input id="area_m2_per_kwp" name="area_m2_per_kwp" type="number" min="0" step="0.01" value="{{ area_m2_per_kwp }}">
               </div>
               <div>
-                <label for="annual_generation_per_kwp">自訂年發電係數</label>
+                <label for="annual_generation_per_kwp">年發電係數 度/kW/年</label>
                 <input id="annual_generation_per_kwp" name="annual_generation_per_kwp" type="number" min="0" step="1" value="{{ annual_generation_per_kwp }}">
+                <div class="field-hint">官方澎湖預設 1249；南寮案例模式 1263。</div>
               </div>
             </div>
             <div class="mode-grid">
@@ -193,7 +195,8 @@
             <div class="mode-grid">
               <div>
                 <label for="sell_price_per_kwh">情境電價 元/度</label>
-                <input id="sell_price_per_kwh" name="sell_price_per_kwh" type="number" min="0" step="0.1" value="{{ sell_price_per_kwh }}">
+                <input id="sell_price_per_kwh" name="sell_price_per_kwh" type="number" min="0" step="0.0001" value="{{ "{:.4f}".format(sell_price_per_kwh) }}">
+                <div class="field-hint">預設會帶入容量級距 FIT：{{ "{:.4f}".format(fit_rate) }} 元/度；你也可以直接改成自己的情境價。</div>
               </div>
               <div>
                 <label for="carbon_factor">減碳係數 kgCO2e/度</label>

@@ -247,19 +247,19 @@ def _build_site_parameters(
 ):
     mode = parameter_mode if parameter_mode in SITE_PARAMETER_PRESETS else "official_penghu_114"
     params = dict(SITE_PARAMETER_PRESETS[mode])
-    if mode == "custom":
-        overrides = {
-            "area_m2_per_kwp": custom_area_m2_per_kwp,
-            "annual_generation_per_kwp": custom_annual_generation_per_kwp,
-            "module_watt": custom_module_watt,
-            "module_area_m2": custom_module_area_m2,
-            "sell_price_per_kwh": custom_sell_price_per_kwh,
-            "construction_unit_cost_per_kwp": custom_construction_unit_cost_per_kwp,
-            "carbon_factor_kg_per_kwh": custom_carbon_factor_kg_per_kwh,
-        }
-        for key, value in overrides.items():
-            if value is not None and value > 0:
-                params[key] = value
+    overrides = {
+        "area_m2_per_kwp": custom_area_m2_per_kwp,
+        "annual_generation_per_kwp": custom_annual_generation_per_kwp,
+        "module_watt": custom_module_watt,
+        "module_area_m2": custom_module_area_m2,
+        "sell_price_per_kwh": custom_sell_price_per_kwh,
+        "construction_unit_cost_per_kwp": custom_construction_unit_cost_per_kwp,
+        "carbon_factor_kg_per_kwh": custom_carbon_factor_kg_per_kwh,
+    }
+    for key, value in overrides.items():
+        if value is not None and value > 0:
+            params[key] = value
+    if custom_annual_generation_per_kwp is not None and custom_annual_generation_per_kwp > 0:
         params["daily_generation_per_kwp"] = params["annual_generation_per_kwp"] / 365
     return mode, params
 
@@ -339,7 +339,12 @@ def build_site_estimate_result(
     year_20_generation_kwh = yearly_generation_rows[-1]["generation_kwh"] if yearly_generation_rows else 0
     construction_cost = capacity_kwp * construction_unit_cost_per_kwp
     fit_rate, fit_tier = _get_fit_rate(capacity_kwp, "rate_115")
-    sell_price_per_kwh = fit_rate if sales_mode == "fit" else params.get("sell_price_per_kwh", fallback_settings["sell_price_per_kwh"])
+    if custom_sell_price_per_kwh is not None and custom_sell_price_per_kwh > 0:
+        sell_price_per_kwh = custom_sell_price_per_kwh
+    elif sales_mode == "fit":
+        sell_price_per_kwh = fit_rate
+    else:
+        sell_price_per_kwh = params.get("sell_price_per_kwh", fallback_settings["sell_price_per_kwh"])
     first_year_revenue = first_year_generation_kwh * sell_price_per_kwh
     lifetime_revenue = lifetime_generation_kwh * sell_price_per_kwh
     reward_max = min(10000000, construction_cost * 0.5)
