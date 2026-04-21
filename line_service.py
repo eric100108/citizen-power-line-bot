@@ -131,7 +131,7 @@ def notify_admin_human_help(line_user_id, user_message):
         "真人協助需求\n\n"
         f"使用者名稱：{display_name}\n"
         f"使用者訊息：{user_message or '真人協助'}\n"
-        f"LINE userId：{line_user_id or '未取得'}\n\n"
+        "\n"
         "請到 LINE 官方帳號後台接續回覆。"
     )
     push_line_message(admin_line_user_id, message)
