@@ -267,9 +267,108 @@
     }
     .feature-grid,
     .story-grid,
-    .utility-grid {
+    .utility-grid,
+    .photo-grid {
       display: grid;
       gap: 14px;
+    }
+    .photo-panel {
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      min-height: 520px;
+      background: #0d2a33;
+      color: #fff;
+    }
+    .photo-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(58,200,74,.28), transparent 28%),
+        linear-gradient(180deg, rgba(7, 22, 27, .18) 0%, rgba(7, 22, 27, .82) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .photo-panel-head {
+      position: relative;
+      z-index: 3;
+      padding: 28px 22px 0;
+      max-width: 720px;
+    }
+    .photo-panel-head h2 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 5vw, 58px);
+      line-height: 1.05;
+      letter-spacing: -.04em;
+    }
+    .photo-panel-head p {
+      margin: 0;
+      max-width: 600px;
+      line-height: 1.75;
+      color: rgba(255,255,255,.84);
+    }
+    .photo-grid {
+      position: relative;
+      z-index: 3;
+      grid-template-columns: 1fr;
+      padding: 24px 16px 22px;
+    }
+    .photo-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 220px;
+      border-radius: 26px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 26px 60px rgba(0,0,0,.28);
+      transform: translateY(18px) scale(.98);
+      transition: transform .8s ease, box-shadow .8s ease;
+    }
+    .photo-card.in-view {
+      transform: translateY(0) scale(1);
+    }
+    .photo-card img {
+      width: 100%;
+      height: 100%;
+      min-height: 220px;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.06) contrast(1.03);
+      transition: transform 1.2s ease;
+    }
+    .photo-card:hover img {
+      transform: scale(1.045);
+    }
+    .photo-caption {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(9, 35, 40, .72);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .photo-caption span {
+      display: block;
+      margin-bottom: 4px;
+      color: #b9fbcb;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .photo-caption strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+    .photo-card.featured {
+      min-height: 300px;
+    }
+    .photo-card.featured img {
+      min-height: 300px;
     }
     .feature-card,
     .story-card,
@@ -283,6 +382,28 @@
       text-decoration: none;
       color: inherit;
       transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .feature-card.has-photo {
+      padding: 0;
+      overflow: hidden;
+    }
+    .feature-card.has-photo .feature-image {
+      height: 145px;
+      overflow: hidden;
+      background: #10272b;
+    }
+    .feature-card.has-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .8s ease;
+    }
+    .feature-card.has-photo:hover img {
+      transform: scale(1.04);
+    }
+    .feature-card.has-photo .feature-body {
+      padding: 18px;
     }
     .feature-card:hover {
       transform: translateY(-2px);
@@ -384,6 +505,12 @@
       opacity: 1;
       transform: translateY(0);
     }
+    .photo-card.reveal {
+      transform: translateY(34px) scale(.96);
+    }
+    .photo-card.reveal.in-view {
+      transform: translateY(0) scale(1);
+    }
     .reveal[data-delay="1"] { transition-delay: .08s; }
     .reveal[data-delay="2"] { transition-delay: .16s; }
     .reveal[data-delay="3"] { transition-delay: .24s; }
@@ -409,6 +536,18 @@
       .feature-grid,
       .story-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .utility-grid { grid-template-columns: 1fr 1fr; }
+      .photo-grid {
+        grid-template-columns: 1.18fr .82fr;
+        grid-template-rows: 260px 260px;
+        padding: 30px;
+      }
+      .photo-card.featured {
+        grid-row: span 2;
+        min-height: 100%;
+      }
+      .photo-card.featured img {
+        min-height: 100%;
+      }
       .hero-copy h1 { font-size: 66px; }
     }
   </style>
@@ -457,30 +596,74 @@
           <span>產品入口</span>
         </div>
         <div class="feature-grid">
-          <a class="feature-card reveal" data-delay="1" href="/project">
-            <div class="tag">Case</div>
-            <strong>南寮案例</strong>
-            <p>案場背景、推動節點、營運成果。</p>
-            <div class="feature-arrow">前往南寮案例</div>
+          <a class="feature-card has-photo reveal" data-delay="1" href="/project">
+            <div class="feature-image"><img src="/static/line-start-build.jpg" alt="南寮公民電廠案場空拍"></div>
+            <div class="feature-body">
+              <div class="tag">Case</div>
+              <strong>南寮案例</strong>
+              <p>案場背景、推動節點、營運成果。</p>
+              <div class="feature-arrow">前往南寮案例</div>
+            </div>
           </a>
-          <a class="feature-card reveal" data-delay="2" href="/site-estimate">
-            <div class="tag">Estimate</div>
-            <strong>場址容量評估</strong>
-            <p>輸入坪數，估容量、板數、發電與補助門檻。</p>
-            <div class="feature-arrow">前往場址容量評估</div>
+          <a class="feature-card has-photo reveal" data-delay="2" href="/site-estimate">
+            <div class="feature-image"><img src="/static/line-site.jpg" alt="南寮屋頂太陽能板俯視"></div>
+            <div class="feature-body">
+              <div class="tag">Estimate</div>
+              <strong>場址容量評估</strong>
+              <p>輸入坪數，估容量、板數、發電與補助門檻。</p>
+              <div class="feature-arrow">前往場址容量評估</div>
+            </div>
           </a>
-          <a class="feature-card reveal" data-delay="3" href="/calc?amount=10000">
-            <div class="tag">Calculator</div>
-            <strong>參與金額判讀</strong>
-            <p>輸入金額，看參與等級與後續動作。</p>
-            <div class="feature-arrow">前往參與金額判讀</div>
+          <a class="feature-card has-photo reveal" data-delay="3" href="/calc?amount=10000">
+            <div class="feature-image"><img src="/static/line-subsidy.jpg" alt="南寮社區與公民電廠空拍"></div>
+            <div class="feature-body">
+              <div class="tag">Calculator</div>
+              <strong>參與金額判讀</strong>
+              <p>輸入金額，看參與等級與後續動作。</p>
+              <div class="feature-arrow">前往參與金額判讀</div>
+            </div>
           </a>
-          <a class="feature-card reveal" data-delay="4" href="/progress">
-            <div class="tag">SOP</div>
-            <strong>SOP 進度</strong>
-            <p>目前階段、已完成項目、待辦事項。</p>
-            <div class="feature-arrow">前往 SOP 追蹤</div>
+          <a class="feature-card has-photo reveal" data-delay="4" href="/progress">
+            <div class="feature-image"><img src="/static/line-sop.jpg" alt="南寮屋頂太陽能施工視角"></div>
+            <div class="feature-body">
+              <div class="tag">SOP</div>
+              <strong>SOP 進度</strong>
+              <p>目前階段、已完成項目、待辦事項。</p>
+              <div class="feature-arrow">前往 SOP 追蹤</div>
+            </div>
           </a>
+        </div>
+      </section>
+    </section>
+
+    <section class="section reveal">
+      <section class="panel photo-panel">
+        <div class="photo-panel-head reveal">
+          <h2>把實際案場放進服務流程</h2>
+          <p>南寮不是展示用案例，而是平台判斷場址、補助、施工與進度的參考基準。使用者進入系統時，看得到真實屋頂，也看得到下一步。</p>
+        </div>
+        <div class="photo-grid">
+          <figure class="photo-card featured reveal" data-delay="1">
+            <img src="/static/line-start-build.jpg" alt="南寮公民電廠多戶屋頂空拍">
+            <figcaption class="photo-caption">
+              <span>起案現場</span>
+              <strong>從社區屋頂開始盤點</strong>
+            </figcaption>
+          </figure>
+          <figure class="photo-card reveal" data-delay="2">
+            <img src="/static/line-site.jpg" alt="太陽能板屋頂配置">
+            <figcaption class="photo-caption">
+              <span>場址判讀</span>
+              <strong>屋頂、遮蔭、可用面積</strong>
+            </figcaption>
+          </figure>
+          <figure class="photo-card reveal" data-delay="3">
+            <img src="/static/line-subsidy.jpg" alt="南寮社區與周邊街廓">
+            <figcaption class="photo-caption">
+              <span>社區脈絡</span>
+              <strong>補助與參與回到地方</strong>
+            </figcaption>
+          </figure>
         </div>
       </section>
     </section>
