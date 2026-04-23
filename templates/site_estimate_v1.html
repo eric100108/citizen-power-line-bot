@@ -95,8 +95,22 @@
     .note h3 { margin:0 0 12px; font-size:24px; }
     .note p, .note li { color:inherit; opacity:.9; line-height:1.8; }
     .note ul { margin:14px 0 0; padding-left:18px; }
+    .note-layout { display:grid; grid-template-columns:1.04fr .96fr; gap:18px; align-items:start; }
+    .note-copy { display:grid; gap:18px; }
+    .note-visual-stack { display:grid; gap:14px; }
+    .note-visual-card { position:relative; overflow:hidden; min-height:340px; border-radius:28px; background:#103845; box-shadow:0 22px 48px rgba(17,50,37,.14); }
+    .note-visual-card img { width:100%; height:100%; min-height:340px; display:block; object-fit:cover; filter:saturate(1.04) contrast(1.02); transform:scale(1.02); transition:transform 1.1s ease; }
+    .note-visual-card:hover img { transform:scale(1.06); }
+    .note-visual-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(8,24,36,.08) 0%, rgba(8,24,36,.74) 100%); }
+    .note-visual-copy { position:absolute; left:16px; right:16px; bottom:16px; z-index:1; padding:14px 16px; border-radius:20px; background:rgba(10,34,44,.56); border:1px solid rgba(255,255,255,.14); color:#fff; }
+    .note-visual-copy span { display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#bff5d1; }
+    .note-visual-copy strong { display:block; font-size:22px; line-height:1.25; }
+    .note-tag-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .note-tag { padding:16px 18px; border-radius:20px; border:1px solid var(--line); background:linear-gradient(180deg,#eef8f1,#fff); box-shadow:0 16px 34px rgba(19,58,42,.06); }
+    .note-tag span { display:block; margin-bottom:6px; font-size:12px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+    .note-tag strong { display:block; font-size:18px; line-height:1.45; }
     .back-link { display:inline-flex; margin-top:18px; color:var(--green-dark); text-decoration:none; font-weight:800; }
-    @media (max-width:1080px) { .two, .metric-grid, .hero-layout, .hero-pills, .note-grid, .mode-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
+    @media (max-width:1080px) { .two, .metric-grid, .hero-layout, .hero-pills, .note-grid, .mode-grid, .note-layout, .note-tag-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
     @media (max-width:720px) { .shell { width:calc(100% - 24px); } .topbar-inner { min-height:68px; align-items:flex-start; flex-direction:column; padding:12px 0; } .nav-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; } .nav-actions a { text-align:center; } .nav-actions a.primary { grid-column:1/-1; } .panel { padding:22px; } .detail { align-items:flex-start; flex-direction:column; } .detail strong { text-align:left; } }
   </style>
 </head>
@@ -254,20 +268,43 @@
 
     <section class="section">
       <div class="shell">
+        
         <section class="note reveal">
-          <h3>官方參考與估算邊界</h3>
-          <div class="mode-grid">
-            <div class="param-card"><span>面積係數</span><strong>{{ "{:,.2f}".format(area_m2_per_kwp) }} m2/kW</strong></div>
-            <div class="param-card"><span>年發電係數</span><strong>{{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kW/年</strong></div>
-            <div class="param-card"><span>減碳係數</span><strong>{{ "{:,.3f}".format(carbon_factor_kg_per_kwh) }} kgCO2e/度</strong></div>
-            <div class="param-card"><span>FIT 參考費率</span><strong>{{ "{:,.4f}".format(fit_rate) }} 元/度</strong></div>
+          <div class="note-layout">
+            <div class="note-copy">
+              <div>
+                <h3>官方參考與估算邊界</h3>
+                <div class="mode-grid">
+                  <div class="param-card"><span>面積係數</span><strong>{{ "{:,.2f}".format(area_m2_per_kwp) }} m2/kW</strong></div>
+                  <div class="param-card"><span>年發電係數</span><strong>{{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kW/年</strong></div>
+                  <div class="param-card"><span>減碳係數</span><strong>{{ "{:,.3f}".format(carbon_factor_kg_per_kwh) }} kgCO2e/度</strong></div>
+                  <div class="param-card"><span>FIT 參考費率</span><strong>{{ "{:,.4f}".format(fit_rate) }} 元/度</strong></div>
+                </div>
+              </div>
+              <div>
+                <ul>
+                  {% for note in official_notes %}
+                  <li>{{ note }}</li>
+                  {% endfor %}
+                </ul>
+                <a class="back-link" href="/progress">前往 SOP 對位</a>
+              </div>
+            </div>
+            <div class="note-visual-stack">
+              <figure class="note-visual-card reveal" data-delay="2">
+                <img src="/static/estimate-reference.jpg" alt="南寮大型屋頂容量盤點俯視">
+                <figcaption class="note-visual-copy">
+                  <span>Official Reference</span>
+                  <strong>把公式放回實際屋頂判讀</strong>
+                </figcaption>
+              </figure>
+              <div class="note-tag-grid">
+                <div class="note-tag"><span>輸入重點</span><strong>先確認可用面積與遮蔭</strong></div>
+                <div class="note-tag"><span>估算口徑</span><strong>官方值當基準，案例值做比較</strong></div>
+                <div class="note-tag"><span>判讀順序</span><strong>先看容量，再看補助與收益</strong></div>
+              </div>
+            </div>
           </div>
-          <ul>
-            {% for note in official_notes %}
-            <li>{{ note }}</li>
-            {% endfor %}
-          </ul>
-          <a class="back-link" href="/progress">前往 SOP 對位</a>
         </section>
       </div>
     </section>

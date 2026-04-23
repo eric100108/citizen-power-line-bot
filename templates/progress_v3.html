@@ -509,6 +509,99 @@
       color: var(--sub);
       line-height: 1.8;
     }
+    .action-stack {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .action-photo-card,
+    .future-photo-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 230px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+      box-shadow: 0 18px 38px rgba(18, 57, 80, .08);
+    }
+    .action-photo-card img,
+    .future-photo-card img {
+      width: 100%;
+      height: 100%;
+      min-height: 230px;
+      display: block;
+      object-fit: cover;
+      transform: scale(1.02);
+      transition: transform 1.1s ease;
+      filter: saturate(1.04) contrast(1.02);
+    }
+    .action-photo-card:hover img,
+    .future-photo-card:hover img {
+      transform: scale(1.06);
+    }
+    .action-photo-card::after,
+    .future-photo-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8, 24, 36, .08) 0%, rgba(8, 24, 36, .76) 100%);
+    }
+    .action-photo-note,
+    .future-photo-note {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 1;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(10, 34, 44, .56);
+      border: 1px solid rgba(255,255,255,.14);
+      color: #fff;
+    }
+    .action-photo-note span,
+    .future-photo-note span {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #bff5d1;
+    }
+    .action-photo-note strong,
+    .future-photo-note strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+    .action-chip-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .action-chip {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px 18px;
+      background: linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+      box-shadow: 0 16px 34px rgba(18, 57, 80, .05);
+    }
+    .action-chip span {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .action-chip strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.45;
+    }
+    .future-photo-card {
+      margin-top: 18px;
+    }
     .sop-list {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -635,7 +728,8 @@
       .guide-strip,
       .grid.two,
       .sop-list,
-      .mini-grid {
+      .mini-grid,
+      .action-chip-grid {
         grid-template-columns: 1fr;
       }
       .section-head {
@@ -846,6 +940,22 @@
                 <div id="upcoming-steps-text">{{ default_sop_status.upcoming_steps[0].title if default_sop_status.upcoming_steps else "目前已到最後一步，重點轉為營運與回饋。" }}</div>
               </div>
             </div>
+
+            <div class="action-stack">
+              <figure class="action-photo-card reveal" data-delay="3">
+                <img src="/static/progress-next-step.jpg" alt="南寮屋頂施工與下一步規劃空拍">
+                <figcaption class="action-photo-note">
+                  <span>Current To Next</span>
+                  <strong>先把目前步驟對回現場，再補文件、窗口與施工條件</strong>
+                </figcaption>
+              </figure>
+              <div class="action-chip-grid">
+                <div class="action-chip"><span>目前對位</span><strong>{{ default_sop_status.current_stage or "尚未填報" }}</strong></div>
+                <div class="action-chip"><span>優先確認</span><strong>{{ default_sop_status.current_step.title if default_sop_status.current_step else "建立服務步驟資料" }}</strong></div>
+                <div class="action-chip"><span>下一個節點</span><strong>{{ default_sop_status.upcoming_steps[0].title if default_sop_status.upcoming_steps else "營運回饋與擴點" }}</strong></div>
+              </div>
+            </div>
+
           </section>
         </section>
       </div>
@@ -892,6 +1002,14 @@
           {% else %}
           <div class="empty-state">目前已進入最後階段，後續重點是營運紀錄、回饋追蹤與擴點準備。</div>
           {% endif %}
+          
+          <figure class="future-photo-card reveal" data-delay="3">
+            <img src="/static/progress-future.jpg" alt="南寮社區與公民電廠未來擴點空拍">
+            <figcaption class="future-photo-note">
+              <span>After This</span>
+              <strong>從單一案場往社區擴點，看後續營運與下一輪複製</strong>
+            </figcaption>
+          </figure>
           <a class="back-link" href="/menu">返回功能選單</a>
         </section>
       </div>
