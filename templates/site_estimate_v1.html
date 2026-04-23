@@ -46,6 +46,17 @@
     .hero-pill { padding:16px 18px; border-radius:22px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(10px); }
     .hero-pill span { display:block; font-size:13px; color:rgba(255,255,255,.76); margin-bottom:6px; }
     .hero-pill strong { font-size:24px; line-height:1.2; }
+    .hero-layout { display:grid; grid-template-columns:1.02fr .98fr; gap:22px; align-items:end; }
+    .hero-copy { position:relative; z-index:1; }
+    .hero-photo-card { position:relative; overflow:hidden; min-height:320px; border-radius:30px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); box-shadow:0 24px 56px rgba(0,0,0,.22); }
+    .hero-photo-card img { width:100%; height:100%; min-height:320px; display:block; object-fit:cover; filter:saturate(1.06) contrast(1.03); transform:scale(1.02); transition:transform 1.2s ease; }
+    .hero-photo-card:hover img { transform:scale(1.06); }
+    .hero-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(8,24,36,.04) 0%, rgba(8,24,36,.72) 100%); }
+    .hero-photo-note { position:absolute; left:16px; right:16px; bottom:16px; z-index:1; padding:14px 16px; border-radius:20px; background:rgba(10,34,44,.56); border:1px solid rgba(255,255,255,.14); backdrop-filter:blur(8px); }
+    .hero-photo-note span { display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#bff5d1; }
+    .hero-photo-note strong { display:block; font-size:22px; line-height:1.25; }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .75s ease, transform .75s ease; }
+    .reveal.in-view { opacity:1; transform:none; }
     .section { padding:24px 0; }
     .grid { display:grid; gap:18px; }
     .two { grid-template-columns:.88fr 1.12fr; align-items:start; }
@@ -85,7 +96,7 @@
     .note p, .note li { color:inherit; opacity:.9; line-height:1.8; }
     .note ul { margin:14px 0 0; padding-left:18px; }
     .back-link { display:inline-flex; margin-top:18px; color:var(--green-dark); text-decoration:none; font-weight:800; }
-    @media (max-width:1080px) { .two, .metric-grid, .hero-pills, .note-grid, .mode-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
+    @media (max-width:1080px) { .two, .metric-grid, .hero-layout, .hero-pills, .note-grid, .mode-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
     @media (max-width:720px) { .shell { width:calc(100% - 24px); } .topbar-inner { min-height:68px; align-items:flex-start; flex-direction:column; padding:12px 0; } .nav-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; } .nav-actions a { text-align:center; } .nav-actions a.primary { grid-column:1/-1; } .panel { padding:22px; } .detail { align-items:flex-start; flex-direction:column; } .detail strong { text-align:left; } }
   </style>
 </head>
@@ -103,22 +114,31 @@
 
   <main>
     <section class="hero">
-      <div class="shell hero-inner">
-        <div class="badge">{{ parameter_label }}｜{{ parameter_source_label }}</div>
-        <h1>場址容量評估</h1>
-        <p>輸入面積，取得容量、板數、發電量、FIT 收益、補助上限與減碳估算。</p>
-        <div class="hero-pills">
-          <div class="hero-pill"><span>案場規模</span><strong>{{ scale_label }}</strong></div>
-          <div class="hero-pill"><span>估算容量</span><strong>{{ "{:,.2f}".format(capacity_kwp) }} kW</strong></div>
-          <div class="hero-pill"><span>太陽能板</span><strong>{{ panel_count }} 片</strong></div>
-          <div class="hero-pill"><span>首年減碳</span><strong>{{ "{:,.2f}".format(annual_carbon_reduction_kg / 1000) }} 噸</strong></div>
+      <div class="shell hero-layout">
+        <div class="hero-copy reveal in-view">
+          <div class="badge">Official Reference</div>
+          <h1>案場容量與發電試算</h1>
+          <p>把屋頂面積、可用率、模組數、發電量、補助上限與減碳量集中在同一頁，先把場址輪廓看清楚，再決定下一步。</p>
+          <div class="hero-pills">
+            <div class="hero-pill"><span>估算模式</span><strong>{{ scale_label }}</strong></div>
+            <div class="hero-pill"><span>容量結果</span><strong>{{ "{:,.2f}".format(capacity_kwp) }} kW</strong></div>
+            <div class="hero-pill"><span>模組片數</span><strong>{{ panel_count }} 片</strong></div>
+            <div class="hero-pill"><span>年減碳量</span><strong>{{ "{:,.2f}".format(annual_carbon_reduction_kg / 1000) }} 噸</strong></div>
+          </div>
         </div>
+        <figure class="hero-photo-card reveal in-view">
+          <img src="/static/site-estimate-roof.jpg" alt="南寮公民電廠大型屋頂案場空拍">
+          <figcaption class="hero-photo-note">
+            <span>Site Estimate</span>
+            <strong>直接對著實際屋頂做容量與發電判讀</strong>
+          </figcaption>
+        </figure>
       </div>
     </section>
 
     <section class="section">
       <div class="shell grid two">
-        <section class="panel form">
+        <section class="panel form reveal">
           <div class="section-head"><h2>輸入案場條件</h2><span>官方參考 / 案例比較 / 自訂</span></div>
           <form method="get" action="/site-estimate">
             <input type="hidden" name="project" value="{{ project_slug }}">
@@ -207,7 +227,7 @@
           </form>
         </section>
 
-        <section class="panel result">
+        <section class="panel result reveal" data-delay="1">
           <div class="section-head"><h2>估算結果</h2><span>{{ scale_summary }}</span></div>
           <div class="metric-grid">
             <div class="metric blue"><span>系統容量</span><strong>{{ "{:,.2f}".format(capacity_kwp) }} kW</strong><small>可用面積 / {{ "{:,.2f}".format(area_m2_per_kwp) }} m2/kW</small></div>
@@ -234,7 +254,7 @@
 
     <section class="section">
       <div class="shell">
-        <section class="note">
+        <section class="note reveal">
           <h3>官方參考與估算邊界</h3>
           <div class="mode-grid">
             <div class="param-card"><span>面積係數</span><strong>{{ "{:,.2f}".format(area_m2_per_kwp) }} m2/kW</strong></div>
@@ -253,5 +273,23 @@
     </section>
 
   </main>
+  <script>
+    const revealNodes = Array.from(document.querySelectorAll(".reveal"));
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+      revealNodes.forEach((node) => {
+        if (!node.classList.contains("in-view")) observer.observe(node);
+      });
+    } else {
+      revealNodes.forEach((node) => node.classList.add("in-view"));
+    }
+  </script>
 </body>
 </html>

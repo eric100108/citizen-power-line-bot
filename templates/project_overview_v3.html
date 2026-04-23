@@ -11,14 +11,14 @@
     .topbar-inner{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand-link{display:flex;align-items:center;gap:14px;color:inherit;text-decoration:none}.brand-mark{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#43d14a 0%,#1f8bf4 100%);font-weight:800}
     .brand-copy strong{display:block;font-size:22px}.brand-copy span{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.76);letter-spacing:.08em}.top-actions{display:flex;gap:10px;flex-wrap:wrap}.top-actions a{text-decoration:none;color:#fff;font-weight:700;padding:11px 16px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16)}.top-actions a.primary{background:var(--green);border-color:transparent}
     .hero-wrap,.section{padding:22px 0}.hero{padding:56px;border-radius:34px;background:linear-gradient(120deg,rgba(8,24,36,.76),rgba(16,72,53,.42)),linear-gradient(135deg,#1d5461 0%,#227f7c 42%,#39c95c 100%);color:#fff;box-shadow:var(--shadow)}
-    .badge{display:inline-flex;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.14);font-size:13px;font-weight:700}.hero h1{margin:16px 0 12px;font-size:clamp(40px,6vw,72px);line-height:1.03}.hero p{max-width:780px;line-height:1.85;font-size:17px;color:rgba(255,255,255,.92)}
+    .badge{display:inline-flex;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.14);font-size:13px;font-weight:700}.hero h1{margin:16px 0 12px;font-size:clamp(40px,6vw,72px);line-height:1.03}.hero p{max-width:780px;line-height:1.85;font-size:17px;color:rgba(255,255,255,.92)}.hero-layout{display:grid;grid-template-columns:1.06fr .94fr;gap:22px;align-items:end}.hero-photo{position:relative;overflow:hidden;min-height:320px;border-radius:30px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);box-shadow:0 24px 56px rgba(0,0,0,.24)}.hero-photo img{width:100%;height:100%;display:block;object-fit:cover;min-height:320px;filter:saturate(1.05) contrast(1.03);transform:scale(1.02);transition:transform 1.2s ease}.hero-photo:hover img{transform:scale(1.06)}.hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,24,36,.08) 0%,rgba(8,24,36,.72) 100%)}.hero-photo-caption{position:absolute;left:18px;right:18px;bottom:18px;z-index:1;padding:16px 18px;border-radius:20px;background:rgba(10,33,40,.56);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14)}.hero-photo-caption span{display:block;margin-bottom:6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#b8f5cb}.hero-photo-caption strong{display:block;font-size:24px;line-height:1.2}
     .grid{display:grid;gap:16px}.hero-pills,.guide-grid,.site-grid,.sop-grid,.highlight-grid,.benefit-grid,.rule-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.two{grid-template-columns:1.05fr .95fr}.card,.panel,.timeline-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.panel{padding:28px}.card{padding:20px}.hero-pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff}.hero-pill span{display:block;margin-bottom:8px;color:rgba(255,255,255,.76);font-size:13px}.hero-pill strong,.card strong{display:block;font-size:24px;line-height:1.2}.card span{display:block;margin-bottom:8px;color:var(--sub);font-size:13px}
     .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}.section-head h2{margin:0;font-size:clamp(28px,3vw,40px)}.section-head span{color:var(--sub);font-size:13px}.lead{margin:0 0 18px;color:var(--sub);line-height:1.85}
     .timeline{display:grid;gap:14px}.timeline-item{padding:20px 20px 20px 56px;position:relative}.timeline-item::before{content:"";position:absolute;left:22px;top:24px;width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 0 7px rgba(57,201,92,.14)}.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.meta span{display:inline-flex;padding:8px 12px;border-radius:999px;background:#eaf5ff;color:#145d8d;font-size:13px;font-weight:700}
     .rule-card{background:linear-gradient(180deg,#fff 0%,#f4fbf6 100%)}.rule-card p{margin:10px 0 0;color:var(--sub);line-height:1.8}
     .notice{padding:16px 18px;border-radius:20px;background:#eef8f2;border:1px solid #cde9d4;color:#24523a;font-weight:700}
     .reveal{opacity:0;transform:translateY(28px);transition:opacity .75s ease,transform .75s ease}.reveal.in-view{opacity:1;transform:none}
-    @media (max-width:1120px){.hero-pills,.guide-grid,.two,.site-grid,.sop-grid,.highlight-grid,.benefit-grid,.rule-grid{grid-template-columns:1fr}.section-head{flex-direction:column;align-items:flex-start}}
+    @media (max-width:1120px){.hero-layout,.hero-pills,.guide-grid,.two,.site-grid,.sop-grid,.highlight-grid,.benefit-grid,.rule-grid{grid-template-columns:1fr}.section-head{flex-direction:column;align-items:flex-start}}
     @media (max-width:720px){:root{--shell:calc(100% - 24px)}.topbar-inner{min-height:68px;align-items:flex-start;flex-direction:column;padding:12px 0}.top-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.top-actions a{text-align:center}.top-actions a.primary{grid-column:1 / -1}.hero,.panel{padding:22px}}
   </style>
 </head>
@@ -37,12 +37,23 @@
   <main>
     <section class="hero-wrap">
       <div class="shell hero">
-        <div class="badge">{{ project.community_name }} 案例頁</div>
-        <h1>{{ project.name }}</h1>
-        <div class="grid guide-grid reveal" style="margin-top:20px;">
-          <div class="card hero-pill"><span>案例重點</span><strong>社區如何啟動與推進</strong></div>
-          <div class="card hero-pill"><span>案例拆解</span><strong>場址、補助、協作與營運</strong></div>
-          <div class="card hero-pill"><span>下一步</span><strong>估算案場或對位 SOP</strong></div>
+        <div class="hero-layout">
+          <div>
+            <div class="badge">{{ project.community_name }} 案例頁</div>
+            <h1>{{ project.name }}</h1>
+            <div class="grid guide-grid reveal" style="margin-top:20px;">
+              <div class="card hero-pill"><span>案例重點</span><strong>社區如何啟動與推進</strong></div>
+              <div class="card hero-pill"><span>案例拆解</span><strong>場址、補助、協作與營運</strong></div>
+              <div class="card hero-pill"><span>下一步</span><strong>估算案場或對位 SOP</strong></div>
+            </div>
+          </div>
+          <figure class="hero-photo reveal" data-delay="2">
+            <img src="/static/project-case-wide.jpg" alt="南寮公民電廠多戶屋頂空拍">
+            <figcaption class="hero-photo-caption">
+              <span>Nanliao Case</span>
+              <strong>從社區屋頂一路推進到可複製案例</strong>
+            </figcaption>
+          </figure>
         </div>
       </div>
     </section>

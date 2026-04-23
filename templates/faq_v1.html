@@ -74,6 +74,14 @@
     .badge { display:inline-flex; padding:8px 14px; border-radius:999px; background:rgba(255,255,255,.14); font-size:13px; font-weight:700; }
     h1 { margin:16px 0 12px; font-size:clamp(42px,6vw,76px); line-height:1.02; letter-spacing:-.035em; }
     .hero p { margin:0; max-width:760px; color:rgba(255,255,255,.9); line-height:1.85; font-size:17px; }
+    .hero-grid { display:grid; grid-template-columns:1.02fr .98fr; gap:22px; align-items:end; }
+    .hero-photo-card { position:relative; overflow:hidden; min-height:300px; border-radius:30px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); box-shadow:0 24px 56px rgba(0,0,0,.22); }
+    .hero-photo-card img { width:100%; height:100%; min-height:300px; display:block; object-fit:cover; filter:saturate(1.06) contrast(1.03); transform:scale(1.02); transition:transform 1.2s ease; }
+    .hero-photo-card:hover img { transform:scale(1.06); }
+    .hero-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(8,24,36,.04) 0%, rgba(8,24,36,.72) 100%); }
+    .hero-photo-note { position:absolute; left:16px; right:16px; bottom:16px; z-index:1; padding:14px 16px; border-radius:20px; background:rgba(10,34,44,.56); border:1px solid rgba(255,255,255,.14); backdrop-filter:blur(8px); }
+    .hero-photo-note span { display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#bff5d1; }
+    .hero-photo-note strong { display:block; font-size:22px; line-height:1.25; }
     .section { padding:24px 0 44px; }
     .panel {
       background:var(--surface);
@@ -118,6 +126,8 @@
       background:#fff;
       box-shadow:0 16px 34px rgba(19,58,42,.06);
     }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .75s ease, transform .75s ease; }
+    .reveal.in-view { opacity:1; transform:none; }
     .faq-card span {
       display:inline-flex;
       margin-bottom:10px;
@@ -154,6 +164,9 @@
       form { grid-template-columns:1fr; }
       .button { width:100%; }
     }
+    @media (max-width:1080px) {
+      .hero-grid { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
@@ -170,15 +183,24 @@
 
   <main>
     <section class="hero">
-      <div class="shell">
-        <div class="badge">FAQ</div>
-        <h1>常見問題</h1>
-        <p>查詢公民電廠建立流程、補助、場址、試算與 SOP 對位。</p>
+      <div class="shell hero-grid">
+        <div class="reveal in-view">
+          <div class="badge">FAQ</div>
+          <h1>常見問題</h1>
+          <p>把補助、場址、試算、SOP 與社區參與整理成可直接查的公開問答，不再只是一串文字列表。</p>
+        </div>
+        <figure class="hero-photo-card reveal in-view">
+          <img src="/static/faq-community.jpg" alt="南寮社區街廓與公民電廠空拍">
+          <figcaption class="hero-photo-note">
+            <span>FAQ View</span>
+            <strong>先看社區脈絡，再快速找到問題答案</strong>
+          </figcaption>
+        </figure>
       </div>
     </section>
 
     <section class="section">
-      <div class="shell panel">
+      <div class="shell panel reveal">
         <form method="get" action="/faq">
           <input name="keyword" type="search" value="{{ keyword }}" placeholder="輸入關鍵字，例如：補助、場址、開始建立電廠">
           <button class="button" type="submit">搜尋</button>
@@ -187,7 +209,7 @@
         {% if faq_rows %}
         <div class="faq-list">
           {% for item in faq_rows %}
-          <article class="faq-card">
+          <article class="faq-card reveal">
             {% if item.category_name %}<span>{{ item.category_name }}</span>{% endif %}
             <h2>{{ item.question }}</h2>
             <p>{{ item.answer }}</p>
@@ -200,5 +222,23 @@
       </div>
     </section>
   </main>
+  <script>
+    const revealNodes = Array.from(document.querySelectorAll(".reveal"));
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+      revealNodes.forEach((node) => {
+        if (!node.classList.contains("in-view")) observer.observe(node);
+      });
+    } else {
+      revealNodes.forEach((node) => node.classList.add("in-view"));
+    }
+  </script>
 </body>
 </html>

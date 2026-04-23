@@ -191,6 +191,64 @@
       line-height: 1.85;
       font-size: 17px;
     }
+    .hero-side {
+      display: grid;
+      gap: 16px;
+      align-self: stretch;
+    }
+    .hero-photo-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 250px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.1);
+      box-shadow: 0 24px 56px rgba(0,0,0,.2);
+    }
+    .hero-photo-card img {
+      width: 100%;
+      height: 100%;
+      min-height: 250px;
+      display: block;
+      object-fit: cover;
+      filter: saturate(1.06) contrast(1.03);
+      transform: scale(1.02);
+      transition: transform 1.2s ease;
+    }
+    .hero-photo-card:hover img {
+      transform: scale(1.06);
+    }
+    .hero-photo-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8, 24, 36, .04) 0%, rgba(8, 24, 36, .72) 100%);
+    }
+    .hero-photo-note {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 1;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: rgba(10, 34, 44, .56);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(8px);
+    }
+    .hero-photo-note span {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #bff5d1;
+    }
+    .hero-photo-note strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.25;
+    }
     .hero-stats {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -665,20 +723,28 @@
             <div class="badge">Nanliao Playbook</div>
             <h1>專案進度與待辦事項</h1>
           </div>
-          <div class="hero-stats reveal" data-delay="1">
-            <div class="hero-stat">
-              <span>目前步驟</span>
-              <strong id="hero-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</strong>
+          <div class="hero-side reveal" data-delay="1">
+            <figure class="hero-photo-card">
+              <img src="/static/progress-roof.jpg" alt="南寮公民電廠屋頂案場空拍">
+              <figcaption class="hero-photo-note">
+                <span>Progress View</span>
+                <strong>把現在的專案進度放回真實案場裡看</strong>
+              </figcaption>
+            </figure>
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <span>目前步驟</span>
+                <strong id="hero-order">第 {{ default_sop_status.current_order }} / {{ default_sop_status.step_count }} 步</strong>
+              </div>
+              <div class="hero-stat">
+                <span>目前專案階段</span>
+                <strong id="hero-stage">{{ default_sop_status.current_stage }}</strong>
+              </div>
+              <div class="hero-stat">
+                <span>最近一次填報</span>
+                <strong id="hero-latest">{% if latest_record %}{{ latest_record.updated_at }}{% else %}尚未填報{% endif %}</strong>
+              </div>
             </div>
-            <div class="hero-stat">
-              <span>目前專案階段</span>
-              <strong id="hero-stage">{{ default_sop_status.current_stage }}</strong>
-            </div>
-            <div class="hero-stat">
-              <span>最近一次填報</span>
-              <strong id="hero-latest">{% if latest_record %}{{ latest_record.updated_at }}{% else %}尚未填報{% endif %}</strong>
-            </div>
-          </div>
         </div>
       </div>
     </section>

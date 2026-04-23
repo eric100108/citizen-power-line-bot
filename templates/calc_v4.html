@@ -47,6 +47,17 @@
     .hero-pill { padding:16px 18px; border-radius:22px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(10px); }
     .hero-pill span { display:block; font-size:13px; color:rgba(255,255,255,.76); margin-bottom:6px; }
     .hero-pill strong { font-size:24px; line-height:1.2; }
+    .hero-layout { display:grid; grid-template-columns:1.02fr .98fr; gap:22px; align-items:end; }
+    .hero-copy { position:relative; z-index:1; }
+    .hero-photo-card { position:relative; overflow:hidden; min-height:300px; border-radius:30px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08); box-shadow:0 24px 56px rgba(0,0,0,.22); }
+    .hero-photo-card img { width:100%; height:100%; min-height:300px; display:block; object-fit:cover; filter:saturate(1.06) contrast(1.03); transform:scale(1.02); transition:transform 1.2s ease; }
+    .hero-photo-card:hover img { transform:scale(1.06); }
+    .hero-photo-card::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(8,24,36,.04) 0%, rgba(8,24,36,.72) 100%); }
+    .hero-photo-note { position:absolute; left:16px; right:16px; bottom:16px; z-index:1; padding:14px 16px; border-radius:20px; background:rgba(10,34,44,.56); border:1px solid rgba(255,255,255,.14); backdrop-filter:blur(8px); }
+    .hero-photo-note span { display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:#bff5d1; }
+    .hero-photo-note strong { display:block; font-size:22px; line-height:1.25; }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .75s ease, transform .75s ease; }
+    .reveal.in-view { opacity:1; transform:none; }
     .section { padding:24px 0; }
     .grid { display:grid; gap:18px; }
     .grid.two { grid-template-columns:1.02fr .98fr; align-items:start; }
@@ -81,7 +92,7 @@
     .note-card p, .note-card li { color:inherit; opacity:.9; line-height:1.8; }
     .note-card ul { margin:14px 0 0; padding-left:18px; }
     .back-link { display:inline-flex; margin-top:18px; color:var(--green-dark); text-decoration:none; font-weight:800; }
-    @media (max-width:1080px) { .grid.two, .card-grid, .hero-pills, .note-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
+    @media (max-width:1080px) { .grid.two, .hero-layout, .card-grid, .hero-pills, .note-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
     @media (max-width:720px) { .shell { width:calc(100% - 24px); } .topbar-inner { min-height:68px; align-items:flex-start; flex-direction:column; padding:12px 0; } .nav-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; } .nav-actions a { text-align:center; } .nav-actions a.primary { grid-column:1/-1; } .panel { padding:22px; } .detail { align-items:flex-start; flex-direction:column; } .detail strong { text-align:left; } }
   </style>
 </head>
@@ -99,23 +110,30 @@
 
   <main>
     <section class="hero">
-      <div class="shell hero-grid">
-        <div>
+      <div class="shell hero-layout">
+        <div class="hero-copy reveal in-view">
           <div class="badge">Nanliao 2026 Calculator</div>
-          <h1>參與金額判讀</h1>
-          <p>輸入投入金額，判斷目前參與位置、參考收益與下一步。</p>
+          <h1>投資試算與參與判讀</h1>
+          <p>把投入金額、屋頂規模、年發電量、參與等級與參考報酬放在同一頁，讓使用者看得懂自己現在是用什麼方式參與。</p>
           <div class="hero-pills">
-            <div class="hero-pill"><span>目前專案階段</span><strong>{{ project_stage }}</strong></div>
-            <div class="hero-pill"><span>容量換算係數</span><strong>{{ "{:,.1f}".format(area_m2_per_kwp) }} m2/kWp</strong></div>
-            <div class="hero-pill"><span>發電基準</span><strong>{{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kWp</strong></div>
+            <div class="hero-pill"><span>目前階段</span><strong>{{ project_stage }}</strong></div>
+            <div class="hero-pill"><span>容量係數</span><strong>{{ "{:,.1f}".format(area_m2_per_kwp) }} m2/kWp</strong></div>
+            <div class="hero-pill"><span>年發電係數</span><strong>{{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kWp</strong></div>
           </div>
         </div>
+        <figure class="hero-photo-card reveal in-view">
+          <img src="/static/calc-roof.jpg" alt="南寮公民電廠屋頂板陣近景">
+          <figcaption class="hero-photo-note">
+            <span>Investment Calculator</span>
+            <strong>從一個實際屋頂開始理解投入與回收</strong>
+          </figcaption>
+        </figure>
       </div>
     </section>
 
     <section class="section">
       <div class="shell grid two">
-        <section class="panel roof">
+        <section class="panel roof reveal">
           <div class="section-head"><h2>輔助容量參考</h2><span>先估屋頂可支持的規模</span></div>
           <form method="get" action="/calc">
             <input type="hidden" name="project" value="{{ project_slug }}">
@@ -139,7 +157,7 @@
           </div>
         </section>
 
-        <section class="panel money">
+        <section class="panel money reveal" data-delay="1">
           <div class="section-head"><h2>投入金額判讀</h2><span>評估自己在哪個位置</span></div>
           <form method="get" action="/calc">
             <input type="hidden" name="project" value="{{ project_slug }}">
@@ -167,7 +185,7 @@
 
     <section class="section">
       <div class="shell note-grid">
-        <section class="note-card">
+        <section class="note-card reveal">
           <h3>收益分配結構</h3>
           <p>{{ public_notice }}</p>
           <div class="detail-list">
@@ -176,7 +194,7 @@
             {% endfor %}
           </div>
         </section>
-        <aside class="note-card dark">
+        <aside class="note-card dark reveal" data-delay="1">
           <h3>看完試算後怎麼走</h3>
           <ul>
             {% for item in public_guidance %}
@@ -188,5 +206,23 @@
       </div>
     </section>
   </main>
+  <script>
+    const revealNodes = Array.from(document.querySelectorAll(".reveal"));
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+      revealNodes.forEach((node) => {
+        if (!node.classList.contains("in-view")) observer.observe(node);
+      });
+    } else {
+      revealNodes.forEach((node) => node.classList.add("in-view"));
+    }
+  </script>
 </body>
 </html>
