@@ -102,6 +102,16 @@
     .note-chip { padding:14px 16px; border-radius:18px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.18); backdrop-filter:blur(8px); }
     .note-chip span { display:block; margin-bottom:6px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.72); }
     .note-chip strong { display:block; font-size:16px; line-height:1.5; }
+    .action-links { display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
+    .action-link {
+      display:inline-flex; align-items:center; justify-content:center;
+      min-height:48px; padding:12px 18px; border-radius:16px;
+      text-decoration:none; font-weight:800; transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .action-link:hover { transform:translateY(-1px); }
+    .action-link.primary { background:linear-gradient(135deg,var(--green),#1fb16f); color:#fff; box-shadow:0 14px 28px rgba(53,198,90,.22); }
+    .action-link.secondary { background:#fff; color:var(--green-dark); border:1px solid #cfe0d5; }
+    .action-link.ghost { background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.18); }
     .back-link { display:inline-flex; margin-top:18px; color:var(--green-dark); text-decoration:none; font-weight:800; }
     @media (max-width:1080px) { .grid.two, .hero-layout, .card-grid, .hero-pills, .note-grid, .note-chip-grid { grid-template-columns:1fr; } .section-head { flex-direction:column; align-items:flex-start; } }
     @media (max-width:720px) { .shell { width:calc(100% - 24px); } .topbar-inner { min-height:68px; align-items:flex-start; flex-direction:column; padding:12px 0; } .nav-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; } .nav-actions a { text-align:center; } .nav-actions a.primary { grid-column:1/-1; } .panel { padding:22px; } .detail { align-items:flex-start; flex-direction:column; } .detail strong { text-align:left; } }
@@ -123,53 +133,30 @@
     <section class="hero">
       <div class="shell hero-layout">
         <div class="hero-copy reveal in-view">
-          <div class="badge">Nanliao 2026 Calculator</div>
-          <h1>投資試算與參與判讀</h1>
-          <p>把投入金額、屋頂規模、年發電量、參與等級與參考報酬放在同一頁，讓使用者看得懂自己現在是用什麼方式參與。</p>
+          <div class="badge">Investment View</div>
+          <h1>投資判讀與參與試算</h1>
+          <p>這一頁只處理投入金額、參與比例、參考分配與下一步。場址容量、板數與排版另外交給官方估算頁與板面配置工具。</p>
           <div class="hero-pills">
-            <div class="hero-pill"><span>目前階段</span><strong>{{ project_stage }}</strong></div>
-            <div class="hero-pill"><span>容量係數</span><strong>{{ "{:,.1f}".format(area_m2_per_kwp) }} m2/kWp</strong></div>
-            <div class="hero-pill"><span>年發電係數</span><strong>{{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kWp</strong></div>
+            <div class="hero-pill"><span>參與等級</span><strong>{{ participation_band }}</strong></div>
+            <div class="hero-pill"><span>參與比例</span><strong>{{ "{:.2%}".format(ownership_ratio) }}</strong></div>
+            <div class="hero-pill"><span>參考年回報</span><strong>NT$ {{ "{:,.0f}".format(annual_reference_return) }}</strong></div>
           </div>
         </div>
         <figure class="hero-photo-card reveal in-view">
-          <img src="/static/calc-roof.jpg" alt="南寮公民電廠屋頂板陣近景">
+          <img src="/static/calc-roof.jpg" alt="南寮公民電廠投資參與案例空拍">
           <figcaption class="hero-photo-note">
             <span>Investment Calculator</span>
-            <strong>從一個實際屋頂開始理解投入與回收</strong>
+            <strong>先判讀投入位置，再決定要不要往下談</strong>
           </figcaption>
         </figure>
       </div>
     </section>
 
     <section class="section">
-      <div class="shell grid two">
-        <section class="panel roof reveal">
-          <div class="section-head"><h2>輔助容量參考</h2><span>先估屋頂可支持的規模</span></div>
-          <form method="get" action="/calc">
-            <input type="hidden" name="project" value="{{ project_slug }}">
-            <input type="hidden" name="amount" value="{{ amount|int }}">
-            <div>
-              <label for="roof_ping">屋頂坪數</label>
-              <input id="roof_ping" name="roof_ping" type="number" min="0" step="1" value="{{ roof_ping|int }}">
-            </div>
-            <button class="button" type="submit">更新屋頂估算</button>
-          </form>
-          <div class="card-grid" style="margin-top:18px;">
-            <div class="metric blue"><span>估算容量</span><strong>{{ "{:,.2f}".format(roof_capacity_kwp) }} kWp</strong><small>公式：坪數 × 3.3058 / {{ "{:,.1f}".format(area_m2_per_kwp) }}</small></div>
-            <div class="metric green"><span>模組片數</span><strong>{{ panel_count }} 片</strong><small>以單片 {{ "{:,.0f}".format(module_watt) }}W 估算</small></div>
-            <div class="metric amber"><span>首年發電量</span><strong>{{ "{:,.0f}".format(first_year_generation_kwh) }} 度</strong><small>容量 × {{ "{:,.0f}".format(annual_generation_per_kwp) }} 度/kWp</small></div>
-          </div>
-          <div class="detail-list">
-            <div class="detail"><span>第 20 年發電量估算</span><strong>{{ "{:,.0f}".format(year_20_generation_kwh) }} 度</strong></div>
-            <div class="detail"><span>粗估建置成本</span><strong>NT$ {{ "{:,.0f}".format(estimated_construction_cost) }}</strong></div>
-            <div class="detail"><span>首年售電收入估算</span><strong>NT$ {{ "{:,.0f}".format(first_year_revenue) }}</strong></div>
-            <div class="detail"><span>售電單價</span><strong>{{ "{:,.1f}".format(sell_price_per_kwh) }} 元/度</strong></div>
-          </div>
-        </section>
-
-        <section class="panel money reveal" data-delay="1">
-          <div class="section-head"><h2>投入金額判讀</h2><span>評估自己在哪個位置</span></div>
+      <div class="shell">
+        <section class="panel money reveal">
+          <div class="section-head"><h2>投入金額判讀</h2><span>只看參與位置與下一步</span></div>
+          <p class="lead">這一頁只處理投入金額、參與比例、參考分紅與下一步。如果要看屋頂可做多大、可裝幾片、補助會不會過門檻，請改走場址容量評估。</p>
           <form method="get" action="/calc">
             <input type="hidden" name="project" value="{{ project_slug }}">
             <input type="hidden" name="roof_ping" value="{{ roof_ping|int }}">
@@ -179,16 +166,21 @@
             </div>
             <button class="button" type="submit">更新參與判讀</button>
           </form>
+          <div class="action-links">
+            <a class="action-link secondary" href="/site-estimate">先做場址容量評估</a>
+            <a class="action-link primary" href="https://larry-0418.github.io/solar-tool/solar_layout_0419.html" target="_blank" rel="noopener noreferrer">開啟板面配置工具</a>
+          </div>
           <div class="card-grid" style="margin-top:18px;">
-            <div class="metric green"><span>目前判讀</span><strong>{{ participation_band }}</strong><small>{{ participation_summary }}</small></div>
-            <div class="metric blue"><span>年參考回報</span><strong>NT$ {{ "{:,.0f}".format(annual_reference_return) }}</strong><small>依參考 IRR {{ "{:.2%}".format(reference_irr) }} 粗估</small></div>
-            <div class="metric amber"><span>股利分配參考</span><strong>NT$ {{ "{:,.0f}".format(annual_dividend_share) }}</strong><small>依持分 {{ "{:.2%}".format(ownership_ratio) }} 換算</small></div>
+            <div class="metric green"><span>參與等級</span><strong>{{ participation_band }}</strong><small>{{ participation_summary }}</small></div>
+            <div class="metric blue"><span>參考年回報</span><strong>NT$ {{ "{:,.0f}".format(annual_reference_return) }}</strong><small>參考 IRR {{ "{:.2%}".format(reference_irr) }}</small></div>
+            <div class="metric amber"><span>參與分潤估算</span><strong>NT$ {{ "{:,.0f}".format(annual_dividend_share) }}</strong><small>參與比例 {{ "{:.2%}".format(ownership_ratio) }}</small></div>
           </div>
           <div class="detail-list">
-            <div class="detail"><span>下一步建議</span><strong>{{ next_step }}</strong></div>
-            <div class="detail"><span>20 年參考回報</span><strong>NT$ {{ "{:,.0f}".format(estimated_20y_reference_return) }}</strong></div>
-            <div class="detail"><span>粗估回收年期</span><strong>{% if payback_years %}{{ "{:.1f}".format(payback_years) }} 年{% else %}尚無足夠資料{% endif %}</strong></div>
-            <div class="detail"><span>居民投資參考池</span><strong>NT$ {{ "{:,.0f}".format(reference_resident_investment) }}</strong></div>
+            <div class="detail"><span>建議下一步</span><strong>{{ next_step }}</strong></div>
+            <div class="detail"><span>20 年參考累積回報</span><strong>NT$ {{ "{:,.0f}".format(estimated_20y_reference_return) }}</strong></div>
+            <div class="detail"><span>參與比例</span><strong>{{ "{:.2%}".format(ownership_ratio) }}</strong></div>
+            <div class="detail"><span>回本年數參考</span><strong>{% if payback_years %}{{ "{:.1f}".format(payback_years) }} 年{% else %}未能估算{% endif %}</strong></div>
+            <div class="detail"><span>社區居民投資參考池</span><strong>NT$ {{ "{:,.0f}".format(reference_resident_investment) }}</strong></div>
           </div>
         </section>
       </div>
@@ -197,7 +189,7 @@
     <section class="section">
       <div class="shell note-grid">
         <section class="note-card reveal">
-          <h3>收益分配結構</h3>
+          <h3>分潤參考</h3>
           <p>{{ public_notice }}</p>
           <div class="detail-list">
             {% for row in distribution_rows %}
@@ -205,25 +197,28 @@
             {% endfor %}
           </div>
         </section>
-        
         <aside class="note-card dark reveal" data-delay="1">
-          <h3>看完試算後怎麼走</h3>
+          <h3>看完投資判讀後怎麼走</h3>
           <ul>
-            {% for item in public_guidance %}
-            <li>{{ item }}</li>
-            {% endfor %}
+            <li>先用金額判讀自己是在初步了解、評估參與還是準備決策。</li>
+            <li>如果要回到實際案場，請改到場址容量評估頁判斷容量、發電與補助。</li>
+            <li>如果要畫屋頂排板、方向與間距，直接開啟板面配置工具。</li>
           </ul>
           <figure class="note-photo-card reveal" data-delay="2">
-            <img src="/static/calc-guidance.jpg" alt="南寮屋頂施工準備與周邊街廓空拍">
+            <img src="/static/calc-guidance.jpg" alt="南寮公民電廠場址與行動路徑">
             <figcaption class="note-photo-caption">
               <span>Next Step</span>
-              <strong>把金額與容量對回真實場址，再決定要不要往下推</strong>
+              <strong>金額、場址、配置分開處理，判讀會比較準確</strong>
             </figcaption>
           </figure>
           <div class="note-chip-grid">
-            <div class="note-chip"><span>先看</span><strong>屋頂坪數與容量是否合理</strong></div>
-            <div class="note-chip"><span>再核對</span><strong>補助、文件與合作條件</strong></div>
-            <div class="note-chip"><span>最後決定</span><strong>要不要進入真人推動</strong></div>
+            <div class="note-chip"><span>金額判讀</span><strong>先看投入金額落在哪個參與位置。</strong></div>
+            <div class="note-chip"><span>場址估算</span><strong>屋頂坪數、板數與補助門檻改到場址頁處理。</strong></div>
+            <div class="note-chip"><span>配置工具</span><strong>要畫排板與方向，直接開外部工具。</strong></div>
+          </div>
+          <div class="action-links">
+            <a class="action-link ghost" href="/site-estimate">前往場址容量評估</a>
+            <a class="action-link ghost" href="https://larry-0418.github.io/solar-tool/solar_layout_0419.html" target="_blank" rel="noopener noreferrer">前往板面配置工具</a>
           </div>
           <a class="back-link" style="color:#fff;" href="/progress">前往 SOP 對位</a>
         </aside>
