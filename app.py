@@ -404,7 +404,16 @@ def home():
 def faq():
     keyword = request.args.get("keyword", default="", type=str)
     rows = list_faqs(keyword)
-    return render_template("faq_v1.html", keyword=keyword, faq_rows=rows)
+    fallback_to_all = False
+    if keyword and not rows:
+        rows = list_faqs("")
+        fallback_to_all = True
+    return render_template(
+        "faq_v1.html",
+        keyword=keyword,
+        faq_rows=rows,
+        fallback_to_all=fallback_to_all,
+    )
 
 
 @app.route("/api/faq")

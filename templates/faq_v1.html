@@ -206,6 +206,10 @@
           <button class="button" type="submit">搜尋</button>
         </form>
 
+        {% if fallback_to_all %}
+        <div class="empty">找不到「{{ keyword }}」的 FAQ，下面先顯示全部常見問題。</div>
+        {% endif %}
+
         {% if faq_rows %}
         <div class="faq-list">
           {% for item in faq_rows %}
